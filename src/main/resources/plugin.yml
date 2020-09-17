@@ -1,0 +1,23 @@
+name: GahvilaCore
+version: ${project.version}
+main: net.gahvila.gahvilacore.GahvilaCore
+authors: [MiksuFIN]
+description: Core plugin for Gahvila.
+
+commands:
+  gui:
+    usage: /gui
+    description: Pro gui
+    aliases: [pro, menu]
+  chatformattoggle:
+    usage: /chatformattoggle
+    description: Toggle chat format
+    aliases: [chat, prefix, chattoggle, prefixtoggle, chatformat]
+  gamemode:
+    usage: /gamemode (0-3)
+    description: Toggle gamemode
+    aliases: [gm, pelitila]
+  fly:
+    usage: /fly [player]
+    description: Toggle flight
+    aliases: [lento, lentotila]

@@ -1,0 +1,7 @@
+#
+#     GahvilaCore
+#
+
+# If chatformat will be used by default when player sends messages
+# Can be toggled by using command /chatformattoggle if player has permission gahvilacore.chatformat.toggle
+chatformatenabled: false
