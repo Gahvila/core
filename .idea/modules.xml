@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/FartherViewDistance.main.iml" filepath="$PROJECT_DIR$/.idea/modules/FartherViewDistance.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/FartherViewDistance.test.iml" filepath="$PROJECT_DIR$/.idea/modules/FartherViewDistance.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GahvilaCore.iml" filepath="$PROJECT_DIR$/.idea/modules/GahvilaCore.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/GahvilaCore.main.iml" filepath="$PROJECT_DIR$/.idea/modules/GahvilaCore.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/GahvilaCore.test.iml" filepath="$PROJECT_DIR$/.idea/modules/GahvilaCore.test.iml" />
     </modules>
