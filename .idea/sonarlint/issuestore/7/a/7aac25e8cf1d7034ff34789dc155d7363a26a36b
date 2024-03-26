@@ -1,0 +1,10 @@
+
+t	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(œ¥áŒøÿÿÿÿ
+\
+java:S6201"FReplace this instanceof check and cast with 'instanceof Player player'( ïÅ³
+\
+java:S6201"FReplace this instanceof check and cast with 'instanceof Player player'( ïÅ³
+;
+java:S1481"&Remove this unused "p" local variable.(áÍ¹>
+C
+java:S1128"-Remove this unused import 'org.bukkit.Sound'.(‘Ü‘

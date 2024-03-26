@@ -1,0 +1,28 @@
+
+^
+java:S1192"HDefine a constant instead of duplicating this literal "restart" 4 times.(¨üµÝ
+|
+java:S1319"fThe type of "rebooting" should be an interface such as "Map" rather than the implementation "HashMap".(÷š—ô
+>
+java:S1604"(Make this anonymous inner class a lambda(Ñ¦›ù
+>
+java:S1604&"(Make this anonymous inner class a lambda(Ñ¦›ù
+k
+java:S1104"UMake rebooting a static final constant or non-public and provide accessors if needed.(÷š—ô
+E
+java:S1444"/Make this "public static rebooting" field final(÷š—ô
+t	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(¦¸‰âþÿÿÿÿ
+3
+java:S2386"Make this member "protected".(÷š—ô
+S
+java:S1874"8Remove this use of "broadcastMessage"; it is deprecated.(ŸÂ®ûúÿÿÿÿ
+M
+java:S1874%"8Remove this use of "broadcastMessage"; it is deprecated.(Á€Õ
+N
+java:S1874*"8Remove this use of "broadcastMessage"; it is deprecated.(…ç¾Œ
+M
+java:S1874,"2Remove this use of "kickPlayer"; it is deprecated.(ªžÏìüÿÿÿÿ
+N
+java:S18740"8Remove this use of "broadcastMessage"; it is deprecated.(Ã¢ÔÎ
+N
+java:S18745"8Remove this use of "broadcastMessage"; it is deprecated.(Ã¢ÔÎ

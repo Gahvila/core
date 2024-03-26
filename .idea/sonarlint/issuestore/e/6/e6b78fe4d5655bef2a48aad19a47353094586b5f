@@ -1,0 +1,6 @@
+
+t	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(¤‡ÉÎûÿÿÿÿ
+F
+java:S1874"0Remove this use of "getLines"; it is deprecated.(úîıÎ
+E
+java:S1874"/Remove this use of "setLine"; it is deprecated.(³çÙ

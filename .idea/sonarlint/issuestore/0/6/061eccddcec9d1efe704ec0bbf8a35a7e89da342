@@ -1,0 +1,56 @@
+
+w
+java:S1319"aThe type of "pro1" should be an interface such as "Map" rather than the implementation "HashMap".(©šĞ‹
+w
+java:S1319"aThe type of "pro2" should be an interface such as "Map" rather than the implementation "HashMap".(š‰³‘
+v
+java:S1319"aThe type of "pro3" should be an interface such as "Map" rather than the implementation "HashMap".(ÕúÜV
+
+java:S1319"fThe type of "namecolor" should be an interface such as "Map" rather than the implementation "HashMap".(ÆˆÍüÿÿÿÿ
+u
+java:S1488f"ZImmediately return this expression instead of assigning it to the temporary variable "s4".(ÓíÅ¬şÿÿÿÿ
+u
+java:S1488}"ZImmediately return this expression instead of assigning it to the temporary variable "s4".(ÓíÅ¬şÿÿÿÿ
+u
+java:S1488’"YImmediately return this expression instead of assigning it to the temporary variable "s".(„·šçûÿÿÿÿ
+f
+java:S1104"PMake pro1 a static final constant or non-public and provide accessors if needed.(©šĞ‹
+f
+java:S1104"PMake pro2 a static final constant or non-public and provide accessors if needed.(š‰³‘
+e
+java:S1104"PMake pro3 a static final constant or non-public and provide accessors if needed.(ÕúÜV
+p
+java:S1104"UMake namecolor a static final constant or non-public and provide accessors if needed.(ÆˆÍüÿÿÿÿ
+@
+java:S1444"*Make this "public static pro1" field final(©šĞ‹
+@
+java:S1444"*Make this "public static pro2" field final(š‰³‘
+?
+java:S1444"*Make this "public static pro3" field final(ÕúÜV
+J
+java:S1444"/Make this "public static namecolor" field final(ÆˆÍüÿÿÿÿ
+o	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(á¯®
+3
+java:S2386"Make this member "protected".(©šĞ‹
+3
+java:S2386"Make this member "protected".(š‰³‘
+2
+java:S2386"Make this member "protected".(ÕúÜV
+8
+java:S2386"Make this member "protected".(ÆˆÍüÿÿÿÿ
+P
+java:S1118":Add a private constructor to hide the implicit public one.(óÊ“â
+C	java:S108")Either remove or fill this block of code.(ÑÚ®Áıÿÿÿÿ
+<	java:S131""Add a default case to this switch.(¼œóÛüÿÿÿÿ
+<	java:S131Z""Add a default case to this switch.(¼œóÛüÿÿÿÿ
+<	java:S131q""Add a default case to this switch.(¼œóÛüÿÿÿÿ
+G
+java:S1128",Remove this unused import 'co.aikar.idb.DB'.(¿üµôúÿÿÿÿ
+T
+java:S1128">Remove this unused import 'org.bukkit.block.data.type.Switch'.(ƒó¼€
+F
+java:S1128"0Remove this unused import 'java.sql.Connection'.(¥ËôÖ
+R
+java:S1128"7Remove this unused import 'java.sql.PreparedStatement'.(òÄ™ƒÿÿÿÿÿ
+H
+java:S1128"2Remove this unused import 'java.sql.SQLException'.(ÛïÆŸ

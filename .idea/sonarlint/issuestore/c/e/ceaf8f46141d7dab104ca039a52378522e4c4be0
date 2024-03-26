@@ -1,0 +1,21 @@
+
+s
+java:S11927"]Define a constant instead of duplicating this literal " Â§eNormaali pelaaja: Â§f1-3" 6 times.(ÜÏãÂ
+j
+java:S11926"ODefine a constant instead of duplicating this literal "Â§6Â§lNopeudet" 6 times.(Ú®¸¼ûÿÿÿÿ
+Ÿ
+java:S1192*"ˆDefine a constant instead of duplicating this literal "Â§fVoit vain kÃ¤yttÃ¤Ã¤ nopeuksia 1-3. VIP-arvolla voit kÃ¤yttÃ¤Ã¤ 1-5." 6 times.(ã‹‘ç
+f
+java:S11928"PDefine a constant instead of duplicating this literal " Â§eVIP: Â§f1-5" 6 times.(‰Úì
+a
+java:S1192&"KDefine a constant instead of duplicating this literal "setspeed.4" 3 times.(ùà
+a
+java:S1192."KDefine a constant instead of duplicating this literal "setspeed.5" 3 times.(˜—¡Ò
+t	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(¦¸‰âşÿÿÿÿ
+g
+java:S3776
+"RRefactor this method to reduce its Cognitive Complexity from 51 to the 15 allowed.(´Î‹H
+<	java:S131""Add a default case to this switch.(Í‚°ûùÿÿÿÿ
+f	java:S128-"LEnd this switch case with an unconditional break, return or throw statement.(íĞï°ùÿÿÿÿ
+f	java:S128X"LEnd this switch case with an unconditional break, return or throw statement.(íĞï°ùÿÿÿÿ
+g	java:S128‡"LEnd this switch case with an unconditional break, return or throw statement.(íĞï°ùÿÿÿÿ
