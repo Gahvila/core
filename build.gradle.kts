@@ -48,7 +48,14 @@ dependencies {
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.5")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.26")
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")}
+    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.13")
+    //commandapi
+    implementation("dev.jorel:commandapi-bukkit-shade:9.3.0")
+    compileOnly("dev.jorel:commandapi-annotations:9.3.0")
+    annotationProcessor("dev.jorel:commandapi-annotations:9.3.0")
+}
+
 
 group = "GahvilaCore"
 version = "2.0"
@@ -68,6 +75,16 @@ tasks {
     }
     assemble {
         dependsOn(shadowJar)
+    }
+    shadowJar {
+        archiveFileName.set("${rootProject.name}-${version}.jar")
+        dependencies {
+            include(dependency("dev.jorel:commandapi-bukkit-shade:9.3.0"))
+            include(dependency("com.github.stefvanschie.inventoryframework:IF:0.10.13"))
+
+        }
+        relocate("dev.jorel.commandapi", "net.gahvila.gahvilacore.shaded.commandapi")
+        relocate ("com.github.stefvanschie.inventoryframework", "net.gahvila.gahvilacore.shaded.inventoryframework")
     }
 
     java {

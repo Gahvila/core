@@ -77,7 +77,6 @@ public class InventoryClick implements Listener {
                                 p.playSound(p.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, MAX_VALUE, 1F);
                                 p.updateInventory();
                             }else{
-
                                 e.setCancelled(true);
                             }
                             break;

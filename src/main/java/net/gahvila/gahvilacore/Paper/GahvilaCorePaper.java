@@ -1,7 +1,12 @@
 package net.gahvila.gahvilacore.Paper;
 
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import net.gahvila.gahvilacore.Paper.ChatFormat.SignFormat;
 import net.gahvila.gahvilacore.Paper.Essentials.*;
+import net.gahvila.gahvilacore.Paper.Marriage.MarriageCommand;
+import net.gahvila.gahvilacore.Paper.Marriage.MarriageManager;
+import net.gahvila.gahvilacore.Paper.Marriage.MarriageMenu;
 import net.gahvila.gahvilacore.Paper.Placeholder.Placeholders;
 import net.gahvila.gahvilacore.Paper.RankFeatures.VIP.FullBypass;
 import net.gahvila.gahvilacore.Paper.RankFeatures.Pro.Prefix.Menu.Events.InventoryClick;
@@ -13,6 +18,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class GahvilaCorePaper extends JavaPlugin {
     public static GahvilaCorePaper instance;
+    private MarriageManager marriageManager;
+    private MarriageMenu marriageMenu;
 
     @Override
     public void onEnable() {
@@ -22,6 +29,16 @@ public final class GahvilaCorePaper extends JavaPlugin {
 
 
         instance = this;
+
+        marriageManager = new MarriageManager();
+        marriageMenu = new MarriageMenu(marriageManager);
+
+
+        CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
+
+        MarriageCommand marriageCommand = new MarriageCommand(marriageMenu, marriageManager);
+        marriageCommand.registerCommands();
+
         this.getCommand("prefixmenu").setExecutor(new PrefixmenuCMD());
         this.getCommand("discord").setExecutor(new DiscordCommand());
         this.getCommand("säännöt").setExecutor(new RulesCommand());
@@ -41,7 +58,7 @@ public final class GahvilaCorePaper extends JavaPlugin {
         this.getCommand("fly").setExecutor(new FlyCommand());
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new Placeholders(this).register();}
+            new Placeholders(this, marriageManager).register();}
 
 
     }
