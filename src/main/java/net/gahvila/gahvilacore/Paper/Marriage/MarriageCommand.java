@@ -88,7 +88,7 @@ public class MarriageCommand {
                                 }
                             }, 20 * 30);
                         }))
-                .withSubcommand(new CommandAPICommand("acceptinvite")
+                .withSubcommand(new CommandAPICommand("denyinvite")
                         .withArguments(new PlayerArgument("nimi"))
                         .executesPlayer((receiver, args) -> {
                             if (marriageManager.isPlayerMarried(receiver)){
@@ -98,12 +98,22 @@ public class MarriageCommand {
                             Player sender = (Player) args.get("nimi");
 
                             if (marry.containsKey(sender) && marry.get(sender) == receiver) {
-                                marry.remove(receiver);
-                                marriageManager.formMarriage(sender.getUniqueId(), receiver.getUniqueId());
+                                marry.remove(sender);
                                 if (sender.isOnline()){
-                                    sender.sendMessage(toMiniMessage("Olet nyt naimisissa <yellow>" + receiver.getName() + ":n</yellow> kanssa. Suurimmat onnittelut!"));
+                                    sender.sendMessage(toMiniMessage(receiver.getName() + " kieltäytyi parisuhdekutsusta."));
                                 }
-                                receiver.sendMessage(toMiniMessage("Olet nyt naimisissa <yellow>" + sender.getName() + ":n</yellow> kanssa. Suurimmat onnittelut!"));
+                                receiver.sendMessage(toMiniMessage("Kieltäydyit parisuhdekutsusta."));
+                            }
+
+                        }))
+                .withSubcommand(new CommandAPICommand("acceptinvite")
+                        .withArguments(new PlayerArgument("nimi"))
+                        .executesPlayer((receiver, args) -> {
+                            Player sender = (Player) args.get("nimi");
+
+                            if (marry.containsKey(sender) && marry.get(sender) == receiver) {
+                                marry.remove(sender);
+                                marriageManager.formMarriage(sender.getUniqueId(), receiver.getUniqueId());
                                 Bukkit.broadcast(toMiniMessage("On suuri ilo ilmoittaa, että <yellow>" + sender.getName() + "</yellow> on mennyt naimisiin <yellow>" + receiver.getName() + ":n</yellow> kanssa."));
                             }
 
