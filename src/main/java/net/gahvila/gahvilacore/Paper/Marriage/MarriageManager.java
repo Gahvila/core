@@ -21,14 +21,13 @@ public class MarriageManager {
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
         String value = metaData.getMetaValue("marriedto-currentname");
         if (value == null) return false;
-        if (value.equals("none#")) return false;
-        return true;
+        return !value.equals("none#");
     }
     public Boolean isPlayerMarriedToPlayer(Player player1, Player player2) {
         LuckPerms api = LuckPermsProvider.get();
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player1);
-        String value = metaData.getMetaValue("marriedto-currentname");
-        return value.equals(player2.getUniqueId().toString());
+        UUID uuid = UUID.fromString(metaData.getMetaValue("marriedto-uuid"));
+        return uuid.equals(player2.getUniqueId());
     }
 
     public String getMarriageInfo(Player player, String info) {
@@ -47,8 +46,8 @@ public class MarriageManager {
         updateUserMarriage(player2, "marriedto-uuid", player1.toString()); //player2 marrying to player1
 
         //current name
-        updateUserMarriage(player1, "marriedto-currentname", Bukkit.getPlayer(player1).getName()); //player1 marrying to player2
-        updateUserMarriage(player2, "marriedto-currentname", Bukkit.getPlayer(player2).getName()); //player2 marrying to player1
+        updateUserMarriage(player1, "marriedto-currentname", Bukkit.getPlayer(player2).getName()); //player1 marrying to player2
+        updateUserMarriage(player2, "marriedto-currentname", Bukkit.getPlayer(player1).getName()); //player2 marrying to player1
     }
 
     public void breakMarriage(UUID player1, UUID player2) {

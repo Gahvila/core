@@ -7,6 +7,7 @@ import net.gahvila.gahvilacore.Paper.Essentials.*;
 import net.gahvila.gahvilacore.Paper.Marriage.MarriageCommand;
 import net.gahvila.gahvilacore.Paper.Marriage.MarriageManager;
 import net.gahvila.gahvilacore.Paper.Marriage.MarriageMenu;
+import net.gahvila.gahvilacore.Paper.Marriage.SexUpdate;
 import net.gahvila.gahvilacore.Paper.Placeholder.Placeholders;
 import net.gahvila.gahvilacore.Paper.RankFeatures.VIP.FullBypass;
 import net.gahvila.gahvilacore.Paper.RankFeatures.Pro.Prefix.Menu.Events.InventoryClick;
@@ -39,6 +40,9 @@ public final class GahvilaCorePaper extends JavaPlugin {
         MarriageCommand marriageCommand = new MarriageCommand(marriageMenu, marriageManager);
         marriageCommand.registerCommands();
 
+        AFK afk = new AFK(instance);
+        afk.afkScheduler();
+
         this.getCommand("prefixmenu").setExecutor(new PrefixmenuCMD());
         this.getCommand("discord").setExecutor(new DiscordCommand());
         this.getCommand("säännöt").setExecutor(new RulesCommand());
@@ -46,13 +50,14 @@ public final class GahvilaCorePaper extends JavaPlugin {
         this.getCommand("flightspeed").setExecutor(new SpeedCommand());
         this.getCommand("walkspeed").setExecutor(new SpeedCommand());
         this.getCommand("timedshutdown").setExecutor(new TimedShutdownCommand());
-        this.getCommand("afk").setExecutor(new AFK());
+        this.getCommand("afk").setExecutor(new AFK(instance));
         this.getCommand("serverinfo").setExecutor(new ServerinfoCommand());
 
         Bukkit.getPluginManager().registerEvents(new SignFormat(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClick(), this);
         Bukkit.getPluginManager().registerEvents(new FullBypass(), this);
-        Bukkit.getPluginManager().registerEvents(new AFK(), this);
+        Bukkit.getPluginManager().registerEvents(new AFK(instance), this);
+        Bukkit.getPluginManager().registerEvents(new SexUpdate(marriageManager), this);
 
         this.getCommand("gamemode").setExecutor(new GameModeCommand());
         this.getCommand("fly").setExecutor(new FlyCommand());

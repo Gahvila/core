@@ -75,7 +75,7 @@ public class Placeholders extends PlaceholderExpansion {
                 } else if (op.hasPermission("gahvilacore.rank.vip")){
                     return "<yellow>";
                 }
-                return "§b";
+                return "<aqua>";
             case "prefix":
                 String prefix = "";
                 if (op.hasPermission("gahvilacore.rank.admin")) {
@@ -94,7 +94,7 @@ public class Placeholders extends PlaceholderExpansion {
                 return prefix;
             case "afk":
                 if (AFK.isAfk.containsKey(player.getUniqueId())){
-                    return "<gray><italic>afk</italic></gray>";
+                    return " <gray><italic>*afk*</italic></gray>";
                 }
                 return "";
         }return null;
