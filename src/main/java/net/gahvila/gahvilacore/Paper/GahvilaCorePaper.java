@@ -61,7 +61,6 @@ public final class GahvilaCorePaper extends JavaPlugin {
 
 
         this.getCommand("gamemode").setExecutor(new GameModeCommand());
-        this.getCommand("fly").setExecutor(new FlyCommand());
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new Placeholders(this, marriageManager).register();}
