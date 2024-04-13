@@ -60,6 +60,10 @@ public class MarriageManager {
         updateUserMarriage(player2, "marriedto-currentname", "none#"); //player2 marrying to player1
     }
 
+    public void updateCurrentName(UUID player1, UUID player2) {
+        updateUserMarriage(player2, "marriedto-currentname", Bukkit.getPlayer(player1).getName());
+    }
+
     private void updateUserMarriage(UUID player, String key, String partnerName) {
         LuckPerms api = LuckPermsProvider.get();
         UserManager userManager = api.getUserManager();

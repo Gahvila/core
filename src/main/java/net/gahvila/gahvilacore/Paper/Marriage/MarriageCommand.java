@@ -9,6 +9,8 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -118,7 +120,7 @@ public class MarriageCommand {
                             }
 
                         }))
-                .withSubcommand(new CommandAPICommand("tp")
+                .withSubcommand(new CommandAPICommand("teleport")
                         .executesPlayer((player, args) -> {
                             if (marriageManager.isPlayerMarried(player)){
                                 UUID uuid = UUID.fromString(marriageManager.getMarriageInfo(player, "uuid"));

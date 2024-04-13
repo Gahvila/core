@@ -5,9 +5,9 @@ import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import net.gahvila.gahvilacore.Paper.ChatFormat.SignFormat;
 import net.gahvila.gahvilacore.Paper.Essentials.*;
 import net.gahvila.gahvilacore.Paper.Marriage.MarriageCommand;
+import net.gahvila.gahvilacore.Paper.Marriage.MarriageEvents;
 import net.gahvila.gahvilacore.Paper.Marriage.MarriageManager;
 import net.gahvila.gahvilacore.Paper.Marriage.MarriageMenu;
-import net.gahvila.gahvilacore.Paper.Marriage.SexUpdate;
 import net.gahvila.gahvilacore.Paper.Placeholder.Placeholders;
 import net.gahvila.gahvilacore.Paper.RankFeatures.VIP.FullBypass;
 import net.gahvila.gahvilacore.Paper.RankFeatures.Pro.Prefix.Menu.Events.InventoryClick;
@@ -57,7 +57,8 @@ public final class GahvilaCorePaper extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new InventoryClick(), this);
         Bukkit.getPluginManager().registerEvents(new FullBypass(), this);
         Bukkit.getPluginManager().registerEvents(new AFK(instance), this);
-        Bukkit.getPluginManager().registerEvents(new SexUpdate(marriageManager), this);
+        Bukkit.getPluginManager().registerEvents(new MarriageEvents(marriageManager), this);
+
 
         this.getCommand("gamemode").setExecutor(new GameModeCommand());
         this.getCommand("fly").setExecutor(new FlyCommand());
