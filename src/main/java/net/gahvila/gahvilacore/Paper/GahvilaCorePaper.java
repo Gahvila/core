@@ -26,8 +26,6 @@ public final class GahvilaCorePaper extends JavaPlugin {
     public void onEnable() {
 
         this.getConfig();
-        this.saveDefaultConfig();
-
 
         instance = this;
 

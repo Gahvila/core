@@ -19,11 +19,11 @@ public class RulesCommand implements CommandExecutor {
             Player p = (Player) sender;
             p.sendMessage(Component.text("Säännöt voidaan lyhentää helposti kolmeen sanaan, “älä oo tyhmä.”\n" +
                     "\n" +
-                    "» 1. Asiaton käytös Ikinä ei ole pakko aiheuttaa kenellekään huonoa fiilistä, vaikka saattaakin tuntua mahdottomalta väitteeltä.\n" +
+                    "» 1. Asiaton käytös: Ikinä ei ole pakko aiheuttaa kenellekään huonoa fiilistä, vaikka saattaakin tuntua mahdottomalta väitteeltä.\n" +
                     "\n" +
-                    "» 2. Mainostaminen Älä mainosta muita Minecraft palvelimia taikka muita Discord palvelimia.\n" +
+                    "» 2. Mainostaminen: Älä mainosta muita Minecraft palvelimia taikka muita Discord palvelimia.\n" +
                     "\n" +
-                    "» 3. Maalaisjärki ja sen käyttäminen Maalaisjärjen käyttäminen on tärkeä taito, joka auttaa monia toimimaan oikein."));
+                    "» 3. Maalaisjärki: Maalaisjärjen käyttäminen on tärkeä taito, joka auttaa monia toimimaan oikein."));
         }
         return false;
     }
