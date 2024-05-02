@@ -94,6 +94,9 @@ public class AFK implements CommandExecutor, Listener {
 
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent e){
+        if (e.getMessage().toLowerCase().startsWith("/afk")){
+            return;
+        }
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
         lastLoc.put(uuid, p.getLocation());

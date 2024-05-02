@@ -51,9 +51,9 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
     implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.13")
     //commandapi
-    implementation("dev.jorel:commandapi-bukkit-shade:9.3.0")
-    compileOnly("dev.jorel:commandapi-annotations:9.3.0")
-    annotationProcessor("dev.jorel:commandapi-annotations:9.3.0")
+    implementation("dev.jorel:commandapi-bukkit-shade:9.4.0")
+    compileOnly("dev.jorel:commandapi-annotations:9.4.0")
+    annotationProcessor("dev.jorel:commandapi-annotations:9.4.0")
 }
 
 
@@ -79,7 +79,7 @@ tasks {
     shadowJar {
         archiveFileName.set("${rootProject.name}-${version}.jar")
         dependencies {
-            include(dependency("dev.jorel:commandapi-bukkit-shade:9.3.0"))
+            include(dependency("dev.jorel:commandapi-bukkit-shade:9.4.0"))
             include(dependency("com.github.stefvanschie.inventoryframework:IF:0.10.13"))
 
         }
