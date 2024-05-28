@@ -16,8 +16,6 @@ import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.PrefixmenuCMD;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
-
 public final class GahvilaCore extends JavaPlugin {
     public static GahvilaCore instance;
 
@@ -28,7 +26,7 @@ public final class GahvilaCore extends JavaPlugin {
 
         //afk
         AFK afk = new AFK(instance);
-        CommandAPI.afkScheduler();
+        afk.afkScheduler();
         afk.registerCommands();
         Bukkit.getPluginManager().registerEvents(afk, this);
 
@@ -38,25 +36,26 @@ public final class GahvilaCore extends JavaPlugin {
         MarriageCommand marriageCommand = new MarriageCommand(marriageMenu, marriageManager);
         marriageCommand.registerCommands();
 
+        //prefixmenu
+        PrefixmenuCMD prefixmenuCMD = new PrefixmenuCMD();
+        prefixmenuCMD.registerCommands();
+
         //general commands
         InfoCommands infoCommands = new InfoCommands();
         infoCommands.registerCommands();
 
-        this.getCommand("prefixmenu").setExecutor(new PrefixmenuCMD());
-        this.getCommand("säännöt").setExecutor(new RulesCommand());
-        this.getCommand("speed").setExecutor(new SpeedCommand());
-        this.getCommand("flightspeed").setExecutor(new SpeedCommand());
-        this.getCommand("walkspeed").setExecutor(new SpeedCommand());
-        this.getCommand("timedshutdown").setExecutor(new TimedShutdownCommand());
-        this.getCommand("serverinfo").setExecutor(new ServerinfoCommand());
+        GamemodeCommand gamemodeCommand = new GamemodeCommand();
+        gamemodeCommand.registerCommands();
 
+        SpeedCommand speedCommand = new SpeedCommand();
+        speedCommand.registerCommands();
+
+        //events
         Bukkit.getPluginManager().registerEvents(new SignFormat(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClick(), this);
         Bukkit.getPluginManager().registerEvents(new FullBypass(), this);
         Bukkit.getPluginManager().registerEvents(new MarriageEvents(marriageManager), this);
 
-
-        this.getCommand("gamemode").setExecutor(new GameModeCommand());
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new Placeholders(this, marriageManager).register();

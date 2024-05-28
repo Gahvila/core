@@ -1,21 +1,16 @@
 package net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import dev.jorel.commandapi.CommandAPICommand;
 
-public class PrefixmenuCMD implements CommandExecutor {
+public class PrefixmenuCMD {
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
-        if(sender instanceof Player) {
-            if (!sender.hasPermission("gahvilacore.rank.pro")) return true;
-            ProPrefixMainMenu.openPrefixMainMenu((Player) sender);
-            return true;
-        }
-
-        return false;
+    public void registerCommands() {
+        new CommandAPICommand("prefixmenu")
+                .withAliases("pro")
+                .withPermission("gahvilacore.rank.pro")
+                .executesPlayer((p, args) -> {
+                    ProPrefixMainMenu.openPrefixMainMenu(p);
+                })
+                .register();
     }
 }
