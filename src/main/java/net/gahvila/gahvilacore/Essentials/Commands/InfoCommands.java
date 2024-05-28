@@ -30,29 +30,30 @@ public class InfoCommands {
                     for (Plugin plugin : Bukkit.getServer().getPluginManager().getPlugins()) {
                         plugins.add(plugin.getName());
                     }
-
-                    p.sendMessage(toMM("Tämä palvelin käyttää Minecraft-versiota <yellow>" + build.minecraftVersionName()
-                            + " " + build.brandName() + "</yellow> <white>koontiversiota</white><yellow> " + build.buildNumber() + "</yellow><br><br>" +
+                    int buildNumber = build.buildNumber().isPresent() ? build.buildNumber().getAsInt() : 0;
+                    p.sendMessage(toMM("Tämä palvelin käyttää <yellow>" + build.brandName()
+                            + " " + build.minecraftVersionName() + "</yellow> <white>koontiversiota</white><yellow> " + buildNumber + "</yellow>.<br><br>" +
                             "Palvelimella on <yellow>" + plugins.size() + "</yellow> lisäosaa: <yellow>" + String.join("<white>,<yellow> ", plugins)));
                 })
                 .register();
         CommandAPI.unregister("perf");
         new CommandAPICommand("perf")
                 .executesPlayer((p, args) -> {
-                    p.sendMessage(toMM("TPS: <yellow>" + Arrays.toString(Bukkit.getTPS()) + "</yellow><br>" +
+                    p.sendMessage(toMM("TPS [1m, 5m, 15m]: <yellow>" + Arrays.toString(Bukkit.getTPS()) + "</yellow><br>" +
                             "MSPT: <gold>" + Bukkit.getAverageTickTime() + "</gold>"));
                 })
                 .register();
         new CommandAPICommand("rules")
                 .withAliases("säännöt")
                 .executesPlayer((p, args) -> {
-                    p.sendMessage(Component.text("Säännöt voidaan lyhentää helposti kolmeen sanaan, “älä oo tyhmä.”\n" +
-                            "\n" +
-                            "» 1. Asiaton käytös: Ikinä ei ole pakko aiheuttaa kenellekään huonoa fiilistä, vaikka saattaakin tuntua mahdottomalta väitteeltä.\n" +
-                            "\n" +
-                            "» 2. Mainostaminen: Älä mainosta muita Minecraft palvelimia taikka muita Discord palvelimia.\n" +
-                            "\n" +
-                            "» 3. Maalaisjärki: Maalaisjärjen käyttäminen on tärkeä taito, joka auttaa monia toimimaan oikein."));
+                    p.sendMessage(Component.text("""
+                            Säännöt voidaan lyhentää helposti kolmeen sanaan, “älä oo tyhmä.”
+
+                            » 1. Asiaton käytös: Ikinä ei ole pakko aiheuttaa kenellekään huonoa fiilistä, vaikka saattaakin tuntua mahdottomalta väitteeltä.
+
+                            » 2. Mainostaminen: Älä mainosta muita Minecraft palvelimia taikka muita Discord palvelimia.
+
+                            » 3. Maalaisjärki: Maalaisjärjen käyttäminen on tärkeä taito, joka auttaa monia toimimaan oikein."""));
                 })
                 .register();
     }

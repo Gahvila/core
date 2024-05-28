@@ -1,6 +1,0 @@
-name: GahvilaCore
-version: 2.0
-main: net.gahvila.gahvilacore.GahvilaCore
-authors: [Jokni, MiksuFIN]
-description: Core plugin for Gahvila.
-api-version: 1.20
