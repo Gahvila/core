@@ -5,7 +5,8 @@
 plugins {
     java
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.papermc.paperweight.userdev") version "1.7.1"
+    id("io.github.goooler.shadow") version "8.1.7"
 }
 
 repositories {
@@ -46,28 +47,27 @@ repositories {
 
 dependencies {
     compileOnly("net.luckperms:api:5.4")
-    compileOnly("me.clip:placeholderapi:2.11.5")
+    compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.26")
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.13")
+    paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
+    implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.14")
     //commandapi
-    implementation("dev.jorel:commandapi-bukkit-shade:9.4.0")
-    compileOnly("dev.jorel:commandapi-annotations:9.4.0")
-    annotationProcessor("dev.jorel:commandapi-annotations:9.4.0")
+    implementation("dev.jorel:commandapi-bukkit-shade:9.4.2")
+    compileOnly("dev.jorel:commandapi-annotations:9.4.2")
+    annotationProcessor("dev.jorel:commandapi-annotations:9.4.2")
 }
 
 
 group = "GahvilaCore"
 version = "2.0"
 description = "GahvilaCore"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 publishing {
     publications.create<MavenPublication>("maven") {
         from(components["java"])
     }
 }
-
 
 tasks {
     withType<JavaCompile> {
@@ -79,9 +79,8 @@ tasks {
     shadowJar {
         archiveFileName.set("${rootProject.name}-${version}.jar")
         dependencies {
-            include(dependency("dev.jorel:commandapi-bukkit-shade:9.4.0"))
-            include(dependency("com.github.stefvanschie.inventoryframework:IF:0.10.13"))
-
+            include(dependency("dev.jorel:commandapi-bukkit-shade:9.4.2"))
+            include(dependency("com.github.stefvanschie.inventoryframework:IF:0.10.14"))
         }
         relocate("dev.jorel.commandapi", "net.gahvila.gahvilacore.shaded.commandapi")
         relocate ("com.github.stefvanschie.inventoryframework", "net.gahvila.gahvilacore.shaded.inventoryframework")
@@ -89,7 +88,7 @@ tasks {
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
+            languageVersion.set(JavaLanguageVersion.of(21))
         }
     }
 }

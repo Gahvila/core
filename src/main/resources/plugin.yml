@@ -1,9 +1,9 @@
 name: GahvilaCore
 version: ${project.version}
-main: net.gahvila.gahvilacore.Paper.GahvilaCorePaper
+main: net.gahvila.gahvilacore.GahvilaCorePaper
 authors: [Jokni, MiksuFIN]
 description: Core plugin for Gahvila.
-api-version: 1.19
+api-version: 1.20
 
 commands:
   serverinfo:
