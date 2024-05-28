@@ -2,12 +2,9 @@ package net.gahvila.gahvilacore.Essentials;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.gahvila.gahvilacore.GahvilaCorePaper;
+import net.gahvila.gahvilacore.GahvilaCore;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,9 +21,9 @@ public class AFK implements Listener {
     public static HashMap<UUID, Location> lastLoc = new HashMap<>();
     public static HashMap<UUID, Long> lastAction = new HashMap<>();
 
-    private final GahvilaCorePaper plugin;
+    private final GahvilaCore plugin;
 
-    public AFK(GahvilaCorePaper plugin) {
+    public AFK(GahvilaCore plugin) {
         this.plugin = plugin;
     }
 

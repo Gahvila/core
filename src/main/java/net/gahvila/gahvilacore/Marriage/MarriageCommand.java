@@ -2,15 +2,13 @@ package net.gahvila.gahvilacore.Marriage;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.PlayerArgument;
-import net.gahvila.gahvilacore.GahvilaCorePaper;
+import net.gahvila.gahvilacore.GahvilaCore;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -79,7 +77,7 @@ public class MarriageCommand {
                             receiver.sendMessage(toMiniMessage("| <red><b>Kieltäydy</b>: /marry denyinvite " + sender.getName())
                                     .hoverEvent(HoverEvent.showText(toMiniMessage("Klikkaa kieltäytyäksesi"))).clickEvent(ClickEvent.runCommand("/marry denyinvite " + sender.getName())));
 
-                            Bukkit.getServer().getScheduler().runTaskLater(GahvilaCorePaper.instance, new Runnable() {
+                            Bukkit.getServer().getScheduler().runTaskLater(GahvilaCore.instance, new Runnable() {
                                 @Override
                                 public void run() {
                                     if (marry.get(sender) != null) {

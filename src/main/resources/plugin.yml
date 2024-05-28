@@ -1,26 +1,6 @@
 name: GahvilaCore
-version: ${project.version}
-main: net.gahvila.gahvilacore.GahvilaCorePaper
+version: 2.0
+main: net.gahvila.gahvilacore.GahvilaCore
 authors: [Jokni, MiksuFIN]
 description: Core plugin for Gahvila.
 api-version: 1.20
-
-commands:
-  serverinfo:
-  timedshutdown:
-  afk:
-  speed:
-  walkspeed:
-  flightspeed:
-  säännöt:
-    aliases: [rules]
-  discord:
-    aliases: [dc]
-  prefixmenu:
-    usage: /prefixmenu
-    aliases: [pro]
-    description: Pro gui
-  gamemode:
-    usage: /gamemode (0-3)
-    description: Toggle gamemode
-    aliases: [gm, pelitila]

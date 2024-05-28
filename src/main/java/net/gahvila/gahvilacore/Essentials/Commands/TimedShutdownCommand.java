@@ -1,6 +1,6 @@
 package net.gahvila.gahvilacore.Essentials.Commands;
 
-import net.gahvila.gahvilacore.GahvilaCorePaper;
+import net.gahvila.gahvilacore.GahvilaCore;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,7 +18,7 @@ public class TimedShutdownCommand implements CommandExecutor {
             if (!rebooting.containsKey("restart")){
                 rebooting.put("restart", true);
                 Bukkit.broadcastMessage("§cPalvelin käynnistyy uudelleen §e1 §cminuutin kuluttua!");
-                Bukkit.getScheduler().runTaskLater(GahvilaCorePaper.instance, new Runnable() {
+                Bukkit.getScheduler().runTaskLater(GahvilaCore.instance, new Runnable() {
                     @Override
                     public void run() {
                         TimedShutdownCommand.reboot();
@@ -35,7 +35,7 @@ public class TimedShutdownCommand implements CommandExecutor {
     public static void reboot(){
         if (rebooting.containsKey("restart")){
             Bukkit.broadcastMessage("§c§lPalvelin käynnistyy uudelleen §e§l10 §c§lsekuntin kuluttua!");
-            Bukkit.getScheduler().runTaskLater(GahvilaCorePaper.instance, new Runnable() {
+            Bukkit.getScheduler().runTaskLater(GahvilaCore.instance, new Runnable() {
                 @Override
                 public void run() {
                     if (rebooting.containsKey("restart")){

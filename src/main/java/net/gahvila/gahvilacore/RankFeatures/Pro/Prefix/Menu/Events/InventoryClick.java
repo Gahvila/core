@@ -1,6 +1,6 @@
 package net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.Events;
 
-import net.gahvila.gahvilacore.GahvilaCorePaper;
+import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.ColorSelectors.ColorSelectorName;
 import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.ColorSelectors.ColorSelectorO;
 import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.ColorSelectors.ColorSelectorP;
@@ -69,7 +69,7 @@ public class InventoryClick implements Listener {
                         case 0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16:
                             if (!cooldown.containsKey(p.getUniqueId())) {
                                 cooldown.put(p.getUniqueId(), System.currentTimeMillis());
-                                Bukkit.getScheduler().runTaskLater(GahvilaCorePaper.instance, () -> cooldown.remove(p.getUniqueId()), 10);
+                                Bukkit.getScheduler().runTaskLater(GahvilaCore.instance, () -> cooldown.remove(p.getUniqueId()), 10);
                                 String string = String.valueOf(e.getCurrentItem().getItemMeta().getDisplayName().charAt(1));
                                 e.setCancelled(true);
                                 PrefixManager.setPrefix(p, position, string);
@@ -99,7 +99,7 @@ public class InventoryClick implements Listener {
                         case 0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16:
                             if (!cooldown.containsKey(p.getUniqueId())) {
                                 cooldown.put(p.getUniqueId(), System.currentTimeMillis());
-                                Bukkit.getScheduler().runTaskLater(GahvilaCorePaper.instance, () -> cooldown.remove(p.getUniqueId()), 10);
+                                Bukkit.getScheduler().runTaskLater(GahvilaCore.instance, () -> cooldown.remove(p.getUniqueId()), 10);
                                 String string = String.valueOf(e.getCurrentItem().getItemMeta().getDisplayName().charAt(1));
                                 e.setCancelled(true);
                                 PrefixManager.setPrefix(p, position, string);
@@ -129,7 +129,7 @@ public class InventoryClick implements Listener {
                         case 0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16:
                             if (!cooldown.containsKey(p.getUniqueId())) {
                                 cooldown.put(p.getUniqueId(), System.currentTimeMillis());
-                                Bukkit.getScheduler().runTaskLater(GahvilaCorePaper.instance, () -> cooldown.remove(p.getUniqueId()), 10);
+                                Bukkit.getScheduler().runTaskLater(GahvilaCore.instance, () -> cooldown.remove(p.getUniqueId()), 10);
                                 String string = String.valueOf(e.getCurrentItem().getItemMeta().getDisplayName().charAt(1));
                                 e.setCancelled(true);
                                 PrefixManager.setPrefix(p, position, string);
@@ -159,7 +159,7 @@ public class InventoryClick implements Listener {
                         case 0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16:
                             if (!cooldown.containsKey(p.getUniqueId())) {
                                 cooldown.put(p.getUniqueId(), System.currentTimeMillis());
-                                Bukkit.getScheduler().runTaskLater(GahvilaCorePaper.instance, () -> cooldown.remove(p.getUniqueId()), 10);
+                                Bukkit.getScheduler().runTaskLater(GahvilaCore.instance, () -> cooldown.remove(p.getUniqueId()), 10);
                                 String string = String.valueOf(e.getCurrentItem().getItemMeta().getDisplayName().charAt(1));
                                 e.setCancelled(true);
                                 PrefixManager.setPrefix(p, position, string);

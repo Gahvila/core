@@ -18,8 +18,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 
 
-public final class GahvilaCorePaper extends JavaPlugin {
-    public static GahvilaCorePaper instance;
+public final class GahvilaCore extends JavaPlugin {
+    public static GahvilaCore instance;
 
     @Override
     public void onEnable() {
@@ -28,7 +28,7 @@ public final class GahvilaCorePaper extends JavaPlugin {
 
         //afk
         AFK afk = new AFK(instance);
-        afk.afkScheduler();
+        CommandAPI.afkScheduler();
         afk.registerCommands();
         Bukkit.getPluginManager().registerEvents(afk, this);
 

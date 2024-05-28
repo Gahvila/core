@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/GahvilaCore.iml" filepath="$PROJECT_DIR$/.idea/modules/GahvilaCore.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/GahvilaCore.test.iml" filepath="$PROJECT_DIR$/.idea/modules/GahvilaCore.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Plugins.GahvilaCore.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Plugins.GahvilaCore.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Plugins.GahvilaCore.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Plugins.GahvilaCore.test.iml" />
     </modules>
   </component>
 </project>

@@ -2,13 +2,12 @@ package net.gahvila.gahvilacore.Placeholder;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.gahvila.gahvilacore.Essentials.AFK;
-import net.gahvila.gahvilacore.GahvilaCorePaper;
+import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.Marriage.MarriageManager;
 import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.PrefixManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -16,11 +15,11 @@ import org.bukkit.entity.Player;
 
 public class Placeholders extends PlaceholderExpansion {
 
-    private final GahvilaCorePaper plugin;
+    private final GahvilaCore plugin;
     private final MarriageManager marriageManager;
 
 
-    public Placeholders(GahvilaCorePaper plugin, MarriageManager marriageManager) {
+    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager) {
         this.plugin = plugin;
         this.marriageManager = marriageManager;
     }
