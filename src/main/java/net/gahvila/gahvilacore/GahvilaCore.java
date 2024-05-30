@@ -3,6 +3,8 @@ package net.gahvila.gahvilacore;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import net.gahvila.gahvilacore.ChatFormat.SignFormat;
+import net.gahvila.gahvilacore.Economy.EconomyCommand;
+import net.gahvila.gahvilacore.Economy.EconomyManager;
 import net.gahvila.gahvilacore.Essentials.*;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
 import net.gahvila.gahvilacore.Marriage.MarriageCommand;
@@ -39,6 +41,11 @@ public final class GahvilaCore extends JavaPlugin {
         //prefixmenu
         PrefixmenuCMD prefixmenuCMD = new PrefixmenuCMD();
         prefixmenuCMD.registerCommands();
+
+        //economy
+        EconomyManager economyManager = new EconomyManager();
+        EconomyCommand economyCommand = new EconomyCommand(economyManager);
+        economyCommand.registerCommands();
 
         //general commands
         InfoCommands infoCommands = new InfoCommands();
