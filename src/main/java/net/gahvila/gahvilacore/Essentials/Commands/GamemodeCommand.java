@@ -42,7 +42,7 @@ public class GamemodeCommand {
                             return;
                         }
 
-                        p.setGameMode(entry.getValue());
+                        player.setGameMode(entry.getValue());
 
                         if (p == player) {
                             p.sendMessage(toMM("Asetit pelitilan <yellow>" + gamemode + "</yellow> itsellesi."));

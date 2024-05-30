@@ -33,20 +33,20 @@ public class SpeedCommand {
                     }
                     switch (speed) {
                         case 1:
-                            p.setWalkSpeed(0.2F);
-                            p.setFlySpeed(0.1F);
+                            player.setWalkSpeed(0.2F);
+                            player.setFlySpeed(0.1F);
                             break;
                         case 2:
-                            p.setWalkSpeed(0.3F);
-                            p.setFlySpeed(0.2F);
+                            player.setWalkSpeed(0.3F);
+                            player.setFlySpeed(0.2F);
                             break;
                         case 3:
-                            p.setWalkSpeed(0.4F);
-                            p.setFlySpeed(0.3F);
+                            player.setWalkSpeed(0.4F);
+                            player.setFlySpeed(0.3F);
                             break;
                         case 4:
-                            p.setWalkSpeed(0.5F);
-                            p.setFlySpeed(0.4F);
+                            player.setWalkSpeed(0.5F);
+                            player.setFlySpeed(0.4F);
                             break;
                         case 5:
                             p.setWalkSpeed(0.6F);
