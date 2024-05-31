@@ -5,8 +5,8 @@ import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.ColorSelectors.Color
 import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.ColorSelectors.ColorSelectorO;
 import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.ColorSelectors.ColorSelectorP;
 import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.ColorSelectors.ColorSelectorR;
-import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.ProPrefixMainMenu;
 import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.PrefixManager;
+import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.ProPrefixMainMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;

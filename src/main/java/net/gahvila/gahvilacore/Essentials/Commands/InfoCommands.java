@@ -10,7 +10,6 @@ import org.bukkit.plugin.Plugin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 

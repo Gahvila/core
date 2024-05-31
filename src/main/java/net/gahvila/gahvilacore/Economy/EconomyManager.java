@@ -17,35 +17,47 @@ public class EconomyManager {
 
     String balanceKey = "serverbalance";
 
-    public Double getBalance(UUID player) {
+    //only use when player is online
+    public double getBalance(Player player) {
         LuckPerms api = LuckPermsProvider.get();
-        User user = (User) api.getUserManager().loadUser(player);
-        CachedMetaData metaData = api.getPlayerAdapter(User.class).getMetaData(user);
-        return Double.parseDouble(metaData.getMetaValue(balanceKey));
+        CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
+        return metaData.getMetaValue(balanceKey, Double::parseDouble).orElse(0.0);
+    }
+
+    public CompletableFuture<Double> getBalanceAsync(UUID who) {
+        LuckPerms api = LuckPermsProvider.get();
+        return api.getUserManager().loadUser(who)
+                .thenApplyAsync(user -> {
+                    CachedMetaData metaData = api.getPlayerAdapter(User.class).getMetaData(user);
+                    return metaData.getMetaValue(balanceKey, Double::parseDouble).orElse(0.0);
+                });
     }
 
     public void addBalance(UUID player, double amount) {
-        String balance = String.valueOf(getBalance(player) + amount);
-        updateBalance(player, balance);
+        getBalanceAsync(player).thenAcceptAsync(result -> {
+            updateBalance(player, amount);
+        });
     }
 
     public void removeBalance(UUID player, double amount) {
-        String balance = String.valueOf(getBalance(player) - amount);
-        updateBalance(player, balance);
+        getBalanceAsync(player).thenAcceptAsync(result -> {
+            updateBalance(player, amount);
+        });
     }
 
     public void setBalance(UUID player, double amount) {
-        String balance = String.valueOf(amount);
-        updateBalance(player, balance);
+        getBalanceAsync(player).thenAcceptAsync(result -> {
+            updateBalance(player, amount);
+        });
     }
 
-    private void updateBalance(UUID player, String balance) {
+    private void updateBalance(UUID player, double balance) {
         LuckPerms api = LuckPermsProvider.get();
         UserManager userManager = api.getUserManager();
         CompletableFuture<User> userFuture = userManager.loadUser(player);
 
         userFuture.thenAcceptAsync(user -> {
-            MetaNode node = MetaNode.builder(balanceKey, balance).build();
+            MetaNode node = MetaNode.builder(balanceKey, String.valueOf(balance)).build();
             user.data().clear(NodeType.META.predicate(mn -> mn.getMetaKey().equals(balanceKey)));
             user.data().add(node);
             api.getUserManager().saveUser(user);

@@ -3,7 +3,6 @@ package net.gahvila.gahvilacore.Essentials.Commands;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LiteralArgument;
-import dev.jorel.commandapi.arguments.MultiLiteralArgument;
 import dev.jorel.commandapi.arguments.PlayerArgument;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
