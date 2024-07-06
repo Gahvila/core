@@ -25,6 +25,7 @@ public class GamemodeCommand {
         for (Map.Entry<String, GameMode> entry : gamemodes.entrySet()) {
             new CommandAPICommand("gamemode")
                     .withAliases("gm")
+                    .withPermission("gahvilacore.gamemode")
                     .withArguments(new LiteralArgument(entry.getKey()))
                     .withOptionalArguments(new PlayerArgument("pelaaja"))
                     .executesPlayer((p, args) -> {
