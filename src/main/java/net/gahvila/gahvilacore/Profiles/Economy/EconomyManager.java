@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Economy;
+package net.gahvila.gahvilacore.Profiles.Economy;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -7,7 +7,6 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -20,6 +19,11 @@ public class EconomyManager {
     //only use when player is online
     public double getBalance(Player player) {
         LuckPerms api = LuckPermsProvider.get();
+        if (player.isOnline()){
+            User user = api.getPlayerAdapter(Player.class).getUser(player);
+        } else {
+
+        }
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
         return metaData.getMetaValue(balanceKey, Double::parseDouble).orElse(0.0);
     }
@@ -35,22 +39,22 @@ public class EconomyManager {
 
     public void addBalance(UUID player, double amount) {
         getBalanceAsync(player).thenAcceptAsync(result -> {
-            updateBalance(player, amount);
+            updateBalance(player, result + amount);
         });
     }
 
     public void removeBalance(UUID player, double amount) {
         getBalanceAsync(player).thenAcceptAsync(result -> {
-            updateBalance(player, amount);
+            updateBalance(player, result - amount);
         });
     }
 
     public void setBalance(UUID player, double amount) {
-        getBalanceAsync(player).thenAcceptAsync(result -> {
-            updateBalance(player, amount);
-        });
+        updateBalance(player, amount);
     }
 
+
+    //internals
     private void updateBalance(UUID player, double balance) {
         LuckPerms api = LuckPermsProvider.get();
         UserManager userManager = api.getUserManager();

@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Marriage;
+package net.gahvila.gahvilacore.Profiles.Marriage;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;

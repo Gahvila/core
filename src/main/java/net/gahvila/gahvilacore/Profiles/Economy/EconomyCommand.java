@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Economy;
+package net.gahvila.gahvilacore.Profiles.Economy;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.DoubleArgument;

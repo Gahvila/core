@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Marriage;
+package net.gahvila.gahvilacore.Profiles.Marriage;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;

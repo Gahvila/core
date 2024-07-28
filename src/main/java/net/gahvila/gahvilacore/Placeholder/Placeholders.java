@@ -3,7 +3,7 @@ package net.gahvila.gahvilacore.Placeholder;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.gahvila.gahvilacore.Essentials.AFK;
 import net.gahvila.gahvilacore.GahvilaCore;
-import net.gahvila.gahvilacore.Marriage.MarriageManager;
+import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
 import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.PrefixManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;

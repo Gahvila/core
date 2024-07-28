@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Marriage;
+package net.gahvila.gahvilacore.Profiles.Marriage;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
