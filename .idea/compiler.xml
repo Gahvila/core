@@ -5,9 +5,9 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.jorel/commandapi-annotations/9.5.1/dc6e808cb080d3511b114e4f2d728a158681dbb/commandapi-annotations-9.5.1.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.jorel/commandapi-bukkit-core/9.5.1/7f37553214b3bb2fa029e06f87efeae572694141/commandapi-bukkit-core-9.5.1.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.jorel/commandapi-core/9.5.1/83ac2d6c9bb214c90ebcbefb80eb8e352421d6dd/commandapi-core-9.5.1.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.jorel/commandapi-annotations/9.5.3/d8bdced45dab8a1e1b7281c5880fd2da7ee838ac/commandapi-annotations-9.5.3.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.jorel/commandapi-bukkit-core/9.5.3/f92088042210baf0f877109d27dee4775052bdec/commandapi-bukkit-core-9.5.3.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.jorel/commandapi-core/9.5.3/6984934e78c7698e7e22e3eabd934a671235abdc/commandapi-core-9.5.3.jar" />
         </processorPath>
         <module name="Plugins.GahvilaCore.main" />
       </profile>

@@ -49,12 +49,12 @@ dependencies {
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.27")
-    paperweight.paperDevBundle("1.21-R0.1-SNAPSHOT")
-    implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.15")
+    paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
+    implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.17")
     //commandapi
-    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.1")
-    compileOnly("dev.jorel:commandapi-annotations:9.5.1")
-    annotationProcessor("dev.jorel:commandapi-annotations:9.5.1")
+    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.3")
+    compileOnly("dev.jorel:commandapi-annotations:9.5.3")
+    annotationProcessor("dev.jorel:commandapi-annotations:9.5.3")
 }
 
 
@@ -79,8 +79,8 @@ tasks {
     shadowJar {
         archiveFileName.set("${rootProject.name}-${version}.jar")
         dependencies {
-            include(dependency("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.1"))
-            include(dependency("com.github.stefvanschie.inventoryframework:IF:0.10.15"))
+            include(dependency("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.3"))
+            include(dependency("com.github.stefvanschie.inventoryframework:IF:0.10.17"))
         }
         relocate("dev.jorel.commandapi", "net.gahvila.gahvilacore.shaded.commandapi")
         relocate ("com.github.stefvanschie.inventoryframework", "net.gahvila.gahvilacore.shaded.inventoryframework")
