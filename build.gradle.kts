@@ -13,36 +13,14 @@ repositories {
     mavenLocal()
     mavenCentral()
     gradlePluginPortal()
-    maven {
-        url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-    }
-
-    maven {
-        url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
-
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
-
-    maven {
-        url = uri("https://libraries.minecraft.net/")
-    }
-    maven {
-        url = uri("https://repo.codemc.org/repository/maven-public/")
-    }
-
-    maven {
-        url = uri("https://oss.sonatype.org/content/groups/public/")
-    }
-
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-    }
+    maven { url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/") }
+    maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
+    maven { url = uri("https://repo.maven.apache.org/maven2/") }
+    maven { url = uri("https://libraries.minecraft.net/") }
+    maven { url = uri("https://repo.codemc.org/repository/maven-public/") }
+    maven { url = uri("https://oss.sonatype.org/content/groups/public/") }
+    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -51,6 +29,7 @@ dependencies {
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.27")
     paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
     implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.17")
+    implementation ("com.github.DaJokni:simplixstorage:-SNAPSHOT")
     //commandapi
     implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.3")
     compileOnly("dev.jorel:commandapi-annotations:9.5.3")
@@ -81,9 +60,11 @@ tasks {
         dependencies {
             include(dependency("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.3"))
             include(dependency("com.github.stefvanschie.inventoryframework:IF:0.10.17"))
+            include(dependency("com.github.DaJokni:simplixstorage:-SNAPSHOT"))
         }
         relocate("dev.jorel.commandapi", "net.gahvila.gahvilacore.shaded.commandapi")
         relocate ("com.github.stefvanschie.inventoryframework", "net.gahvila.gahvilacore.shaded.inventoryframework")
+        relocate("de.leonhard.storage", "net.gahvila.gahvilacore.shaded.storage")
     }
 
     java {
