@@ -1,23 +1,25 @@
 package net.gahvila.gahvilacore.Profiles.Prefix;
 
-public enum Ranks {
+public enum Prefixes {
     //default
     DEFAULT(""),
-    //legacy ranks
-    VIP("VIP"),
-    MVP("MVP"),
-    PRO("Pro"),
-    OG("OG"),
     //new ranks from cheapest to best
     MOCHA("Mocha"),
     LATTE("Latte"),
     CAPPUCCINO("Cappuccino"),
     CORTADO("Cortado"),
-    ESPRESSO("Espresso");
+    ESPRESSO("Espresso"),
+    //legacy ranks
+    VIP("VIP"),
+    MVP("MVP"),
+    PRO("Pro"),
+    OG("OG"),
+    //admin
+    ADMIN("Admin");
 
     private final String displayName;
 
-    Ranks(String displayName) {
+    Prefixes(String displayName) {
         this.displayName = displayName;
     }
 
