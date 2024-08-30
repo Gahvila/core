@@ -79,16 +79,12 @@ public class Placeholders extends PlaceholderExpansion {
                 String prefix = "";
                 if (op.hasPermission("gahvilacore.rank.admin")) {
                     prefix = "<#FF0000><bold>Admin</bold>";
-                } else if (op.hasPermission("gahvilacore.rank.pro")) {
+                } else if (op.hasPermission("gahvilacore.rank.og")) {
                     if (metaData.getMetaValue("prefixcolor-4") != null) {
-                        prefix = "<b><" + PrefixManager.getPrefix(player, 1) + ">P" + "<" + PrefixManager.getPrefix(player, 2) + ">r" + "<" + PrefixManager.getPrefix(player, 3) + ">o</b>";
+                        prefix = "<b><" + PrefixManager.getPrefix(player, 1) + ">O" + "<" + PrefixManager.getPrefix(player, 2) + ">G";
                     } else {
-                        prefix = "<b><dark_purple>Pro</dark_purple></b>";
+                        prefix = "<b><dark_purple>OG</dark_purple></b>";
                     }
-                } else if (op.hasPermission("gahvilacore.rank.mvp")) {
-                    prefix = "<gold><b>MVP</b></gold>";
-                } else if (op.hasPermission("gahvilacore.rank.vip")) {
-                    prefix = "<yellow><b>VIP</b></yellow>";
                 }
                 return prefix;
             case "afk":
