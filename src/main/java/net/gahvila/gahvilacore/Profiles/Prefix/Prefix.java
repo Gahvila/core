@@ -1,6 +1,6 @@
 package net.gahvila.gahvilacore.Profiles.Prefix;
 
-public enum Prefixes {
+public enum Prefix {
     //default
     DEFAULT(""),
     //new ranks from cheapest to best
@@ -19,7 +19,7 @@ public enum Prefixes {
 
     private final String displayName;
 
-    Prefixes(String displayName) {
+    Prefix(String displayName) {
         this.displayName = displayName;
     }
 

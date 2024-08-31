@@ -4,7 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.gahvila.gahvilacore.Essentials.AFK;
 import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
-import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.PrefixManager;
+import net.gahvila.gahvilacore.Profiles.Prefix.PrefixManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -17,11 +17,13 @@ public class Placeholders extends PlaceholderExpansion {
 
     private final GahvilaCore plugin;
     private final MarriageManager marriageManager;
+    private final net.gahvila.gahvilacore.Profiles.Prefix.PrefixManager prefixManager;
 
 
-    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager) {
+    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager, PrefixManager prefixManager) {
         this.plugin = plugin;
         this.marriageManager = marriageManager;
+        this.prefixManager = prefixManager;
     }
 
 
@@ -49,10 +51,7 @@ public class Placeholders extends PlaceholderExpansion {
         if (player == null) {
             return "";
         }
-        LuckPerms api = LuckPermsProvider.get();
         Player op = player.getPlayer();
-        CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(op);
-
         switch (params) {
             case "playerinfo":
                 if (!marriageManager.isPlayerMarried(op)){
@@ -64,11 +63,7 @@ public class Placeholders extends PlaceholderExpansion {
                 if (op.hasPermission("gahvilacore.rank.admin")){
                     return "<#FF4433>";
                 } else if (op.hasPermission("gahvilacore.rank.pro")) {
-                    if (metaData.getMetaValue("prefixcolor-4") != null) {
-                        return "<" + PrefixManager.getPrefix(player, 4) + ">";
-                    } else {
-                        return "<dark_purple>";
-                    }
+                    return "<dark_purple>";
                 } else if (op.hasPermission("gahvilacore.rank.mvp")){
                     return "<gold>";
                 } else if (op.hasPermission("gahvilacore.rank.vip")){
@@ -76,17 +71,7 @@ public class Placeholders extends PlaceholderExpansion {
                 }
                 return "<aqua>";
             case "prefix":
-                String prefix = "";
-                if (op.hasPermission("gahvilacore.rank.admin")) {
-                    prefix = "<#FF0000><bold>Admin</bold>";
-                } else if (op.hasPermission("gahvilacore.rank.og")) {
-                    if (metaData.getMetaValue("prefixcolor-4") != null) {
-                        prefix = "<b><" + PrefixManager.getPrefix(player, 1) + ">O" + "<" + PrefixManager.getPrefix(player, 2) + ">G";
-                    } else {
-                        prefix = "<b><dark_purple>OG</dark_purple></b>";
-                    }
-                }
-                return prefix;
+                return prefixManager.generatePrefix(op);
             case "afk":
                 if (AFK.isAfk.containsKey(player.getUniqueId())){
                     return " <gray><italic>*afk*</italic></gray>";
