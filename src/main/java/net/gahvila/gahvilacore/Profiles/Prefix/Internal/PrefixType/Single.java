@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Profiles.Prefix.PrefixType;
+package net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixType;
 
 public enum Single {
     MUSTA("Musta", "black"),

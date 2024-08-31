@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Profiles.Prefix;
+package net.gahvila.gahvilacore.Profiles.Prefix.Internal;
 
 public enum Prefix {
     //default

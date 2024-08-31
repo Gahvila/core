@@ -4,10 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.gahvila.gahvilacore.Essentials.AFK;
 import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
-import net.gahvila.gahvilacore.Profiles.Prefix.PrefixManager;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.cacheddata.CachedMetaData;
+import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -17,7 +14,7 @@ public class Placeholders extends PlaceholderExpansion {
 
     private final GahvilaCore plugin;
     private final MarriageManager marriageManager;
-    private final net.gahvila.gahvilacore.Profiles.Prefix.PrefixManager prefixManager;
+    private final PrefixManager prefixManager;
 
 
     public Placeholders(GahvilaCore plugin, MarriageManager marriageManager, PrefixManager prefixManager) {
@@ -60,18 +57,13 @@ public class Placeholders extends PlaceholderExpansion {
                     return "Pelaaja <yellow>" + op.getName() + "</yellow> on naimisissa<br>pelaajan <yellow>" + marriageManager.getMarriageInfo(op, "currentname") + "</yellow> kanssa.";
                 }
             case "namecolor":
-                if (op.hasPermission("gahvilacore.rank.admin")){
-                    return "<#FF4433>";
-                } else if (op.hasPermission("gahvilacore.rank.pro")) {
-                    return "<dark_purple>";
-                } else if (op.hasPermission("gahvilacore.rank.mvp")){
-                    return "<gold>";
-                } else if (op.hasPermission("gahvilacore.rank.vip")){
-                    return "<yellow>";
-                }
-                return "<aqua>";
+                return prefixManager.generateNamecolor(op);
             case "prefix":
                 return prefixManager.generatePrefix(op);
+            case "prefixandname":
+                return prefixManager.generatePrefixAndName(op);
+            case "prefixwithoutclosing":
+                return prefixManager.generatePrefixWithoutClosing(op);
             case "afk":
                 if (AFK.isAfk.containsKey(player.getUniqueId())){
                     return " <gray><italic>*afk*</italic></gray>";

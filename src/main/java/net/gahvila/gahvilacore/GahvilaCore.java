@@ -14,18 +14,25 @@ import net.gahvila.gahvilacore.Profiles.Marriage.MarriageEvents;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageMenu;
 import net.gahvila.gahvilacore.Placeholder.Placeholders;
-import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.Events.InventoryClick;
-import net.gahvila.gahvilacore.RankFeatures.Pro.Prefix.Menu.PrefixmenuCMD;
-import net.gahvila.gahvilacore.RankFeatures.VIP.FullBypass;
+import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixManager;
+import net.gahvila.gahvilacore.Profiles.Prefix.Outernal.PrefixCommand;
+import net.gahvila.gahvilacore.Profiles.Prefix.Outernal.PrefixColorMenu;
+import net.gahvila.gahvilacore.RankFeatures.FullBypass;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class GahvilaCore extends JavaPlugin {
     public static GahvilaCore instance;
+    private PrefixManager prefixManager;
+    private PrefixColorMenu prefixColorMenu;
+
 
     @Override
     public void onEnable() {
         instance = this;
+        prefixManager = new PrefixManager();
+        prefixColorMenu = new PrefixColorMenu(prefixManager);
+
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
 
         //afk
@@ -41,8 +48,8 @@ public final class GahvilaCore extends JavaPlugin {
         marriageCommand.registerCommands();
 
         //prefixmenu
-        PrefixmenuCMD prefixmenuCMD = new PrefixmenuCMD();
-        prefixmenuCMD.registerCommands();
+        PrefixCommand prefixCommand = new PrefixCommand(prefixColorMenu);
+        prefixCommand.registerCommands();
 
         //economy
         EconomyManager economyManager = new EconomyManager();
@@ -63,13 +70,12 @@ public final class GahvilaCore extends JavaPlugin {
         teleportCommands.registerCommands();
 
         //events
-        Bukkit.getPluginManager().registerEvents(new InventoryClick(), this);
         Bukkit.getPluginManager().registerEvents(new FullBypass(), this);
         Bukkit.getPluginManager().registerEvents(new MarriageEvents(marriageManager), this);
 
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new Placeholders(this, marriageManager).register();
+            new Placeholders(this, marriageManager, prefixManager).register();
         }
     }
 

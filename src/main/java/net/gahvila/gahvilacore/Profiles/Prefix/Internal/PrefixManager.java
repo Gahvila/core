@@ -1,7 +1,7 @@
-package net.gahvila.gahvilacore.Profiles.Prefix;
+package net.gahvila.gahvilacore.Profiles.Prefix.Internal;
 
-import net.gahvila.gahvilacore.Profiles.Prefix.PrefixType.Gradient;
-import net.gahvila.gahvilacore.Profiles.Prefix.PrefixType.Single;
+import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixType.Gradient;
+import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixType.Single;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -14,14 +14,48 @@ import java.util.Map;
 
 public class PrefixManager {
 
-    //prefix generator
+    //generators
     public String generatePrefix(Player player) {
+        if (!isPlayerInGroup(player, "legacy")) return "";
+        String prefix = getPrefix(player).getDisplayName();
+
+        PrefixTypes type = getPrefixType(player);
+        return switch(type) {
+            case GRADIENT -> "<gradient:" + getGradient(player) + "><b>" + prefix + "</b></gradient>";
+            case SINGLE -> "<" + getSingle(player) + "><b>" + prefix + "</b>" + "</" + getSingle(player) + ">";
+        };
+    }
+
+    public String generatePrefixWithoutClosing(Player player) {
+        if (!isPlayerInGroup(player, "legacy")) return "";
+        String prefix = getPrefix(player).getDisplayName();
+
+        PrefixTypes type = getPrefixType(player);
+
+        return switch(type) {
+            case GRADIENT -> "<gradient:" + getGradient(player) + "><b>" + prefix + "</b> ";
+            case SINGLE -> "<" + getSingle(player) + "><b>" + prefix + "</b> ";
+        };
+    }
+
+    public String generatePrefixAndName(Player player) {
+        if (!isPlayerInGroup(player, "legacy")) return player.getName();
         String prefix = getPrefix(player).getDisplayName();
 
         PrefixTypes type = getPrefixType(player);
         return switch(type) {
             case GRADIENT -> "<gradient:" + getGradient(player) + "><b>" + prefix + "</b>" + " " + player.getName() + "</gradient>";
             case SINGLE -> "<" + getSingle(player) + "><b>" + prefix + "</b>" + " " + player.getName() + "</" + getSingle(player) + ">";
+        };
+    }
+
+    public String generateNamecolor(Player player) {
+        if (!isPlayerInGroup(player, "legacy")) return "";
+
+        PrefixTypes type = getPrefixType(player);
+        return switch(type) {
+            case GRADIENT -> "<gradient:" + getGradient(player) + ">";
+            case SINGLE -> "<" + getSingle(player) + ">";
         };
     }
 
@@ -46,7 +80,7 @@ public class PrefixManager {
         LuckPerms api = LuckPermsProvider.get();
 
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
-        if (metaData.getMetaValue("prefix") == null) {
+        if (metaData.getMetaValue("prefixtype") == null) {
             return PrefixTypes.SINGLE;
         } else {
             return PrefixTypes.valueOf(metaData.getMetaValue("prefixtype"));
@@ -79,7 +113,7 @@ public class PrefixManager {
 
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
         if (metaData.getMetaValue("single") == null) {
-            return Single.KELTAINEN.getColor();
+            return Single.TURKOOSI.getColor();
         } else {
             return Single.valueOf(metaData.getMetaValue("single")).getColor();
         }
@@ -90,24 +124,25 @@ public class PrefixManager {
     }
 
     //internal stuff to the class
-
-    private static final Map<String, Prefix> GROUP_PREFIX_MAP = Map.of(
-            "admin", Prefix.ADMIN,
-            "legacy", Prefix.OG,
-            "espresso", Prefix.ESPRESSO,
-            "cortado", Prefix.CORTADO,
-            "cappuccino", Prefix.CAPPUCCINO,
-            "latte", Prefix.LATTE,
-            "mocha", Prefix.MOCHA
-    );
-
     private Prefix getPrefixBasedOnGroup(Player player) {
         // check which group player is in
-        return GROUP_PREFIX_MAP.entrySet().stream()
-                .filter(entry -> isPlayerInGroup(player, entry.getKey()))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(Prefix.DEFAULT);
+        if (isPlayerInGroup(player, "admin")) {
+            return Prefix.ADMIN;
+        } else if (isPlayerInGroup(player, "legacy")) {
+            return Prefix.OG;
+        } else if (isPlayerInGroup(player, "espresso")) {
+            return Prefix.ESPRESSO;
+        } else if (isPlayerInGroup(player, "cortado")) {
+            return Prefix.CORTADO;
+        } else if (isPlayerInGroup(player, "cappuccino")) {
+            return Prefix.CAPPUCCINO;
+        } else if (isPlayerInGroup(player, "latte")) {
+            return Prefix.LATTE;
+        } else if (isPlayerInGroup(player, "mocha")) {
+            return Prefix.MOCHA;
+        } else {
+            return Prefix.DEFAULT;
+        }
     }
 
     private void setData(Player player, String key, String value) {

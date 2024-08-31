@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.RankFeatures.VIP;
+package net.gahvila.gahvilacore.RankFeatures;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
