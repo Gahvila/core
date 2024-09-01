@@ -96,10 +96,14 @@ public class PrefixManager {
         LuckPerms api = LuckPermsProvider.get();
 
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
-        if (metaData.getMetaValue("gradient") == null) {
+        String gradientValue = metaData.getMetaValue("gradient");
+
+        if (gradientValue == null) return Gradient.KAHVI.getGradient();
+
+        try {
+            return Gradient.valueOf(gradientValue.toUpperCase()).getGradient();
+        } catch (IllegalArgumentException e) {
             return Gradient.KAHVI.getGradient();
-        } else {
-            return Gradient.valueOf(metaData.getMetaValue("gradient")).getGradient();
         }
     }
 
@@ -112,10 +116,14 @@ public class PrefixManager {
         LuckPerms api = LuckPermsProvider.get();
 
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
-        if (metaData.getMetaValue("single") == null) {
+        String singleValue = metaData.getMetaValue("single");
+
+        if (singleValue == null) return Single.TURKOOSI.getColor();
+
+        try {
+            return Single.valueOf(singleValue).getColor();
+        } catch (IllegalArgumentException e) {
             return Single.TURKOOSI.getColor();
-        } else {
-            return Single.valueOf(metaData.getMetaValue("single")).getColor();
         }
     }
 

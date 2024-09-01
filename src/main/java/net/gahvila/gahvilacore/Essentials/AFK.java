@@ -36,6 +36,8 @@ public class AFK implements Listener {
                         p.sendMessage("Olet nyt afk.");
                     }else{
                         p.sendMessage("Et ole enää afk.");
+                        lastLoc.put(uuid, p.getLocation());
+                        lastAction.put(p.getUniqueId(), System.currentTimeMillis());
                         isAfk.remove(uuid);
                     }
                 })
