@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Profiles.Prefix.Internal;
+package net.gahvila.gahvilacore.Profiles.Prefix.Backend;
 
 public enum Prefix {
     //default
@@ -6,7 +6,6 @@ public enum Prefix {
     //new ranks from cheapest to best
     MOCHA("Mocha"),
     LATTE("Latte"),
-    CAPPUCCINO("Cappuccino"),
     CORTADO("Cortado"),
     ESPRESSO("Espresso"),
     //legacy ranks
@@ -25,5 +24,9 @@ public enum Prefix {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getPermissionNode() {
+        return "gahvilacore.prefix." + this.name().toLowerCase();
     }
 }

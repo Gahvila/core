@@ -1,7 +1,7 @@
-package net.gahvila.gahvilacore.Profiles.Prefix.Internal;
+package net.gahvila.gahvilacore.Profiles.Prefix.Backend;
 
-import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixType.Gradient;
-import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixType.Single;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixType.Gradient;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixType.Single;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -9,8 +9,6 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 import org.bukkit.entity.Player;
-
-import java.util.Map;
 
 public class PrefixManager {
 
@@ -64,10 +62,14 @@ public class PrefixManager {
         LuckPerms api = LuckPermsProvider.get();
 
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
-        if (metaData.getMetaValue("prefix") == null) {
-            return getPrefixBasedOnGroup(player);
-        } else {
+        String prefixValue = metaData.getMetaValue("prefix");
+
+        if (prefixValue == null) return getPrefixBasedOnGroup(player);
+
+        try {
             return Prefix.valueOf(metaData.getMetaValue("prefix"));
+        } catch (IllegalArgumentException e) {
+            return getPrefixBasedOnGroup(player);
         }
     }
 
@@ -142,8 +144,6 @@ public class PrefixManager {
             return Prefix.ESPRESSO;
         } else if (isPlayerInGroup(player, "cortado")) {
             return Prefix.CORTADO;
-        } else if (isPlayerInGroup(player, "cappuccino")) {
-            return Prefix.CAPPUCCINO;
         } else if (isPlayerInGroup(player, "latte")) {
             return Prefix.LATTE;
         } else if (isPlayerInGroup(player, "mocha")) {

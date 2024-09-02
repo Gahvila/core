@@ -14,9 +14,11 @@ import net.gahvila.gahvilacore.Profiles.Marriage.MarriageEvents;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageMenu;
 import net.gahvila.gahvilacore.Placeholder.Placeholders;
-import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixManager;
-import net.gahvila.gahvilacore.Profiles.Prefix.Outernal.PrefixCommand;
-import net.gahvila.gahvilacore.Profiles.Prefix.Outernal.PrefixColorMenu;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixMainMenu;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixTypeMenu;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.PrefixCommand;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixColorMenu;
 import net.gahvila.gahvilacore.RankFeatures.FullBypass;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,6 +26,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class GahvilaCore extends JavaPlugin {
     public static GahvilaCore instance;
     private PrefixManager prefixManager;
+    private PrefixTypeMenu prefixTypeMenu;
+    private PrefixMainMenu prefixMainMenu;
     private PrefixColorMenu prefixColorMenu;
 
 
@@ -31,6 +35,8 @@ public final class GahvilaCore extends JavaPlugin {
     public void onEnable() {
         instance = this;
         prefixManager = new PrefixManager();
+        prefixTypeMenu = new PrefixTypeMenu(prefixManager);
+        prefixMainMenu = new PrefixMainMenu();
         prefixColorMenu = new PrefixColorMenu(prefixManager);
 
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
@@ -48,7 +54,7 @@ public final class GahvilaCore extends JavaPlugin {
         marriageCommand.registerCommands();
 
         //prefixmenu
-        PrefixCommand prefixCommand = new PrefixCommand(prefixColorMenu);
+        PrefixCommand prefixCommand = new PrefixCommand(prefixTypeMenu, prefixMainMenu, prefixColorMenu);
         prefixCommand.registerCommands();
 
         //economy

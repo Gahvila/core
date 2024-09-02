@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixType;
+package net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixType;
 
 public enum Gradient {
     VESIMELOONI("Vesimelooni", "#38b91c:#FF476F:#E23C2E:#E23C2E:#FF476F:#38b91c"),
@@ -7,6 +7,7 @@ public enum Gradient {
     PETERGRIFFIN("Peter Griffin", "#783f04:#fce5cd:#ffffff:#3abf00:#000000"),
     DRAGONLORE("Dragon Lore", "#fe620f:#f8d51c:#b5c244:#415d2a:#c9b362"),
     MERI("Meri", "#8aeed5:#63b9db:#4479e1:#2645e0:#071eed"),
+    SATEENKAARI("Sateenkaari", "#e81416:#ffa500:#faeb36:#79c314:#487de7:#4b369d:#70369d"),
     SUOMI1("Suomi 1", "#004bde:#ffffff:#ffffff:#004bde"),
     SUOMI2("Suomi 2", "#004bde:#ffffff"),
     KULTA("Kulta", "#a67c00:#bf9b30:#ffbf00:#ffcf40:#ffdc73"),
@@ -21,8 +22,8 @@ public enum Gradient {
     PIKKUPANDA("Pikkupanda", "#b13d14:#fce7d2:#340701:#9c1a04:#db8758"),
     NAAMIOINTI("Naamiointi", "#19270d:#25591f:#818c3c:#72601b:#593a0e"),
     KIRKASTAIVAS("Kirkas taivas", "#009fff:#19a8ff:#30b1ff:#48baff:#62c4ff"),
-    AMERIKKA("Amerikka", "#ff0000:#ffffff:#0447fd:#ffffff:#ff0000");
-
+    AMERIKKA("Amerikka", "#ff0000:#ffffff:#0447fd:#ffffff:#ff0000"),
+    DOOM("Doom", "#716a4e:#4e3b35:#6c4b36:#b45e33:#1c3b33");
 
     private final String displayName;
     private final String gradient;
@@ -38,5 +39,9 @@ public enum Gradient {
 
     public String getGradient() {
         return gradient;
+    }
+
+    public String getPermissionNode() {
+        return "gahvilacore.prefixtype.gradient." + this.name().toLowerCase();
     }
 }

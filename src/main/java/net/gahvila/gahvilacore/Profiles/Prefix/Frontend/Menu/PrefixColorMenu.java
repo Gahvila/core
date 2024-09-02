@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Profiles.Prefix.Outernal;
+package net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu;
 
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
@@ -8,10 +8,10 @@ import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.PatternPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.github.stefvanschie.inventoryframework.pane.util.Pattern;
-import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixManager;
-import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixType.Gradient;
-import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixType.Single;
-import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixTypes;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixType.Gradient;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixType.Single;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixTypes;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -49,7 +49,7 @@ public class PrefixColorMenu {
                 "1AAAAAAA1",
                 "1AAAAAAA1",
                 "1AAAAAAA1",
-                "111AAA111"
+                "111111111"
         );
         PatternPane border = new PatternPane(0, 0, 9, 5, Pane.Priority.LOWEST, pattern);
         ItemStack background = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
@@ -65,21 +65,25 @@ public class PrefixColorMenu {
         NamespacedKey key = new NamespacedKey(instance, "gahvilacore");
         if (prefixManager.getPrefixType(player) == PrefixTypes.GRADIENT) {
             for (Gradient gradient : Gradient.values()) {
-                ItemStack item = new ItemStack(Material.PAPER);;
-                ItemMeta meta = item.getItemMeta();
-                meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, gradient.toString());
-                meta.displayName(toUndecoratedMM("<gradient:"+ gradient.getGradient() +">" + gradient.getDisplayName()));
-                item.setItemMeta(meta);
-                items.add(item);
+                if (player.hasPermission(gradient.getPermissionNode())){
+                    ItemStack item = new ItemStack(Material.PAPER);;
+                    ItemMeta meta = item.getItemMeta();
+                    meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, gradient.toString());
+                    meta.displayName(toUndecoratedMM("<gradient:"+ gradient.getGradient() +">" + gradient.getDisplayName()));
+                    item.setItemMeta(meta);
+                    items.add(item);
+                }
             }
         } else {
             for (Single single : Single.values()) {
-                ItemStack item = new ItemStack(Material.PAPER);;
-                ItemMeta meta = item.getItemMeta();
-                meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, single.toString());
-                meta.displayName(toUndecoratedMM("<" + single.getColor() +">" + single.getDisplayName()));
-                item.setItemMeta(meta);
-                items.add(item);
+                if (player.hasPermission(single.getPermissionNode())) {
+                    ItemStack item = new ItemStack(Material.PAPER);
+                    ItemMeta meta = item.getItemMeta();
+                    meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, single.toString());
+                    meta.displayName(toUndecoratedMM("<" + single.getColor() + ">" + single.getDisplayName()));
+                    item.setItemMeta(meta);
+                    items.add(item);
+                }
             }
         }
         pages.populateWithItemStacks(items);
@@ -96,11 +100,9 @@ public class PrefixColorMenu {
             if (data != null) {
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
                 if (prefixManager.getPrefixType(player) == PrefixTypes.GRADIENT) {
-                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
                     prefixManager.setGradient(player, Gradient.valueOf(data));
                     player.sendRichMessage("<white>gradient: " + data + "</white>");
                 } else {
-                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
                     prefixManager.setSingle(player, Single.valueOf(data));
                     player.sendRichMessage("<white>single: " + data + "</white>");
                 }
@@ -112,6 +114,15 @@ public class PrefixColorMenu {
         });
 
         StaticPane navigationPane = new StaticPane(0, 4, 9, 1);
+
+        ItemStack mainmenu = new ItemStack(Material.BARRIER);
+        ItemMeta mainmenuMeta = mainmenu.getItemMeta();
+        mainmenuMeta.displayName(toUndecoratedMM("<b>Päävalikko"));
+        mainmenu.setItemMeta(mainmenuMeta);
+        navigationPane.addItem(new GuiItem(mainmenu, event -> {
+            player.closeInventory();
+            player.performCommand("prefix");
+        }), 0, 0);
 
         ItemStack type = new ItemStack(Material.LEVER);
         ItemMeta typemeta = type.getItemMeta();

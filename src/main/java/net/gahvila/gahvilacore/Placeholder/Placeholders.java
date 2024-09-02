@@ -4,7 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.gahvila.gahvilacore.Essentials.AFK;
 import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
-import net.gahvila.gahvilacore.Profiles.Prefix.Internal.PrefixManager;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
