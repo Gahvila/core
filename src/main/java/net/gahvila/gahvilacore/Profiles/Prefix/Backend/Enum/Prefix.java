@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Profiles.Prefix.Backend;
+package net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum;
 
 public enum Prefix {
     //default

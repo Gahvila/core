@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixType;
+package net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType;
 
 public enum Single {
     MUSTA("Musta", "black"),
@@ -35,9 +35,8 @@ public enum Single {
     PORKKANA("Porkkana", "#ED9121"),
     DENIM("Denim", "#1560BD"),
     HALFLIFE("Half-Life", "#fb7e14"),
-    MUNAKOISO("Munakoiso", "#614051");
-
-
+    MUNAKOISO("Munakoiso", "#614051"),
+    VESIMELOONI("Vesimelooni", "#FD4659");
 
     private final String displayName;
     private final String color;

@@ -1,7 +1,9 @@
 package net.gahvila.gahvilacore.Profiles.Prefix.Backend;
 
-import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixType.Gradient;
-import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixType.Single;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.Prefix;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Gradient;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Single;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixTypes;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;

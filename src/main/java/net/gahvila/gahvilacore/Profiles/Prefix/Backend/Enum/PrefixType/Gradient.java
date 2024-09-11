@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixType;
+package net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType;
 
 public enum Gradient {
     VESIMELOONI("Vesimelooni", "#38b91c:#FF476F:#E23C2E:#E23C2E:#FF476F:#38b91c"),
@@ -23,7 +23,9 @@ public enum Gradient {
     NAAMIOINTI("Naamiointi", "#19270d:#25591f:#818c3c:#72601b:#593a0e"),
     KIRKASTAIVAS("Kirkas taivas", "#009fff:#19a8ff:#30b1ff:#48baff:#62c4ff"),
     AMERIKKA("Amerikka", "#ff0000:#ffffff:#0447fd:#ffffff:#ff0000"),
-    DOOM("Doom", "#716a4e:#4e3b35:#6c4b36:#b45e33:#1c3b33");
+    DOOM("Doom", "#716a4e:#4e3b35:#6c4b36:#b45e33:#1c3b33"),
+    RUUSUKULTA("Ruusukulta", "#daa4aa:#ffdfe1:#ffebe9:#fff5ee:#fffffb"),
+    RUBIINI("Rubiini", "#850014:#ae001a:#e10531:#ae001a:#850014");
 
     private final String displayName;
     private final String gradient;
