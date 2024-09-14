@@ -16,7 +16,7 @@ public class SpeedCommand {
                 .executesPlayer((p, args) -> {
                     int speed = (int) args.get("nopeus");
                     Player player;
-                    if (args.get("pelaaja") != null && p.hasPermission("gahvilacore.gamemode.others")) {
+                    if (args.get("pelaaja") != null && p.hasPermission("gahvilacore.speed.others")) {
                         player = (Player) args.get("pelaaja");
                     } else {
                         player = p;
