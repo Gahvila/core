@@ -39,8 +39,8 @@ public class SpeedCommand {
                             player.setFlySpeed(0.4F);
                             break;
                         case 5:
-                            p.setWalkSpeed(0.6F);
-                            p.setFlySpeed(0.5F);
+                            player.setWalkSpeed(0.6F);
+                            player.setFlySpeed(0.5F);
                             break;
                     }
 
