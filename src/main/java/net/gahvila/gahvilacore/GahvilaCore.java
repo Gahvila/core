@@ -54,7 +54,7 @@ public final class GahvilaCore extends JavaPlugin {
         marriageCommand.registerCommands();
 
         //prefixmenu
-        PrefixCommand prefixCommand = new PrefixCommand(prefixTypeMenu, prefixMainMenu, prefixColorMenu);
+        PrefixCommand prefixCommand = new PrefixCommand(prefixTypeMenu, prefixMainMenu, prefixColorMenu, prefixManager);
         prefixCommand.registerCommands();
 
         //economy

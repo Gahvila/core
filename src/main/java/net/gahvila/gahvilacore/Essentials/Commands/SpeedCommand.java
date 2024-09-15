@@ -21,6 +21,7 @@ public class SpeedCommand {
                     } else {
                         player = p;
                     }
+                    assert player != null;
                     switch (speed) {
                         case 1:
                             player.setWalkSpeed(0.2F);

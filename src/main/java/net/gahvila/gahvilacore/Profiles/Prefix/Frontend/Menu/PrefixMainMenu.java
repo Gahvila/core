@@ -57,7 +57,7 @@ public class PrefixMainMenu {
         ItemStack color = new ItemStack(Material.PAPER);
         ItemMeta colorMeta = color.getItemMeta();
         colorMeta.displayName(toUndecoratedMM("<green><b>Värin valinta</b></green>"));
-        colorMeta.getPersistentDataContainer().set(key, PersistentDataType.STRING, "colorpicker");
+        colorMeta.getPersistentDataContainer().set(key, PersistentDataType.STRING, "setcolor");
         color.setItemMeta(colorMeta);
         navigationPane.addItem(new GuiItem(color), 2, 0);
 
