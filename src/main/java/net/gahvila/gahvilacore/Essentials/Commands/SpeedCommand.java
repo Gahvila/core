@@ -11,12 +11,13 @@ public class SpeedCommand {
 
     public void registerCommands() {
         new CommandAPICommand("speed")
+                .withPermission("gahvilacore.command.speed")
                 .withArguments(new IntegerArgument("nopeus", 1, 5))
                 .withOptionalArguments(new PlayerArgument("pelaaja"))
                 .executesPlayer((p, args) -> {
                     int speed = (int) args.get("nopeus");
                     Player player;
-                    if (args.get("pelaaja") != null && p.hasPermission("gahvilacore.speed.others")) {
+                    if (args.get("pelaaja") != null && p.hasPermission("gahvilacore.command.speed.others")) {
                         player = (Player) args.get("pelaaja");
                     } else {
                         player = p;

@@ -25,13 +25,13 @@ public class GamemodeCommand {
         for (Map.Entry<String, GameMode> entry : gamemodes.entrySet()) {
             new CommandAPICommand("gamemode")
                     .withAliases("gm")
-                    .withPermission("gahvilacore.gamemode")
+                    .withPermission("gahvilacore.command.gamemode")
                     .withArguments(new LiteralArgument(entry.getKey()))
                     .withOptionalArguments(new PlayerArgument("pelaaja"))
                     .executesPlayer((p, args) -> {
                         String gamemode = entry.getKey();
                         Player player;
-                        if (args.get("pelaaja") != null && p.hasPermission("gahvilacore.gamemode.others")) {
+                        if (args.get("pelaaja") != null && p.hasPermission("gahvilacore.command.gamemode.others")) {
                             player = (Player) args.get("pelaaja");
                         } else {
                             player = p;
