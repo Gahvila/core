@@ -2,13 +2,10 @@ package net.gahvila.gahvilacore;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
-import net.gahvila.gahvilacore.Essentials.Commands.TeleportCommands;
+import net.gahvila.gahvilacore.Essentials.Commands.*;
 import net.gahvila.gahvilacore.Profiles.Economy.EconomyCommand;
 import net.gahvila.gahvilacore.Profiles.Economy.EconomyManager;
 import net.gahvila.gahvilacore.Essentials.AFK;
-import net.gahvila.gahvilacore.Essentials.Commands.GamemodeCommand;
-import net.gahvila.gahvilacore.Essentials.Commands.InfoCommands;
-import net.gahvila.gahvilacore.Essentials.Commands.SpeedCommand;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageCommand;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageEvents;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
@@ -74,6 +71,9 @@ public final class GahvilaCore extends JavaPlugin {
 
         TeleportCommands teleportCommands = new TeleportCommands();
         teleportCommands.registerCommands();
+
+        FlyCommand flyCommand = new FlyCommand();
+        flyCommand.registerCommands();
 
         //events
         Bukkit.getPluginManager().registerEvents(new FullBypass(), this);
