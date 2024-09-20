@@ -129,7 +129,6 @@ public class MusicMenu {
         pause.setItemMeta(pauseMeta);
         navigationPane.addItem(new GuiItem(pause, event -> {
             if (cooldown.contains(player)) return;
-            musicManager.clearCookies(player);
             cooldown.add(player);
             Bukkit.getScheduler().runTaskLater(instance, () -> cooldown.remove(player), 10);
 

@@ -298,6 +298,9 @@ public class MusicManager {
         }
         saveSongPlayer(player, esp);
         Bukkit.getScheduler().runTaskLater(instance, () -> songPlayerSchedule(player, esp), 5);
+
+        saveTitleToCookie(player);
+        saveTickToCookie(player);
     }
 
     public void saveTitleToCookie(Player player) {
