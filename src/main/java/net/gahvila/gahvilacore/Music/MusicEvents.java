@@ -1,6 +1,9 @@
 package net.gahvila.gahvilacore.Music;
 
+import com.xxmicloxx.NoteBlockAPI.event.SongDestroyingEvent;
+import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongNextEvent;
+import com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.songplayer.EntitySongPlayer;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
@@ -68,6 +71,18 @@ public class MusicEvents implements Listener {
                 musicManager.saveTickToCookie(player);
                 player.sendRichMessage("Nyt soi: <yellow>" + songPlayer.getSong().getTitle());
                 musicManager.songPlayerSchedule(player, songPlayer);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onSongStop(SongEndEvent event) {
+        SongPlayer songPlayer = event.getSongPlayer();
+        Set<UUID> playerUUIDs = songPlayer.getPlayerUUIDs();
+        for (UUID uuid : playerUUIDs) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                musicManager.clearCookies(player);
             }
         }
     }

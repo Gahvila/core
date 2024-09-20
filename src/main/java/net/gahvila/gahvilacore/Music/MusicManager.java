@@ -83,6 +83,7 @@ public class MusicManager {
         SongPlayer songPlayer = songPlayers.get(player);
         songPlayer.destroy();
         songPlayers.remove(player);
+        clearCookies(player);
     }
 
     //SPEAKER MODE
