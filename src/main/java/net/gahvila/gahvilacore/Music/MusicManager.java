@@ -1,7 +1,11 @@
 package net.gahvila.gahvilacore.Music;
 
+import com.xxmicloxx.NoteBlockAPI.model.Playlist;
+import com.xxmicloxx.NoteBlockAPI.model.RepeatMode;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoStereoMode;
 import com.xxmicloxx.NoteBlockAPI.songplayer.EntitySongPlayer;
+import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder;
 import de.leonhard.storage.Json;
@@ -10,12 +14,18 @@ import net.draycia.carbon.api.users.CarbonPlayer;
 import net.gahvila.gahvilacore.Utils.WorldGuardRegionChecker;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
@@ -32,6 +42,8 @@ public class MusicManager {
     public static HashMap<Player, Boolean> autoEnabled = new HashMap<>();
     public static HashMap<Player, Integer> playerVolume = new HashMap<>();
 
+    public static NamespacedKey titleKey = new NamespacedKey(instance, "musicplayer.song.title");
+    public static NamespacedKey tickKey = new NamespacedKey(instance, "musicplayer.song.tick");
 
 
     public void loadSongs() {
@@ -148,6 +160,7 @@ public class MusicManager {
                 songPlayer.getSong().getTitle() + "</aqua>"), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
         player.showBossBar(progressBar);
         Bukkit.getScheduler().runTaskTimerAsynchronously(instance, task -> {
+            saveTickToCookie(player);
             double progress = (double) songPlayer.getTick() / length;
             if (progress >= 1.0 || progress < 0){
                 progressBar.removeViewer(player);
@@ -177,6 +190,7 @@ public class MusicManager {
                     task2.cancel();
                     return;
                 }
+
                 if (carbonEnabled || wgEnabled) {
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                         if (wgEnabled) {
@@ -187,6 +201,10 @@ public class MusicManager {
                                 }
                             } else {
                                 songPlayer.removePlayer(onlinePlayer);
+                            }
+                        } else {
+                            if (songPlayer.isPlaying()) {
+                                onlinePlayer.spawnParticle(Particle.NOTE, player.getLocation().add(0, 2, 0), 1);
                             }
                         }
 
@@ -225,5 +243,112 @@ public class MusicManager {
         int seconds = (int) (lengthInSeconds % 60);
 
         return String.format("%d:%02d", minutes, seconds);
+    }
+
+    //Song player creation
+    public void createSP(Player player, Song song, Short tick) {
+        clearSongPlayer(player);
+        Playlist playlist = new Playlist(song);
+        RadioSongPlayer rsp = new RadioSongPlayer(playlist);
+        rsp.setChannelMode(new MonoStereoMode());
+        rsp.setVolume(volumeConverter(getVolume(player)));
+        rsp.addPlayer(player);
+        if (tick != null){
+            rsp.setTick(tick);
+        }
+        rsp.setPlaying(true);
+        if (getAutoEnabled(player)) {
+            ArrayList<Song> songs = getSongs();
+            for (Song playlistSong : songs) {
+                playlist.add(playlistSong);
+            }
+            rsp.setRandom(true);
+            rsp.setRepeatMode(RepeatMode.ALL);
+        } else {
+            rsp.setRandom(false);
+            rsp.setRepeatMode(RepeatMode.NO);
+        }
+        saveSongPlayer(player, rsp);
+        Bukkit.getScheduler().runTaskLater(instance, () -> songPlayerSchedule(player, rsp), 5);
+
+        saveTitleToCookie(player);
+        saveTickToCookie(player);
+    }
+
+    public void createESP(Player player, Song song, Short tick) {
+        clearSongPlayer(player);
+        EntitySongPlayer esp = new EntitySongPlayer(song);
+        esp.setEntity(player);
+        esp.setVolume((byte) 45);
+        esp.setDistance(24);
+        if (tick != null){
+            esp.setTick(tick);
+        }
+        esp.setPlaying(true);
+
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")){
+                if(Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
+                    CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(onlinePlayer.getUniqueId()).getNow(null);
+                    if (!carbonPlayer.ignoring(esp.getEntity().getUniqueId())) {
+                        esp.addPlayer(onlinePlayer);
+                    }
+                }
+            }
+        }
+        saveSongPlayer(player, esp);
+        Bukkit.getScheduler().runTaskLater(instance, () -> songPlayerSchedule(player, esp), 5);
+    }
+
+    public void saveTitleToCookie(Player player) {
+        if (getSongPlayer(player) != null && getSongPlayer(player).isPlaying()) {
+            SongPlayer songPlayer = getSongPlayer(player);
+            player.storeCookie(titleKey, songPlayer.getSong().getTitle().getBytes());
+        }
+    }
+
+    public void saveTickToCookie(Player player) {
+        if (getSongPlayer(player) != null && getSongPlayer(player).isPlaying()) {
+            SongPlayer songPlayer = getSongPlayer(player);
+
+            ByteBuffer buffer = ByteBuffer.allocate(2);
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            buffer.putShort(songPlayer.getTick());
+
+            player.storeCookie(tickKey, buffer.array());
+        }
+    }
+
+    public void clearCookies(Player player) {
+        player.storeCookie(titleKey, new byte[]{});
+        player.storeCookie(tickKey, new byte[]{});
+    }
+
+    private CompletableFuture<String> retrieveTitleCookie(Player player) {
+        return player.retrieveCookie(titleKey)
+                .thenApply(bytes -> bytes != null ? new String(bytes, StandardCharsets.UTF_8) : null);
+    }
+
+    private CompletableFuture<Short> retrieveTickCookie(Player player) {
+        return player.retrieveCookie(tickKey)
+                .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getShort() : null);
+    }
+
+    public void playSongFromCookies(Player player) {
+        Bukkit.getScheduler().runTaskAsynchronously(instance, task -> {
+            String title = retrieveTitleCookie(player).join();
+            Short tick = retrieveTickCookie(player).join();
+
+            if (title == null || tick == null) {
+                return;
+            }
+
+            for (Song song : getSongs()) {
+                if (song.getTitle().equals(title)) {
+                    clearSongPlayer(player);
+                    createSP(player, song, tick);
+                }
+            }
+        });
     }
 }

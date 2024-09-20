@@ -107,9 +107,9 @@ public class MusicMenu {
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
                 musicManager.clearSongPlayer(player);
                 if (!musicManager.getSpeakerEnabled(player)) {
-                    createSP(player, song, null);
+                    musicManager.createSP(player, song, null);
                 } else if (musicManager.getSpeakerEnabled(player)) {
-                    createESP(player, song, null);
+                    musicManager.createESP(player, song, null);
                 }
                 player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + songName + "</yellow> <white>soimaan.");
                 gui.update();
@@ -129,6 +129,7 @@ public class MusicMenu {
         pause.setItemMeta(pauseMeta);
         navigationPane.addItem(new GuiItem(pause, event -> {
             if (cooldown.contains(player)) return;
+            musicManager.clearCookies(player);
             cooldown.add(player);
             Bukkit.getScheduler().runTaskLater(instance, () -> cooldown.remove(player), 10);
 
@@ -165,12 +166,12 @@ public class MusicMenu {
                 if (musicManager.getSpeakerEnabled(player)){
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        createESP(player, sp.getSong(), sp.getTick());
+                        musicManager.createESP(player, sp.getSong(), sp.getTick());
                     }
                 } else {
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        createSP(player, sp.getSong(), sp.getTick());
+                        musicManager.createSP(player, sp.getSong(), sp.getTick());
                     }
                 }
                 autoplay.lore(List.of(toUndecoratedMM("<gray>Toistaa jatkuvasti"), toUndecoratedMM("<gray>uusia kappaleita."), toUndecoratedMM("<red>Pois päältä")));
@@ -179,12 +180,12 @@ public class MusicMenu {
                     player.sendRichMessage("<red>Jatkuva toisto ei ole käytössä kaiutintilan päällä ollessa!");
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        createESP(player, sp.getSong(), sp.getTick());
+                        musicManager.createESP(player, sp.getSong(), sp.getTick());
                     }
                 } else {
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        createSP(player, sp.getSong(), sp.getTick());
+                        musicManager.createSP(player, sp.getSong(), sp.getTick());
                     }
                 }
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.8F);
@@ -215,7 +216,7 @@ public class MusicMenu {
                 musicManager.setSpeakerEnabled(player, false);
                 if (musicManager.getSongPlayer(player) != null) {
                     SongPlayer sp = musicManager.getSongPlayer(player);
-                    createSP(player, sp.getSong(), sp.getTick());
+                    musicManager.createSP(player, sp.getSong(), sp.getTick());
                 }
                 speaker.lore(List.of(toUndecoratedMM("<gray>Soittaa kappaleesi ympärillä"), toUndecoratedMM("<gray>oleville pelaajille."), toUndecoratedMM("<red>Pois päältä")));
             }else {
@@ -227,7 +228,7 @@ public class MusicMenu {
                 musicManager.setSpeakerEnabled(player, true);
                 if (musicManager.getSongPlayer(player) != null) {
                     SongPlayer sp = musicManager.getSongPlayer(player);
-                    createESP(player, sp.getSong(), sp.getTick());
+                    musicManager.createESP(player, sp.getSong(), sp.getTick());
                 }
                 speaker.lore(List.of(toUndecoratedMM("<gray>Soittaa kappaleesi ympärillä"), toUndecoratedMM("<gray>oleville pelaajille."), toUndecoratedMM("<green>Päällä")));
             }
@@ -295,57 +296,6 @@ public class MusicMenu {
         gui.addPane(navigationPane);
 
         gui.update();
-    }
-
-    public void createSP(Player player, Song song, Short tick) {
-        musicManager.clearSongPlayer(player);
-        Playlist playlist = new Playlist(song);
-        RadioSongPlayer rsp = new RadioSongPlayer(playlist);
-        rsp.setChannelMode(new MonoStereoMode());
-        rsp.setVolume(musicManager.volumeConverter(musicManager.getVolume(player)));
-        rsp.addPlayer(player);
-        if (tick != null){
-            rsp.setTick(tick);
-        }
-        rsp.setPlaying(true);
-        if (musicManager.getAutoEnabled(player)) {
-            ArrayList<Song> songs = musicManager.getSongs();
-            for (Song playlistSong : songs) {
-                playlist.add(playlistSong);
-            }
-            rsp.setRandom(true);
-            rsp.setRepeatMode(RepeatMode.ALL);
-        } else {
-            rsp.setRandom(false);
-            rsp.setRepeatMode(RepeatMode.NO);
-        }
-        musicManager.saveSongPlayer(player, rsp);
-        Bukkit.getScheduler().runTaskLater(instance, () -> musicManager.songPlayerSchedule(player, rsp), 5);
-    }
-
-    public void createESP(Player player, Song song, Short tick) {
-        musicManager.clearSongPlayer(player);
-        EntitySongPlayer esp = new EntitySongPlayer(song);
-        esp.setEntity(player);
-        esp.setVolume((byte) 45);
-        esp.setDistance(24);
-        if (tick != null){
-            esp.setTick(tick);
-        }
-        esp.setPlaying(true);
-
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")){
-                if(Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
-                    CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(onlinePlayer.getUniqueId()).getNow(null);
-                    if (!carbonPlayer.ignoring(esp.getEntity().getUniqueId())) {
-                        esp.addPlayer(onlinePlayer);
-                    }
-                }
-            }
-        }
-        musicManager.saveSongPlayer(player, esp);
-        Bukkit.getScheduler().runTaskLater(instance, () -> musicManager.songPlayerSchedule(player, esp), 5);
     }
 }
 
