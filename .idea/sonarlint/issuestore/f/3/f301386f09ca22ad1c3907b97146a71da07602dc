@@ -1,21 +1,0 @@
-
-o
-java:S1104"TMake instance a static final constant or non-public and provide accessors if needed.(Í¸¼Ğşÿÿÿÿ
-I
-java:S1444".Make this "public static instance" field final(Í¸¼Ğşÿÿÿÿ
-Q
-java:S2696&"6Make the enclosing method "static" or remove this set.(ñõîÙşÿÿÿÿ
-G
-java:S1128",Remove this unused import 'co.aikar.idb.DB'.(¿üµôúÿÿÿÿ
-H
-java:S1128"2Remove this unused import 'co.aikar.idb.Database'.(Şşïô
-T
-java:S1128"9Remove this unused import 'co.aikar.idb.DatabaseOptions'.(“ıİªşÿÿÿÿ
-T
-java:S1128"?Remove this unused import 'co.aikar.idb.PooledDatabaseOptions'.(¿ÿ_
-R
-java:S1128"0Remove this unused import 'org.bukkit.Location'.(Æ”øÊûÿÿÿÿ8µÇÚõ0
-P
-java:S1128".Remove this unused import 'java.util.HashMap'.(™˜”€ùÿÿÿÿ8µÇÚõ0
-P
-java:S1128":Remove this unused import 'java.util.concurrent.TimeUnit'.(Æ™ş

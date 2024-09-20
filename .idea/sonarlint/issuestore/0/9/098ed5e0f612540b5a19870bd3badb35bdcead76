@@ -1,19 +1,0 @@
-
-t
-java:S2293"YReplace the type specification in this constructor call with the diamond operator ("<>").(ø©ùûÿÿÿÿ
-m
-java:S1192"WDefine a constant instead of duplicating this literal "gahvilacore.prefix.pro" 5 times.(ˆåù
-o	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(‘ïİ
-m
-java:S3776"RRefactor this method to reduce its Cognitive Complexity from 47 to the 15 allowed.(ôŠÎöıÿÿÿÿ
-<	java:S131""Add a default case to this switch.(Óºöàùÿÿÿÿ
-K
-java:S1874"0Remove this use of "getTitle"; it is deprecated.(Óºöàùÿÿÿÿ
-Q
-java:S1874I"6Remove this use of "getDisplayName"; it is deprecated.(ï© úşÿÿÿÿ
-Q
-java:S1874h"6Remove this use of "getDisplayName"; it is deprecated.(ï© úşÿÿÿÿ
-R
-java:S1874†"6Remove this use of "getDisplayName"; it is deprecated.(ï© úşÿÿÿÿ
-R
-java:S1874¤"6Remove this use of "getDisplayName"; it is deprecated.(ï© úşÿÿÿÿ
