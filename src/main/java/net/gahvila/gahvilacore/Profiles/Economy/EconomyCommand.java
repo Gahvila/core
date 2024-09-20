@@ -5,8 +5,6 @@ import dev.jorel.commandapi.arguments.DoubleArgument;
 import dev.jorel.commandapi.arguments.OfflinePlayerArgument;
 import org.bukkit.OfflinePlayer;
 
-import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
-
 public class EconomyCommand {
 
     private final EconomyManager economyManager;
@@ -20,7 +18,7 @@ public class EconomyCommand {
     public void registerCommands() {
         new CommandAPICommand("temporarybalcommand")
                 .executesPlayer((p, args) -> {
-                    p.sendMessage(toMM("<white>Tililläsi on " + economyManager.getBalance(p) + " rahaa."));
+                    p.sendRichMessage("<white>Tililläsi on " + economyManager.getBalance(p) + " rahaa.");
                 })
                 .register();
         new CommandAPICommand("temporarybalcommandadmin")

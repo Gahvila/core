@@ -1,4 +1,4 @@
-package net.gahvila.gahvilacore.Utils;
+package net.gahvila.gahvilacore.API.Utils;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -6,7 +6,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 
 public class MiniMessageUtils {
-
     public static @NotNull Component toMM(@NotNull String string) {
         return MiniMessage.miniMessage().deserialize(string);
     }

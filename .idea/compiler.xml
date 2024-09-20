@@ -9,7 +9,7 @@
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.jorel/commandapi-bukkit-core/9.5.3/f92088042210baf0f877109d27dee4775052bdec/commandapi-bukkit-core-9.5.3.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.jorel/commandapi-core/9.5.3/6984934e78c7698e7e22e3eabd934a671235abdc/commandapi-core-9.5.3.jar" />
         </processorPath>
-        <module name="Plugins.GahvilaCore.main" />
+        <module name="GahvilaCore.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="17" />

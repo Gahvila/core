@@ -3,6 +3,10 @@ package net.gahvila.gahvilacore;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
+import net.gahvila.gahvilacore.Music.MusicCommand;
+import net.gahvila.gahvilacore.Music.MusicEvents;
+import net.gahvila.gahvilacore.Music.MusicManager;
+import net.gahvila.gahvilacore.Music.MusicMenu;
 import net.gahvila.gahvilacore.Profiles.Economy.EconomyCommand;
 import net.gahvila.gahvilacore.Profiles.Economy.EconomyManager;
 import net.gahvila.gahvilacore.Essentials.AFK;
@@ -18,6 +22,8 @@ import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.PrefixCommand;
 import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixColorMenu;
 import net.gahvila.gahvilacore.RankFeatures.FullBypass;
 import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class GahvilaCore extends JavaPlugin {
@@ -26,11 +32,12 @@ public final class GahvilaCore extends JavaPlugin {
     private PrefixTypeMenu prefixTypeMenu;
     private PrefixMainMenu prefixMainMenu;
     private PrefixColorMenu prefixColorMenu;
-
+    private PluginManager pluginManager;
 
     @Override
     public void onEnable() {
         instance = this;
+        pluginManager = Bukkit.getPluginManager();
         prefixManager = new PrefixManager();
         prefixTypeMenu = new PrefixTypeMenu(prefixManager);
         prefixMainMenu = new PrefixMainMenu();
@@ -43,6 +50,14 @@ public final class GahvilaCore extends JavaPlugin {
         afk.afkScheduler();
         afk.registerCommands();
         Bukkit.getPluginManager().registerEvents(afk, this);
+
+        //music
+        MusicManager musicManager = new MusicManager();
+        MusicMenu musicMenu = new MusicMenu(musicManager);
+        musicManager.loadSongs();
+        MusicCommand musicCommand = new MusicCommand(musicManager, musicMenu);
+        musicCommand.registerCommands();
+        registerListeners(new MusicEvents(musicManager));
 
         //marriage
         MarriageManager marriageManager = new MarriageManager();
@@ -91,5 +106,10 @@ public final class GahvilaCore extends JavaPlugin {
 
     }
 
+    private void registerListeners(Listener...listeners){
+        for(Listener listener : listeners){
+            pluginManager.registerEvents(listener, this);
+        }
+    }
 
 }

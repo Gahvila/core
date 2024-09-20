@@ -5,8 +5,6 @@ import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.PlayerArgument;
 import org.bukkit.entity.Player;
 
-import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
-
 public class SpeedCommand {
 
     public void registerCommands() {
@@ -47,9 +45,9 @@ public class SpeedCommand {
                     }
 
                     if (p == player) {
-                        p.sendMessage(toMM("Asetit nopeuden <yellow>" + speed + "</yellow> itsellesi."));
+                        p.sendRichMessage("Asetit nopeuden <yellow>" + speed + "</yellow> itsellesi.");
                     } else {
-                        p.sendMessage(toMM("Asetit nopeuden <yellow>" + speed + "</yellow> pelaajalle <yellow>" + player.getName() + "</yellow>."));
+                        p.sendRichMessage(("Asetit nopeuden <yellow>" + speed + "</yellow> pelaajalle <yellow>" + player.getName() + "</yellow>."));
                     }
                 })
                 .register();

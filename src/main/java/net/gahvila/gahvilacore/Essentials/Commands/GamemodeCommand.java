@@ -10,7 +10,8 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
+import static net.gahvila.gahvilacore.API.Utils.MiniMessageUtils.toMM;
+
 
 public class GamemodeCommand {
 
@@ -38,16 +39,16 @@ public class GamemodeCommand {
                         }
 
                         if (gamemode == null) {
-                            p.sendMessage("Sinun täytyy syöttää kelvollinen pelitila.");
+                            p.sendRichMessage("Sinun täytyy syöttää kelvollinen pelitila.");
                             return;
                         }
 
                         player.setGameMode(entry.getValue());
 
                         if (p == player) {
-                            p.sendMessage(toMM("Asetit pelitilan <yellow>" + gamemode + "</yellow> itsellesi."));
+                            p.sendRichMessage("Asetit pelitilan <yellow>" + gamemode + "</yellow> itsellesi.");
                         } else {
-                            p.sendMessage(toMM("Asetit pelitilan <yellow>" + gamemode + "</yellow> pelaajalle <yellow>" + player.getName() + "</yellow>."));
+                            p.sendRichMessage("Asetit pelitilan <yellow>" + gamemode + "</yellow> pelaajalle <yellow>" + player.getName() + "</yellow>.");
                         }
                     })
                     .register();
