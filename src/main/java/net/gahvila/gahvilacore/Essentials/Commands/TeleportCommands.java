@@ -5,7 +5,6 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.PlayerArgument;
 import net.draycia.carbon.api.CarbonChatProvider;
 import net.draycia.carbon.api.users.CarbonPlayer;
-import net.gahvila.gahvilacore.GahvilaCore;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
@@ -19,7 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 
-import static net.gahvila.gahvilacore.API.Utils.MiniMessageUtils.toMM;
+import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class TeleportCommands {

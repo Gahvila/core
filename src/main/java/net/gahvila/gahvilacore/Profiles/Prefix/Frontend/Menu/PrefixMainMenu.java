@@ -4,8 +4,6 @@ import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHold
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.*;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -14,10 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.List;
-
-import static net.gahvila.gahvilacore.API.Utils.MiniMessageUtils.toMM;
-import static net.gahvila.gahvilacore.API.Utils.MiniMessageUtils.toUndecoratedMM;
+import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
+import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toUndecoratedMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class PrefixMainMenu {

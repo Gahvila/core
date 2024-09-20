@@ -3,15 +3,12 @@ package net.gahvila.gahvilacore.Essentials.Commands;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.ServerBuildInfo;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static net.gahvila.gahvilacore.API.Utils.MiniMessageUtils.toMM;
 
 public class InfoCommands {
 

@@ -7,7 +7,7 @@ import com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder;
 import de.leonhard.storage.Json;
 import net.draycia.carbon.api.CarbonChatProvider;
 import net.draycia.carbon.api.users.CarbonPlayer;
-import net.gahvila.gahvilacore.API.Utils.WorldGuardRegionChecker;
+import net.gahvila.gahvilacore.Utils.WorldGuardRegionChecker;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
@@ -17,7 +17,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static net.gahvila.gahvilacore.API.Utils.MiniMessageUtils.toMM;
+import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class MusicManager {
@@ -168,26 +168,33 @@ public class MusicManager {
         }, 0, 1);
 
         if (songPlayer instanceof EntitySongPlayer){
+            boolean carbonEnabled = Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null;
+            boolean wgEnabled = Bukkit.getServer().getPluginManager().getPlugin("WorldGuard") != null;
+
             Bukkit.getScheduler().runTaskTimer(instance, task2 -> {
                 double progress = (double) songPlayer.getTick() / length;
                 if (progress >= 1.0 || progress < 0){
                     task2.cancel();
                     return;
                 }
-                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                    if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")){
-                        songPlayer.addPlayer(onlinePlayer);
-                        if (songPlayer.isPlaying()){
-                            onlinePlayer.spawnParticle(Particle.NOTE, player.getLocation().add(0, 2, 0), 1);
+                if (carbonEnabled || wgEnabled) {
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        if (wgEnabled) {
+                            if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")) {
+                                songPlayer.addPlayer(onlinePlayer);
+                                if (songPlayer.isPlaying()) {
+                                    onlinePlayer.spawnParticle(Particle.NOTE, player.getLocation().add(0, 2, 0), 1);
+                                }
+                            } else {
+                                songPlayer.removePlayer(onlinePlayer);
+                            }
                         }
-                    } else {
-                        songPlayer.removePlayer(onlinePlayer);
-                    }
 
-                    if(Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
-                        CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(onlinePlayer.getUniqueId()).getNow(null);
-                        if (carbonPlayer.ignoring(((EntitySongPlayer) songPlayer).getEntity().getUniqueId())) {
-                            songPlayer.removePlayer(onlinePlayer);
+                        if (carbonEnabled) {
+                            CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(onlinePlayer.getUniqueId()).getNow(null);
+                            if (carbonPlayer.ignoring(((EntitySongPlayer) songPlayer).getEntity().getUniqueId())) {
+                                songPlayer.removePlayer(onlinePlayer);
+                            }
                         }
                     }
                 }

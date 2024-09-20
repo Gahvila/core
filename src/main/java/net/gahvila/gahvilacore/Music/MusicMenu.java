@@ -18,7 +18,7 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import net.draycia.carbon.api.CarbonChatProvider;
 import net.draycia.carbon.api.users.CarbonPlayer;
-import net.gahvila.gahvilacore.API.Utils.WorldGuardRegionChecker;
+import net.gahvila.gahvilacore.Utils.WorldGuardRegionChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static net.gahvila.gahvilacore.API.Utils.MiniMessageUtils.toUndecoratedMM;
+import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toUndecoratedMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class MusicMenu {
