@@ -1,8 +1,7 @@
 plugins {
     java
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "1.7.1"
-    id("io.github.goooler.shadow") version "8.1.7"
+    id ("com.gradleup.shadow") version "8.3.2"
 }
 
 repositories {
@@ -20,15 +19,16 @@ repositories {
 }
 
 dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.27")
     compileOnly ("com.github.koca2000:NoteBlockAPI:1.6.2")
-    compileOnly ("com.sk89q.worldguard:worldguard-bukkit:7.0.10")
-    paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
+    compileOnly ("com.sk89q.worldguard:worldguard-bukkit:7.0.12")
     implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.17")
     implementation ("com.github.DaJokni:simplixstorage:-SNAPSHOT")
-    //commandapi
+
     implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.3")
     compileOnly("dev.jorel:commandapi-annotations:9.5.3")
     annotationProcessor("dev.jorel:commandapi-annotations:9.5.3")
