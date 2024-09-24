@@ -322,12 +322,6 @@ public class MusicManager {
             player.storeCookie(tickKey, buffer.array());
         }
     }
-
-    public void clearCookies(Player player) {
-        player.storeCookie(titleKey, new byte[]{});
-        player.storeCookie(tickKey, new byte[]{});
-    }
-
     private CompletableFuture<String> retrieveTitleCookie(Player player) {
         return player.retrieveCookie(titleKey)
                 .thenApply(bytes -> bytes != null ? new String(bytes, StandardCharsets.UTF_8) : null);
@@ -336,6 +330,11 @@ public class MusicManager {
     private CompletableFuture<Short> retrieveTickCookie(Player player) {
         return player.retrieveCookie(tickKey)
                 .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getShort() : null);
+    }
+
+    public void clearCookies(Player player) {
+        player.storeCookie(titleKey, new byte[]{});
+        player.storeCookie(tickKey, new byte[]{});
     }
 
     public void playSongFromCookies(Player player) {
@@ -350,6 +349,7 @@ public class MusicManager {
             for (Song song : getSongs()) {
                 if (song.getTitle().equals(title)) {
                     clearSongPlayer(player);
+                    setVolume(player, 5);
                     createSP(player, song, tick);
                 }
             }

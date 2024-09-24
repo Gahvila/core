@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class AFK implements Listener {
 
-    public static HashMap<UUID, Boolean> isAfk = new HashMap();
+    public static HashMap<UUID, Boolean> isAfk = new HashMap<>();
     public static HashMap<UUID, Location> lastLoc = new HashMap<>();
     public static HashMap<UUID, Long> lastAction = new HashMap<>();
 

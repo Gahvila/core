@@ -64,9 +64,9 @@ public class TeleportCommands {
                     tpareceiver.sendMessage(toMM("\n| <#85FF00>" + tpasender.getName() + " </#85FF00>lähetti sinulle <#85FF00>TPA-pyynnön</#85FF00>."));
                     tpareceiver.sendMessage(toMM("<white>| Sinulla on <#85FF00>30 sekuntia</#85FF00> <white>aikaa hyväksyä."));
                     tpareceiver.sendMessage(toMM("| <green><b>Hyväksy</b>: /tpayes " + tpasender.getName())
-                            .hoverEvent(HoverEvent.showText(toMM("Klikkaa hyväksyäksesi."))).clickEvent(ClickEvent.runCommand("/tpayes " + tpasender.getName())));
+                            .hoverEvent(HoverEvent.showText(toMM("<green>Klikkaa hyväksyäksesi</green>"))).clickEvent(ClickEvent.runCommand("/tpayes " + tpasender.getName())));
                     tpareceiver.sendMessage(toMM("| <red><b>Kieltäydy</b>: /tpano " + tpasender.getName())
-                            .hoverEvent(HoverEvent.showText(toMM("Klikkaa kieltäytyäksesi"))).clickEvent(ClickEvent.runCommand("/tpano " + tpasender.getName())));
+                            .hoverEvent(HoverEvent.showText(toMM("<red>Klikkaa kieltäytyäksesi</red>"))).clickEvent(ClickEvent.runCommand("/tpano " + tpasender.getName())));
 
                     Bukkit.getServer().getScheduler().runTaskLater(instance, new Runnable() {
                         @Override
@@ -117,9 +117,9 @@ public class TeleportCommands {
                     tpareceiver.sendMessage(toMM("\n<white>| <#85FF00>" + tpasender.getName() + " </#85FF00>lähetti sinulle <#85FF00>TPAHere-pyynnön</#85FF00>."));
                     tpareceiver.sendMessage(toMM("<white>| Sinulla on <#85FF00>30 sekuntia</#85FF00> <white>aikaa hyväksyä."));
                     tpareceiver.sendMessage(toMM("<white>| <green><b>Hyväksy</b>: /tpayes " + tpasender.getName())
-                            .hoverEvent(HoverEvent.showText(toMM("Klikkaa hyväksyäksesi."))).clickEvent(ClickEvent.runCommand("/tpayes " + tpasender.getName())));
+                            .hoverEvent(HoverEvent.showText(toMM("<green>Klikkaa hyväksyäksesi</green>"))).clickEvent(ClickEvent.runCommand("/tpayes " + tpasender.getName())));
                     tpareceiver.sendMessage(toMM("<white>| <red><b>Kieltäydy</b>: /tpano " + tpasender.getName())
-                            .hoverEvent(HoverEvent.showText(toMM("Klikkaa kieltäytyäksesi"))).clickEvent(ClickEvent.runCommand("/tpano " + tpasender.getName())));
+                            .hoverEvent(HoverEvent.showText(toMM("<red>Klikkaa kieltäytyäksesi</red>"))).clickEvent(ClickEvent.runCommand("/tpano " + tpasender.getName())));
 
                     Bukkit.getServer().getScheduler().runTaskLater(instance, new Runnable() {
                         @Override
