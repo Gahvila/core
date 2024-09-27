@@ -31,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
@@ -57,8 +58,9 @@ public class MusicManager {
         return isLoaded;
     }
 
-    public void loadSongs() {
+    public void loadSongs(Consumer<Long> onComplete) {
         isLoaded = false;
+        long startTime = System.currentTimeMillis();
         Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
             List<Song> concurrentSongs = new CopyOnWriteArrayList<>();
             Map<String, Song> concurrentNamedSong = new ConcurrentHashMap<>();
@@ -68,7 +70,13 @@ public class MusicManager {
 
             File folder = new File(instance.getDataFolder(), "songs");
             File[] songFiles = folder.listFiles();
-            if (songFiles == null || songFiles.length == 0) return;
+            if (songFiles == null || songFiles.length == 0) {
+                Bukkit.getScheduler().runTask(instance, () -> {
+                    long executionTime = System.currentTimeMillis() - startTime;
+                    onComplete.accept(executionTime);
+                });
+                return;
+            }
 
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                 for (File file : songFiles) {
@@ -88,7 +96,11 @@ public class MusicManager {
 
             namedSong.putAll(concurrentNamedSong);
 
-            isLoaded = true;
+            Bukkit.getScheduler().runTask(instance, () -> {
+                isLoaded = true;
+                long executionTime = System.currentTimeMillis() - startTime;
+                onComplete.accept(executionTime);
+            });
         });
     }
 

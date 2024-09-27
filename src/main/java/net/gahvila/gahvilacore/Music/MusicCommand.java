@@ -18,9 +18,11 @@ public class MusicCommand {
 
                 .withSubcommand(new CommandAPICommand("musicreload")
                         .withPermission("music.reload")
-                        .executesPlayer((p, args) -> {
-                            musicManager.loadSongs();
-                            p.sendMessage("Ladattu musiikit uudelleen.");
+                        .executes((sender, args) -> {
+                            sender.sendMessage("Ladataan musiikit uudelleen...");
+                            musicManager.loadSongs(executionTime -> {
+                                sender.sendMessage("Ladattu musiikit uudelleen " + executionTime + " millisekuntissa.");
+                            });
                         }))
                 .executesPlayer((p, args) -> {
                     p.playSound(p.getLocation(), Sound.ENTITY_LLAMA_SWAG, 0.6F, 1F);
