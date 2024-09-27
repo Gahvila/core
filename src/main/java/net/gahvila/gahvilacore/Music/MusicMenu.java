@@ -282,6 +282,7 @@ public class MusicMenu {
             if (pages.getPage() > 0) {
                 pages.setPage(pages.getPage() - 1);
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.7F);
+                gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
 
                 gui.update();
             }
@@ -294,11 +295,13 @@ public class MusicMenu {
             if (pages.getPage() < pages.getPages() - 1) {
                 pages.setPage(pages.getPage() + 1);
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.8F);
+                gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
 
                 gui.update();
             }
         }), 7, 0);
         gui.addPane(navigationPane);
+        gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
 
         gui.update();
     }
