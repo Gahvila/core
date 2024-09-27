@@ -43,10 +43,21 @@ public class PrefixManager {
         String prefix = getPrefix(player).getDisplayName();
 
         PrefixTypes type = getPrefixType(player);
-        return switch(type) {
-            case GRADIENT -> "<gradient:" + getGradient(player) + "><b>" + prefix + "</b>" + " " + player.getName() + "</gradient>";
-            case SINGLE -> "<" + getSingle(player) + "><b>" + prefix + "</b>" + " " + player.getName() + "</" + getSingle(player) + ">";
-        };
+        if (getPrefix(player) == Prefix.DEFAULT) {
+            return switch (type) {
+                case GRADIENT ->
+                        "<gradient:" + getGradient(player) + ">" + player.getName() + "</gradient>";
+                case SINGLE ->
+                        "<" + getSingle(player) + ">" + player.getName() + "</" + getSingle(player) + ">";
+            };
+        } else {
+            return switch (type) {
+                case GRADIENT ->
+                        "<gradient:" + getGradient(player) + "><b>" + prefix + "</b>" + " " + player.getName() + "</gradient>";
+                case SINGLE ->
+                        "<" + getSingle(player) + "><b>" + prefix + "</b>" + " " + player.getName() + "</" + getSingle(player) + ">";
+            };
+        }
     }
 
     public String generateNamecolor(Player player) {
