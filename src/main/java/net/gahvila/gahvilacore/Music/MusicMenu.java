@@ -75,20 +75,22 @@ public class MusicMenu {
         ArrayList<Material> discs = new ArrayList<>(MaterialTags.MUSIC_DISCS.getValues());
         discs.remove(Material.MUSIC_DISC_11);
 
-        if (!musicManager.getSongs().isEmpty()){
-            Random random = new Random();
-            for (Song song : musicManager.getSongs()) {
-                Material randomDisc = discs.get(random.nextInt(discs.size()));
-                ItemStack item = new ItemStack(randomDisc);;
-                ItemMeta meta = item.getItemMeta();
-                meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, song.getTitle());
-                meta.displayName(toUndecoratedMM("<white>" + song.getTitle()));
-                meta.lore(List.of(toUndecoratedMM("<gray>" + song.getOriginalAuthor()), toUndecoratedMM("<gray>" + musicManager.songLength(song))));
-                JukeboxPlayableComponent component = meta.getJukeboxPlayable();
-                component.setShowInTooltip(false);
-                meta.setJukeboxPlayable(component);
-                item.setItemMeta(meta);
-                items.add(item);
+        if (musicManager.getLoadState()) {
+            if (!musicManager.getSongs().isEmpty()) {
+                Random random = new Random();
+                for (Song song : musicManager.getSongs()) {
+                    Material randomDisc = discs.get(random.nextInt(discs.size()));
+                    ItemStack item = new ItemStack(randomDisc);
+                    ItemMeta meta = item.getItemMeta();
+                    meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, song.getTitle());
+                    meta.displayName(toUndecoratedMM("<white>" + song.getTitle()));
+                    meta.lore(List.of(toUndecoratedMM("<gray>" + song.getOriginalAuthor()), toUndecoratedMM("<gray>" + musicManager.songLength(song))));
+                    JukeboxPlayableComponent component = meta.getJukeboxPlayable();
+                    component.setShowInTooltip(false);
+                    meta.setJukeboxPlayable(component);
+                    item.setItemMeta(meta);
+                    items.add(item);
+                }
             }
         }
         pages.populateWithItemStacks(items);

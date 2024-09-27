@@ -45,20 +45,33 @@ public class MusicManager {
     public static NamespacedKey titleKey = new NamespacedKey(instance, "musicplayer.song.title");
     public static NamespacedKey tickKey = new NamespacedKey(instance, "musicplayer.song.tick");
 
+    public static Boolean isLoaded = false;
+
+
+    public Boolean getLoadState() {
+        return isLoaded;
+    }
 
     public void loadSongs() {
-        if (songs != null) songs.clear();
-        if (namedSong != null) namedSong.clear();
+        isLoaded = false;
+        Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
+            if (songs != null) songs.clear();
+            if (namedSong != null) namedSong.clear();
 
-        File folder = new File(instance.getDataFolder(), "songs");
-        if (folder.listFiles() == null) return;
-        for (File file : folder.listFiles()) {
-            Song song = NBSDecoder.parse(file);
-            songs.add(song);
-            namedSong.put(song.getTitle(), song);
-        }
+            File folder = new File(instance.getDataFolder(), "songs");
+            if (folder.listFiles() == null) return;
+            for (File file : folder.listFiles()) {
+                Song song = NBSDecoder.parse(file);
+                songs.add(song);
+                namedSong.put(song.getTitle(), song);
+            }
 
-        songs.sort((song1, song2) -> song1.getTitle().compareToIgnoreCase(song2.getTitle()));
+            songs.sort((song1, song2) -> song1.getTitle().compareToIgnoreCase(song2.getTitle()));
+
+            Bukkit.getScheduler().runTask(instance, () -> {
+                isLoaded = true;
+            });
+        });
     }
 
     public ArrayList<Song> getSongs() {
