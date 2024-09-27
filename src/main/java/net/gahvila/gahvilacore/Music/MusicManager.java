@@ -25,7 +25,12 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
 
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
@@ -55,22 +60,35 @@ public class MusicManager {
     public void loadSongs() {
         isLoaded = false;
         Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
+            List<Song> concurrentSongs = new CopyOnWriteArrayList<>();
+            Map<String, Song> concurrentNamedSong = new ConcurrentHashMap<>();
+
             if (songs != null) songs.clear();
             if (namedSong != null) namedSong.clear();
 
             File folder = new File(instance.getDataFolder(), "songs");
-            if (folder.listFiles() == null) return;
-            for (File file : folder.listFiles()) {
-                Song song = NBSDecoder.parse(file);
-                songs.add(song);
-                namedSong.put(song.getTitle(), song);
+            File[] songFiles = folder.listFiles();
+            if (songFiles == null || songFiles.length == 0) return;
+
+            try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                for (File file : songFiles) {
+                    executor.submit(() -> {
+                        Song song = NBSDecoder.parse(file);
+                        if (song != null) {
+                            concurrentSongs.add(song);
+                            concurrentNamedSong.put(song.getTitle(), song);
+                        }
+                    });
+                }
             }
 
-            songs.sort((song1, song2) -> song1.getTitle().compareToIgnoreCase(song2.getTitle()));
+            concurrentSongs.parallelStream()
+                    .sorted((song1, song2) -> song1.getTitle().compareToIgnoreCase(song2.getTitle()))
+                    .forEachOrdered(songs::add);
 
-            Bukkit.getScheduler().runTask(instance, () -> {
-                isLoaded = true;
-            });
+            namedSong.putAll(concurrentNamedSong);
+
+            isLoaded = true;
         });
     }
 
