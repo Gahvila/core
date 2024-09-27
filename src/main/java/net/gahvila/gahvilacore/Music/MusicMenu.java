@@ -9,16 +9,9 @@ import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.PatternPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.github.stefvanschie.inventoryframework.pane.util.Pattern;
-import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.RepeatMode;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoStereoMode;
-import com.xxmicloxx.NoteBlockAPI.songplayer.EntitySongPlayer;
 import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
-import net.draycia.carbon.api.CarbonChatProvider;
-import net.draycia.carbon.api.users.CarbonPlayer;
-import net.gahvila.gahvilacore.Utils.WorldGuardRegionChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -31,8 +24,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toUndecoratedMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
@@ -47,7 +39,7 @@ public class MusicMenu {
         this.musicManager = musicManager;
     }
 
-    public void showGUI(Player player) {
+    public void showGUI(Player player, int openingPage) {
         ChestGui gui = new ChestGui(5, ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko")));
         gui.show(player);
 
@@ -75,17 +67,28 @@ public class MusicMenu {
 
         ArrayList<Material> discs = new ArrayList<>(MaterialTags.MUSIC_DISCS.getValues());
         discs.remove(Material.MUSIC_DISC_11);
+        discs.remove(Material.MUSIC_DISC_CREATOR);
+        discs.remove(Material.MUSIC_DISC_CREATOR_MUSIC_BOX);
+        discs.remove(Material.MUSIC_DISC_PRECIPICE);
+        discs.remove(Material.MUSIC_DISC_RELIC);
+        discs.remove(Material.MUSIC_DISC_PIGSTEP);
 
         if (musicManager.getLoadState() && !musicManager.getSongs().isEmpty()) {
-            Random random = new Random();
             int discsSize = discs.size();
 
             for (Song song : musicManager.getSongs()) {
-                Material randomDisc = discs.get(random.nextInt(discsSize));
-                ItemStack item = new ItemStack(randomDisc);
+                int hash = Math.abs((song.getAuthor() + song.getTitle()).hashCode());
+                Material disc = discs.get(hash % discsSize);
+                ItemStack item = new ItemStack(disc);
                 ItemMeta meta = item.getItemMeta();
                 meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, song.getTitle());
-                meta.displayName(toUndecoratedMM("<white>" + song.getTitle()));
+                if (musicManager.isFavorited(player, song)){
+                    meta.displayName(toUndecoratedMM("<white>" + song.getTitle() + "</white> <yellow><b>⭐</b></yellow>"));
+                    meta.setEnchantmentGlintOverride(true);
+                } else {
+                    meta.displayName(toUndecoratedMM("<white>" + song.getTitle()));
+                    meta.setEnchantmentGlintOverride(false);
+                }
                 meta.lore(List.of(
                         toUndecoratedMM("<gray>" + song.getOriginalAuthor()),
                         toUndecoratedMM("<gray>" + musicManager.songLength(song))
@@ -93,6 +96,10 @@ public class MusicMenu {
                 JukeboxPlayableComponent component = meta.getJukeboxPlayable();
                 component.setShowInTooltip(false);
                 meta.setJukeboxPlayable(component);
+                if (musicManager.isFavorited(player, song)){
+                    meta.setEnchantmentGlintOverride(true);
+                }
+
                 item.setItemMeta(meta);
                 items.add(item);
             }
@@ -110,6 +117,19 @@ public class MusicMenu {
             String songName = event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING);
             Song song = musicManager.getSong(songName);
             if (songName != null && song != null){
+                if (event.getClick().isShiftClick()) {
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
+                    musicManager.toggleFavorited(player, song);
+
+                    if (musicManager.isFavorited(player, song)){
+                        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_YES, 0.6F, 1F);
+                    } else {
+                        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.6F, 1F);
+                    }
+                    showGUI(player, pages.getPage());
+                    return;
+                }
+
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
                 musicManager.clearSongPlayer(player);
                 if (!musicManager.getSpeakerEnabled(player)) {
@@ -301,6 +321,8 @@ public class MusicMenu {
             }
         }), 7, 0);
         gui.addPane(navigationPane);
+
+        pages.setPage(openingPage);
         gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
 
         gui.update();
