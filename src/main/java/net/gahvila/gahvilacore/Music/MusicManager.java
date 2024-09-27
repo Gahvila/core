@@ -51,6 +51,7 @@ public class MusicManager {
     public static NamespacedKey titleKey = new NamespacedKey(instance, "musicplayer.song.title");
     public static NamespacedKey tickKey = new NamespacedKey(instance, "musicplayer.song.tick");
 
+    public static Boolean isLoading = false;
     public static Boolean isLoaded = false;
 
 
@@ -59,6 +60,8 @@ public class MusicManager {
     }
 
     public void loadSongs(Consumer<Long> onComplete) {
+        if (isLoading) return;
+        isLoading = true;
         isLoaded = false;
         long startTime = System.currentTimeMillis();
         Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
@@ -73,6 +76,8 @@ public class MusicManager {
             if (songFiles == null || songFiles.length == 0) {
                 Bukkit.getScheduler().runTask(instance, () -> {
                     long executionTime = System.currentTimeMillis() - startTime;
+                    isLoaded = true;
+                    isLoading = false;
                     onComplete.accept(executionTime);
                 });
                 return;
@@ -98,6 +103,7 @@ public class MusicManager {
 
             Bukkit.getScheduler().runTask(instance, () -> {
                 isLoaded = true;
+                isLoading = false;
                 long executionTime = System.currentTimeMillis() - startTime;
                 onComplete.accept(executionTime);
             });
