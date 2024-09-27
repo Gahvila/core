@@ -83,6 +83,7 @@ public class MusicManager {
                 return;
             }
 
+            //create a executor for virtual threads
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                 for (File file : songFiles) {
                     executor.submit(() -> {
@@ -95,12 +96,14 @@ public class MusicManager {
                 }
             }
 
+            //song sorting
             concurrentSongs.parallelStream()
                     .sorted((song1, song2) -> song1.getTitle().compareToIgnoreCase(song2.getTitle()))
                     .forEachOrdered(songs::add);
 
             namedSong.putAll(concurrentNamedSong);
 
+            //callback to the mainthread
             Bukkit.getScheduler().runTask(instance, () -> {
                 isLoaded = true;
                 isLoading = false;
