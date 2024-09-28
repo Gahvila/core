@@ -20,10 +20,17 @@ public class PrefixManager {
         String prefix = getPrefix(player).getDisplayName();
 
         PrefixTypes type = getPrefixType(player);
-        return switch(type) {
-            case GRADIENT -> "<gradient:" + getGradient(player) + "><b>" + prefix + "</b></gradient>";
-            case SINGLE -> "<" + getSingle(player) + "><b>" + prefix + "</b>" + "</" + getSingle(player) + ">";
-        };
+        if (getPrefix(player) == Prefix.DEFAULT) {
+            return switch (type) {
+                case GRADIENT -> "<gradient:" + getGradient(player) + "></gradient>";
+                case SINGLE -> "<" + getSingle(player) + "></" + getSingle(player) + ">";
+            };
+        } else {
+            return switch (type) {
+                case GRADIENT -> "<gradient:" + getGradient(player) + "><b>" + prefix + "</b></gradient>";
+                case SINGLE -> "<" + getSingle(player) + "><b>" + prefix + "</b>" + "</" + getSingle(player) + ">";
+            };
+        }
     }
 
     public String generatePrefixWithoutClosing(Player player) {
@@ -32,10 +39,17 @@ public class PrefixManager {
 
         PrefixTypes type = getPrefixType(player);
 
-        return switch(type) {
-            case GRADIENT -> "<gradient:" + getGradient(player) + "><b>" + prefix + "</b> ";
-            case SINGLE -> "<" + getSingle(player) + "><b>" + prefix + "</b> ";
-        };
+        if (getPrefix(player) == Prefix.DEFAULT) {
+            return switch (type) {
+                case GRADIENT -> "<gradient:" + getGradient(player) + ">";
+                case SINGLE -> "<" + getSingle(player) + ">";
+            };
+        }else {
+            return switch (type) {
+                case GRADIENT -> "<gradient:" + getGradient(player) + "><b>" + prefix + "</b> ";
+                case SINGLE -> "<" + getSingle(player) + "><b>" + prefix + "</b> ";
+            };
+        }
     }
 
     public String generatePrefixAndName(Player player) {
