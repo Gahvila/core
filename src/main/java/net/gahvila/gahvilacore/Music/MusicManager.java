@@ -77,6 +77,7 @@ public class MusicManager {
             File folder = new File(instance.getDataFolder(), "songs");
             File[] songFiles = folder.listFiles();
             if (songFiles == null || songFiles.length == 0) {
+                //callback to the mainthread if there are no songs
                 Bukkit.getScheduler().runTask(instance, () -> {
                     long executionTime = System.currentTimeMillis() - startTime;
                     isLoaded = true;

@@ -74,6 +74,13 @@ public class PrefixManager {
         }
     }
 
+    public String generatePrefixPlain(Player player) {
+        if (!isPlayerInGroup(player, "legacy")) return "";
+        String prefix = getPrefix(player).getDisplayName();
+
+        return prefix;
+    }
+
     public String generateNamecolor(Player player) {
         if (!isPlayerInGroup(player, "legacy")) return "";
 
@@ -81,6 +88,16 @@ public class PrefixManager {
         return switch(type) {
             case GRADIENT -> "<gradient:" + getGradient(player) + ">";
             case SINGLE -> "<" + getSingle(player) + ">";
+        };
+    }
+
+    public String generateNamecolorPlain(Player player) {
+        if (!isPlayerInGroup(player, "legacy")) return "";
+
+        PrefixTypes type = getPrefixType(player);
+        return switch(type) {
+            case GRADIENT -> getGradient(player);
+            case SINGLE -> getSingle(player);
         };
     }
 

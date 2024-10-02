@@ -58,17 +58,21 @@ public class Placeholders extends PlaceholderExpansion {
                 }
             case "namecolor":
                 return prefixManager.generateNamecolor(op);
+            case "namecolorplain":
+                return prefixManager.generateNamecolorPlain(op);
             case "prefix":
                 return prefixManager.generatePrefix(op);
+            case "prefixplain":
+                return prefixManager.generatePrefixPlain(op);
             case "prefixandname":
                 return prefixManager.generatePrefixAndName(op);
             case "prefixwithoutclosing":
                 return prefixManager.generatePrefixWithoutClosing(op);
             case "afk":
                 if (AFK.isAfk.containsKey(player.getUniqueId())){
-                    return " <gray><italic>*afk*</italic></gray>";
+                    return "true";
                 }
-                return "";
+                return "false";
         }return null;
     }
 }
