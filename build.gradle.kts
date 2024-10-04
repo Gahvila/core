@@ -27,7 +27,7 @@ dependencies {
     compileOnly ("com.github.koca2000:NoteBlockAPI:1.6.2")
     compileOnly ("com.sk89q.worldguard:worldguard-bukkit:7.0.12")
     implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.17")
-    implementation ("com.github.DaJokni:simplixstorage:-SNAPSHOT")
+    implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
 
     implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.3")
     compileOnly("dev.jorel:commandapi-annotations:9.5.3")
@@ -59,11 +59,11 @@ tasks {
         dependencies {
             include(dependency("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.3"))
             include(dependency("com.github.stefvanschie.inventoryframework:IF:0.10.17"))
-            include(dependency("com.github.DaJokni:simplixstorage:-SNAPSHOT"))
+            include(dependency("com.github.simplix-softworks:simplixstorage:3.2.7"))
         }
         relocate("dev.jorel.commandapi", "net.gahvila.gahvilacore.shaded.commandapi")
         relocate ("com.github.stefvanschie.inventoryframework", "net.gahvila.gahvilacore.shaded.inventoryframework")
-        relocate("de.leonhard.storage", "net.gahvila.gahvilacore.shaded.storage")
+        relocate("de.leonhard.storage", "net.gahvila.aula.shaded.storage")
     }
 
     java {
