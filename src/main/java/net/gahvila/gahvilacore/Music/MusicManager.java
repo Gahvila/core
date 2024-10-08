@@ -1,5 +1,6 @@
 package net.gahvila.gahvilacore.Music;
 
+import com.google.common.primitives.Ints;
 import com.xxmicloxx.NoteBlockAPI.model.Playlist;
 import com.xxmicloxx.NoteBlockAPI.model.RepeatMode;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
@@ -51,6 +52,9 @@ public class MusicManager {
 
     public static NamespacedKey titleKey = new NamespacedKey(instance, "song.title");
     public static NamespacedKey tickKey = new NamespacedKey(instance, "song.tick");
+    public static NamespacedKey pauseKey = new NamespacedKey(instance, "song.pause");
+    public static NamespacedKey volumeKey = new NamespacedKey(instance, "song.volume");
+
 
 
     //
@@ -192,7 +196,7 @@ public class MusicManager {
         clearCookies(player);
     }
 
-    public void createSP(Player player, Song song, Short tick) {
+    public void createSP(Player player, Song song, Short tick, Boolean playing) {
         clearSongPlayer(player);
         Playlist playlist = new Playlist(song);
         RadioSongPlayer rsp = new RadioSongPlayer(playlist);
@@ -202,7 +206,7 @@ public class MusicManager {
         if (tick != null){
             rsp.setTick(tick);
         }
-        rsp.setPlaying(true);
+        rsp.setPlaying(playing);
         if (getAutoEnabled(player)) {
             ArrayList<Song> songs = getSongs();
             for (Song playlistSong : songs) {
@@ -219,6 +223,7 @@ public class MusicManager {
 
         saveTitleToCookie(player);
         saveTickToCookie(player);
+        savePauseToCookie(player);
     }
 
     public void createESP(Player player, Song song, Short tick) {
@@ -440,6 +445,17 @@ public class MusicManager {
             player.storeCookie(tickKey, buffer.array());
         }
     }
+
+    public void savePauseToCookie(Player player) {
+        if (getSongPlayer(player) != null) {
+            SongPlayer songPlayer = getSongPlayer(player);
+
+            byte[] byteArray = new byte[1];
+            byteArray[0] = (byte) (songPlayer.isPlaying() ? 1 : 0);
+            player.storeCookie(pauseKey, byteArray);
+        }
+    }
+
     private CompletableFuture<String> retrieveTitleCookie(Player player) {
         return player.retrieveCookie(titleKey)
                 .thenApply(bytes -> bytes != null ? new String(bytes, StandardCharsets.UTF_8) : null);
@@ -448,6 +464,11 @@ public class MusicManager {
     private CompletableFuture<Short> retrieveTickCookie(Player player) {
         return player.retrieveCookie(tickKey)
                 .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getShort() : null);
+    }
+
+    private CompletableFuture<Boolean> retrievePauseCookie(Player player) {
+        return player.retrieveCookie(pauseKey)
+                .thenApply(bytes -> bytes != null ? bytes[0] == 1 : null);
     }
 
     public void clearCookies(Player player) {
@@ -459,8 +480,9 @@ public class MusicManager {
         Bukkit.getScheduler().runTaskAsynchronously(instance, task -> {
             String title = retrieveTitleCookie(player).join();
             Short tick = retrieveTickCookie(player).join();
+            Boolean pause = retrievePauseCookie(player).join();
 
-            if (title == null || tick == null) {
+            if (title == null || tick == null || pause == null) {
                 return;
             }
 
@@ -468,7 +490,7 @@ public class MusicManager {
                 if (song.getTitle().equals(title)) {
                     clearSongPlayer(player);
                     setVolume(player, 5);
-                    createSP(player, song, tick);
+                    createSP(player, song, tick, pause);
                 }
             }
         });

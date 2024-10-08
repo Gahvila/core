@@ -133,7 +133,7 @@ public class MusicMenu {
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
                 musicManager.clearSongPlayer(player);
                 if (!musicManager.getSpeakerEnabled(player)) {
-                    musicManager.createSP(player, song, null);
+                    musicManager.createSP(player, song, null, true);
                 } else if (musicManager.getSpeakerEnabled(player)) {
                     musicManager.createESP(player, song, null);
                 }
@@ -162,6 +162,7 @@ public class MusicMenu {
                 if (musicManager.getSongPlayer(player) != null) {
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 1F);
                     musicManager.getSongPlayer(player).setPlaying(!musicManager.getSongPlayer(player).isPlaying());
+                    musicManager.savePauseToCookie(player);
                 }
             } else if (event.getClick().isRightClick()) {
                 player.playSound(player.getLocation(), Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1F, 1F);
@@ -196,7 +197,7 @@ public class MusicMenu {
                 } else {
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createSP(player, sp.getSong(), sp.getTick());
+                        musicManager.createSP(player, sp.getSong(), sp.getTick(), true);
                     }
                 }
                 autoplay.lore(List.of(toUndecoratedMM("<gray>Toistaa jatkuvasti"), toUndecoratedMM("<gray>uusia kappaleita."), toUndecoratedMM("<red>Pois päältä")));
@@ -210,7 +211,7 @@ public class MusicMenu {
                 } else {
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createSP(player, sp.getSong(), sp.getTick());
+                        musicManager.createSP(player, sp.getSong(), sp.getTick(), true);
                     }
                 }
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.8F);
@@ -241,7 +242,9 @@ public class MusicMenu {
                 musicManager.setSpeakerEnabled(player, false);
                 if (musicManager.getSongPlayer(player) != null) {
                     SongPlayer sp = musicManager.getSongPlayer(player);
-                    musicManager.createSP(player, sp.getSong(), sp.getTick());
+                    if (sp.isPlaying()){
+                        musicManager.createSP(player, sp.getSong(), sp.getTick(), true);
+                    }
                 }
                 speaker.lore(List.of(toUndecoratedMM("<gray>Soittaa kappaleesi ympärillä"), toUndecoratedMM("<gray>oleville pelaajille."), toUndecoratedMM("<red>Pois päältä")));
             }else {
@@ -253,7 +256,9 @@ public class MusicMenu {
                 musicManager.setSpeakerEnabled(player, true);
                 if (musicManager.getSongPlayer(player) != null) {
                     SongPlayer sp = musicManager.getSongPlayer(player);
-                    musicManager.createESP(player, sp.getSong(), sp.getTick());
+                    if (sp.isPlaying()){
+                        musicManager.createESP(player, sp.getSong(), sp.getTick());
+                    }
                 }
                 speaker.lore(List.of(toUndecoratedMM("<gray>Soittaa kappaleesi ympärillä"), toUndecoratedMM("<gray>oleville pelaajille."), toUndecoratedMM("<green>Päällä")));
             }
