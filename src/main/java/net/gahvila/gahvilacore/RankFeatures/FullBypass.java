@@ -13,7 +13,7 @@ public class FullBypass implements Listener {
         if (e.getResult().equals(PlayerLoginEvent.Result.KICK_FULL)) {
             if (e.getPlayer().hasPermission("gahvilacore.playerlimit.bypass")) {
                 e.allow();
-                e.getPlayer().sendMessage(toMM("§eOhitit palvelimen maksimi pelaajamäärän."));
+                e.getPlayer().sendMessage(toMM("<yellow>Ohitit palvelimen maksimi pelaajamäärän."));
             }
         }
     }
