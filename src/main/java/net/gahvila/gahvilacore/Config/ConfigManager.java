@@ -10,7 +10,6 @@ public class ConfigManager {
     public static String getDownloadUsername() {
         Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
         return data.getOrDefault("download-server-username", "admin");
-
     }
 
     public static String getDownloadPassword() {

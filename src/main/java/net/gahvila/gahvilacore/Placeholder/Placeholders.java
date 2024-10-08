@@ -50,12 +50,6 @@ public class Placeholders extends PlaceholderExpansion {
         }
         Player op = player.getPlayer();
         switch (params) {
-            case "playerinfo":
-                if (!marriageManager.isPlayerMarried(op)){
-                    return "Pelaaja <yellow>" + op.getName() + "</yellow> ei ole naimisissa.";
-                }else {
-                    return "Pelaaja <yellow>" + op.getName() + "</yellow> on naimisissa<br>pelaajan <yellow>" + marriageManager.getMarriageInfo(op, "currentname") + "</yellow> kanssa.";
-                }
             case "namecolor":
                 return prefixManager.generateNamecolor(op);
             case "namecolorplain":

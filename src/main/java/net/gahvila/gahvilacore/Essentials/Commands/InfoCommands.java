@@ -32,13 +32,6 @@ public class InfoCommands {
                             "Palvelimella on <yellow>" + plugins.size() + "</yellow> lisäosaa: <yellow>" + String.join("<white>,<yellow> ", plugins));
                 })
                 .register();
-        CommandAPI.unregister("perf");
-        new CommandAPICommand("perf")
-                .executesPlayer((p, args) -> {
-                    p.sendRichMessage("TPS [1m, 5m, 15m]: <yellow>" + Arrays.toString(Bukkit.getTPS()) + "</yellow><br>" +
-                            "MSPT: <gold>" + Bukkit.getAverageTickTime() + "</gold>");
-                })
-                .register();
         new CommandAPICommand("rules")
                 .withAliases("säännöt")
                 .executesPlayer((p, args) -> {
