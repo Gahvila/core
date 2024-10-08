@@ -1,7 +1,6 @@
 package net.gahvila.gahvilacore.Config;
 
 import de.leonhard.storage.Yaml;
-import org.bukkit.entity.Player;
 
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 

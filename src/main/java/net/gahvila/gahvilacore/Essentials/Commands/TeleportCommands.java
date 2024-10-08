@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 
-import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
+import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 
 public class TeleportCommands {
     //player which sent the tpa request, player which received the teleport request

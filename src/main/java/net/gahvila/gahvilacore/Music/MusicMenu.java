@@ -24,10 +24,9 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toUndecoratedMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
+import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toUndecoratedMM;
 
 public class MusicMenu {
     private final MusicManager musicManager;

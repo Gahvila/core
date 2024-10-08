@@ -8,10 +8,10 @@ import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.PatternPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.github.stefvanschie.inventoryframework.pane.util.Pattern;
-import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Gradient;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Single;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixTypes;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -24,8 +24,8 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toUndecoratedMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
+import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toUndecoratedMM;
 
 public class PrefixColorMenu {
 

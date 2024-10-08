@@ -1,33 +1,17 @@
 package net.gahvila.gahvilacore.Music;
 
-import com.xxmicloxx.NoteBlockAPI.event.SongDestroyingEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongNextEvent;
-import com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.songplayer.EntitySongPlayer;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
-import net.draycia.carbon.api.CarbonChatProvider;
-import net.draycia.carbon.api.users.CarbonPlayer;
-import net.gahvila.gahvilacore.Utils.WorldGuardRegionChecker;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class MusicEvents implements Listener {
 
