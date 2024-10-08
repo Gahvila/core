@@ -36,6 +36,8 @@ public final class GahvilaCore extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        this.saveDefaultConfig();
+
         instance = this;
         pluginManager = Bukkit.getPluginManager();
         prefixManager = new PrefixManager();

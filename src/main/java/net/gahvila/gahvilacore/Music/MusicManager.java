@@ -19,20 +19,21 @@ import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.security.MessageDigest;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import static net.gahvila.gahvilacore.Config.ConfigManager.*;
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
@@ -62,11 +63,20 @@ public class MusicManager {
         return isLoaded;
     }
 
+    private static String username;
+    private static String password;
+    private static String url;
+
     public void loadSongs(Consumer<Long> onComplete) {
         if (isLoading) return;
         isLoading = true;
         isLoaded = false;
         long startTime = System.currentTimeMillis();
+
+        username = getDownloadUsername();
+        password = getDownloadPassword();
+        url = getDownloadUrl();
+
         Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
             List<Song> concurrentSongs = new CopyOnWriteArrayList<>();
             Map<String, Song> concurrentNamedSong = new ConcurrentHashMap<>();
@@ -74,40 +84,38 @@ public class MusicManager {
             if (songs != null) songs.clear();
             if (namedSong != null) namedSong.clear();
 
-            File folder = new File(instance.getDataFolder(), "songs");
-            File[] songFiles = folder.listFiles();
-            if (songFiles == null || songFiles.length == 0) {
-                //callback to the mainthread if there are no songs
-                Bukkit.getScheduler().runTask(instance, () -> {
-                    long executionTime = System.currentTimeMillis() - startTime;
-                    isLoaded = true;
-                    isLoading = false;
-                    onComplete.accept(executionTime);
-                });
-                return;
-            }
+            try {
+                List<String> remoteFiles = getRemoteFileList();
 
-            //create a executor for virtual threads
-            try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-                for (File file : songFiles) {
-                    executor.submit(() -> {
-                        Song song = NBSDecoder.parse(file);
-                        if (song != null) {
-                            concurrentSongs.add(song);
-                            concurrentNamedSong.put(song.getTitle(), song);
-                        }
-                    });
+                try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                    for (String fileName : remoteFiles) {
+                        executor.submit(() -> {
+                            try {
+                                URL fileUrl = new URL(url + fileName);
+                                Song song = downloadAndParseSong(fileUrl);
+                                if (song != null) {
+                                    concurrentSongs.add(song);
+                                    concurrentNamedSong.put(song.getTitle(), song);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
                 }
+
+
+                //song sorting
+                concurrentSongs.parallelStream()
+                        .sorted((song1, song2) -> song1.getTitle().compareToIgnoreCase(song2.getTitle()))
+                        .forEachOrdered(songs::add);
+
+                namedSong.putAll(concurrentNamedSong);
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            //song sorting
-            concurrentSongs.parallelStream()
-                    .sorted((song1, song2) -> song1.getTitle().compareToIgnoreCase(song2.getTitle()))
-                    .forEachOrdered(songs::add);
-
-            namedSong.putAll(concurrentNamedSong);
-
-            //callback to the mainthread
             Bukkit.getScheduler().runTask(instance, () -> {
                 isLoaded = true;
                 isLoading = false;
@@ -115,6 +123,44 @@ public class MusicManager {
                 onComplete.accept(executionTime);
             });
         });
+    }
+
+    private List<String> getRemoteFileList() throws Exception {
+        URL directoryUrl = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) directoryUrl.openConnection();
+        String auth = username + ":" + password;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+        connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String inputLine;
+        List<String> fileList = new ArrayList<>();
+
+        while ((inputLine = in.readLine()) != null) {
+            if (inputLine.contains(".nbs")) {
+                String fileName = inputLine.substring(inputLine.indexOf("href=\"") + 6, inputLine.indexOf(".nbs") + 4);
+                fileList.add(fileName);
+            }
+        }
+        in.close();
+        return fileList;
+    }
+
+    private Song downloadAndParseSong(URL fileUrl) throws Exception {
+        HttpURLConnection connection = (HttpURLConnection) fileUrl.openConnection();
+
+        String auth = username + ":" + password;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+        connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            throw new IOException("Failed to authenticate: " + responseCode);
+        }
+
+        try (InputStream in = connection.getInputStream()) {
+            return NBSDecoder.parse(in);
+        }
     }
 
     public ArrayList<Song> getSongs() {

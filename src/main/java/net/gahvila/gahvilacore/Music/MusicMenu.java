@@ -322,7 +322,9 @@ public class MusicMenu {
         }), 7, 0);
         gui.addPane(navigationPane);
 
-        pages.setPage(openingPage);
+        if (openingPage <= pages.getPages() - 1) {
+            pages.setPage(openingPage);
+        }
         gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
 
         gui.update();
