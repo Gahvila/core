@@ -91,6 +91,7 @@ public class MusicManager {
             try {
                 List<String> remoteFiles = getRemoteFileList();
 
+                //create a executor for virtual threads
                 try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                     for (String fileName : remoteFiles) {
                         executor.submit(() -> {
@@ -132,15 +133,19 @@ public class MusicManager {
     private List<String> getRemoteFileList() throws Exception {
         URL directoryUrl = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) directoryUrl.openConnection();
+
         String auth = username + ":" + password;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
         connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
 
+        //create reader for the response from server
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String inputLine;
         List<String> fileList = new ArrayList<>();
 
+        //read response line by line
         while ((inputLine = in.readLine()) != null) {
+            //extract lines with .nbs in them
             if (inputLine.contains(".nbs")) {
                 String fileName = inputLine.substring(inputLine.indexOf("href=\"") + 6, inputLine.indexOf(".nbs") + 4);
                 fileList.add(fileName);
@@ -219,7 +224,7 @@ public class MusicManager {
             rsp.setRepeatMode(RepeatMode.NO);
         }
         saveSongPlayer(player, rsp);
-        Bukkit.getScheduler().runTaskLater(instance, () -> songPlayerSchedule(player, rsp), 5);
+        Bukkit.getScheduler().runTaskLater(instance, () -> songPlayerSchedule(player, rsp), 3);
 
         saveTitleToCookie(player);
         saveTickToCookie(player);
@@ -248,7 +253,7 @@ public class MusicManager {
             }
         }
         saveSongPlayer(player, esp);
-        Bukkit.getScheduler().runTaskLater(instance, () -> songPlayerSchedule(player, esp), 5);
+        Bukkit.getScheduler().runTaskLater(instance, () -> songPlayerSchedule(player, esp), 3);
 
         saveTitleToCookie(player);
         saveTickToCookie(player);

@@ -66,6 +66,7 @@ public class MusicEvents implements Listener {
         for (UUID uuid : playerUUIDs) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
+                musicManager.clearSongPlayer(player);
                 musicManager.clearCookies(player);
             }
         }
