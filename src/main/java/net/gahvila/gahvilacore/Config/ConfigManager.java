@@ -20,4 +20,9 @@ public class ConfigManager {
         Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
         return data.getOrDefault("download-server-url", "");
     }
+
+    public static String getServerName() {
+        Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
+        return data.getOrDefault("server-name", "unknown").toLowerCase();
+    }
 }

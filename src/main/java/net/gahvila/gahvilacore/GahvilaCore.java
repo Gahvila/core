@@ -2,6 +2,7 @@ package net.gahvila.gahvilacore;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
+import net.gahvila.gahvilacore.Config.ConfigManager;
 import net.gahvila.gahvilacore.Essentials.AFK;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
 import net.gahvila.gahvilacore.Music.MusicCommand;
@@ -15,6 +16,9 @@ import net.gahvila.gahvilacore.Profiles.Marriage.MarriageCommand;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageEvents;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageMenu;
+import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeCommand;
+import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeListener;
+import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeManager;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
 import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixColorMenu;
 import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixMainMenu;
@@ -32,6 +36,7 @@ public final class GahvilaCore extends JavaPlugin {
     private PrefixTypeMenu prefixTypeMenu;
     private PrefixMainMenu prefixMainMenu;
     private PrefixColorMenu prefixColorMenu;
+    private PlaytimeManager playtimeManager;
     private PluginManager pluginManager;
 
     @Override
@@ -77,6 +82,13 @@ public final class GahvilaCore extends JavaPlugin {
         EconomyManager economyManager = new EconomyManager();
         EconomyCommand economyCommand = new EconomyCommand(economyManager);
         economyCommand.registerCommands();
+
+        //playtime
+        PlaytimeManager playtimeManager = new PlaytimeManager();
+        PlaytimeCommand playtimeCommand = new PlaytimeCommand(playtimeManager);
+        playtimeCommand.registerCommands();
+        registerListeners(new PlaytimeListener(playtimeManager));
+        playtimeManager.startScheduledSaveTask();
 
         //general commands
         InfoCommands infoCommands = new InfoCommands();
