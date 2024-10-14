@@ -7,13 +7,11 @@ import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
-import org.apache.commons.lang3.time.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,7 +20,7 @@ import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class PlaytimeManager {
     public static final String PLAYTIME_KEY = "playtime-";
-    private static final HashMap<UUID, CachedPlaytime> playtimeCache = new HashMap<>();
+    private static final HashMap<UUID, PlaytimeCache> playtimeCache = new HashMap<>();
     private static final String SERVER_NAME = ConfigManager.getServerName();
 
     public void loadPlayerIntoCache(Player player) {
@@ -30,8 +28,8 @@ public class PlaytimeManager {
         long joinTime = System.currentTimeMillis();
 
         getPlaytime(player).thenAccept(playtime -> {
-            CachedPlaytime cachedPlaytime = new CachedPlaytime(playtime, joinTime);
-            playtimeCache.put(playerUUID, cachedPlaytime);
+            PlaytimeCache playtimeCache = new PlaytimeCache(playtime, joinTime);
+            PlaytimeManager.playtimeCache.put(playerUUID, playtimeCache);
         });
     }
 
@@ -39,13 +37,13 @@ public class PlaytimeManager {
         UUID playerUUID = player.getUniqueId();
 
         if (playtimeCache.containsKey(playerUUID)) {
-            CachedPlaytime cachedPlaytime = playtimeCache.get(playerUUID);
+            PlaytimeCache playtimeCache = PlaytimeManager.playtimeCache.get(playerUUID);
 
-            Long elapsedTime = cachedPlaytime.getElapsedTime();
-            cachedPlaytime.addPlaytime(elapsedTime);
-            setPlaytime(player, cachedPlaytime.getPlaytime());
+            Long elapsedTime = playtimeCache.getElapsedTime();
+            playtimeCache.addPlaytime(elapsedTime);
+            setPlaytime(player, playtimeCache.getPlaytime());
 
-            cachedPlaytime.setLastJoinTime(System.currentTimeMillis());
+            playtimeCache.setLastJoinTime(System.currentTimeMillis());
         }
     }
 
@@ -80,6 +78,11 @@ public class PlaytimeManager {
                 return 0L;
             }
 
+            if (playtimeCache.containsKey(playerUUID)) {
+                PlaytimeCache playtimeCache = PlaytimeManager.playtimeCache.get(playerUUID);
+                return playtimeCache.getPlaytime() + playtimeCache.getElapsedTime();
+            }
+
             CachedMetaData metaData = user.getCachedData().getMetaData();
             String playtimeValue = metaData.getMetaValue(PLAYTIME_KEY + SERVER_NAME);
 
@@ -93,10 +96,6 @@ public class PlaytimeManager {
                 return 0L;
             }
         });
-    }
-
-    public CompletableFuture<Duration> getPlaytimeDuration(OfflinePlayer player) {
-        return getPlaytime(player).thenApplyAsync(Duration::ofSeconds);
     }
 
     public CompletableFuture<Void> setPlaytime(OfflinePlayer player, Long playtime) {
@@ -114,6 +113,28 @@ public class PlaytimeManager {
         });
     }
 
+    public CompletableFuture<Void> addPlaytime(OfflinePlayer player, Long playtime) {
+        if (player.isOnline()){
+            playtimeCache.get(player.getUniqueId()).addPlaytime(playtime);
+            return CompletableFuture.completedFuture(null);
+        }
+        return getPlaytime(player).thenCompose(currentPlaytime -> setPlaytime(player, playtime + currentPlaytime));
+    }
+
+    public CompletableFuture<Void> reducePlaytime(OfflinePlayer player, Long playtime) {
+        if (player.isOnline()){
+            playtimeCache.get(player.getUniqueId()).subtractPlaytime(playtime);
+            return CompletableFuture.completedFuture(null);
+        }
+        return getPlaytime(player).thenCompose(currentPlaytime -> {
+            long newPlaytime = currentPlaytime - playtime;
+            if (newPlaytime < 0) {
+                newPlaytime = 0L;
+            }
+            return setPlaytime(player, newPlaytime);
+        });
+    }
+
     public CompletableFuture<User> getUser(UUID uuid) {
         LuckPerms luckPerms = LuckPermsProvider.get();
         return luckPerms.getUserManager().loadUser(uuid);
@@ -121,5 +142,42 @@ public class PlaytimeManager {
 
     public CompletableFuture<Void> resetPlaytime(OfflinePlayer player) {
         return setPlaytime(player, 0L);
+    }
+
+    public static String formatDuration(long seconds) {
+        long hours = seconds / 3600;
+        long minutes = (seconds % 3600) / 60;
+        long remainingSeconds = seconds % 60;
+
+        StringBuilder result = new StringBuilder();
+
+        if (hours > 0) {
+            result.append(hours).append(" tunti").append(hours > 1 ? "a" : "");
+        }
+
+        if (minutes > 0) {
+            if (result.length() > 0) {
+                result.append(", ");
+            }
+            result.append(minutes).append(" minuutti").append(minutes > 1 ? "a" : "");
+        }
+
+        if (remainingSeconds > 0) {
+            if (!result.isEmpty()) {
+                result.append(", ");
+            }
+            result.append(remainingSeconds).append(" sekunti").append(remainingSeconds > 1 ? "a" : "");
+        }
+
+        if (!result.isEmpty()) {
+            int lastComma = result.lastIndexOf(",");
+            if (lastComma != -1) {
+                result.replace(lastComma, lastComma + 1, " ja");
+            }
+        } else {
+            return "0 sekuntia";
+        }
+
+        return result.toString();
     }
 }

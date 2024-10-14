@@ -1,12 +1,10 @@
 package net.gahvila.gahvilacore.Profiles.Playtime;
 
-import java.time.Duration;
-
-public class CachedPlaytime {
+public class PlaytimeCache {
     private Long playtime;
     private long lastJoinTime;
 
-    public CachedPlaytime(Long playtime, long lastJoinTime) {
+    public PlaytimeCache(Long playtime, long lastJoinTime) {
         this.playtime = playtime;
         this.lastJoinTime = lastJoinTime;
     }
@@ -19,8 +17,8 @@ public class CachedPlaytime {
         this.playtime = playtime + additionalTime;
     }
 
-    public long getLastJoinTime() {
-        return lastJoinTime;
+    public void subtractPlaytime(Long additionalTime) {
+        this.playtime = playtime - additionalTime;
     }
 
     public void setLastJoinTime(long lastJoinTime) {
