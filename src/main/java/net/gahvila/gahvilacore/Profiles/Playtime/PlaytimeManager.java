@@ -1,5 +1,6 @@
 package net.gahvila.gahvilacore.Profiles.Playtime;
 
+import de.leonhard.storage.Json;
 import net.gahvila.gahvilacore.Config.ConfigManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -9,6 +10,7 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -30,6 +32,8 @@ public class PlaytimeManager {
         getPlaytime(player).thenAccept(playtime -> {
             PlaytimeCache playtimeCache = new PlaytimeCache(playtime, joinTime);
             PlaytimeManager.playtimeCache.put(playerUUID, playtimeCache);
+        }).thenRun(() -> {
+            addStatsPlaytime(player);
         });
     }
 
@@ -179,5 +183,25 @@ public class PlaytimeManager {
         }
 
         return result.toString();
+    }
+
+    public void setHasConverted(Player player) {
+        Json playerData = new Json("playerdata.json", instance.getDataFolder() + "/data/");
+        String uuid = player.getUniqueId().toString();
+        playerData.set(uuid + "." + "playtimeConverted", true);
+    }
+
+    public boolean getHasConverted(Player player) {
+        Json playerData = new Json("playerdata.json", instance.getDataFolder() + "/data/");
+        String uuid = player.getUniqueId().toString();
+        return playerData.getFileData().containsKey(uuid + "." + "playtimeConverted");
+    }
+
+    public void addStatsPlaytime(Player player) {
+        if (!getHasConverted(player)){
+            long amount = player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20;
+            addPlaytime(player, amount);
+            setHasConverted(player);
+        }
     }
 }
