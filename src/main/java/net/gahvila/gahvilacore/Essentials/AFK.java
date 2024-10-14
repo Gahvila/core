@@ -3,6 +3,8 @@ package net.gahvila.gahvilacore.Essentials;
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.gahvila.gahvilacore.GahvilaCore;
+import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeCache;
+import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -27,18 +29,31 @@ public class AFK implements Listener {
         this.plugin = plugin;
     }
 
+    public void setPlayerAFK(Player player, boolean afk) {
+        UUID uuid = player.getUniqueId();
+        PlaytimeCache playtimeCache = PlaytimeManager.playtimeCache.get(uuid);
+
+        if (playtimeCache != null) {
+            playtimeCache.setAfk(afk);
+        }
+
+        if (afk) {
+            isAfk.put(uuid, true);
+            player.sendMessage("Olet nyt afk.");
+        } else {
+            isAfk.remove(uuid);
+            player.sendMessage("Et ole enää afk.");
+        }
+    }
+
     public void registerCommands() {
         new CommandAPICommand("afk")
                 .executesPlayer((p, args) -> {
                     UUID uuid = p.getUniqueId();
                     if (!isAfk.containsKey(uuid)){
-                        isAfk.put(uuid, true);
-                        p.sendMessage("Olet nyt afk.");
-                    }else{
-                        p.sendMessage("Et ole enää afk.");
-                        lastLoc.put(uuid, p.getLocation());
-                        lastAction.put(p.getUniqueId(), System.currentTimeMillis());
-                        isAfk.remove(uuid);
+                        setPlayerAFK(p, true);
+                    } else {
+                        setPlayerAFK(p, false);
                     }
                 })
                 .register();
@@ -51,30 +66,26 @@ public class AFK implements Listener {
                 UUID uuid = player.getUniqueId();
                 if (isAfk.containsKey(uuid)) return;
                 Location currentLocation = player.getLocation();
-                // If lastLoc is null or the currentLocation is different from the last one
                 if (lastLoc.get(uuid) == null || !lastLoc.get(uuid).equals(currentLocation)) {
                     long unixTime = System.currentTimeMillis();
                     long lastMovedTime = lastAction.containsKey(uuid) ? lastAction.get(uuid) : 0;
-                    // If it has been 2.5 minutes since the player has moved
                     if (unixTime - lastMovedTime >= 150000){
-                        isAfk.put(uuid, true);
-                        player.sendMessage("Olet nyt afk.");
+                        setPlayerAFK(player, true);
                     }
                 }
             }
         }, 0, 20).getTaskId();
     }
 
+
     @EventHandler
-    public void onMove(PlayerMoveEvent e){
-        if (!(e.getFrom().getX() != e.getTo().getX() || e.getFrom().getY() != e.getTo().getY() || e.getFrom().getZ() != e.getTo().getZ())) return;
+    public void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
         lastLoc.put(uuid, p.getLocation());
         lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
-            p.sendMessage("Et ole enää afk.");
-            isAfk.remove(uuid);
+            setPlayerAFK(p, false);
         }
     }
 
@@ -100,8 +111,7 @@ public class AFK implements Listener {
         lastLoc.put(uuid, p.getLocation());
         lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
-            p.sendMessage("Et ole enää afk.");
-            isAfk.remove(uuid);
+            setPlayerAFK(p, false);
         }
     }
 
@@ -112,8 +122,7 @@ public class AFK implements Listener {
         lastLoc.put(uuid, p.getLocation());
         lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
-            p.sendMessage("Et ole enää afk.");
-            isAfk.remove(uuid);
+            setPlayerAFK(p, false);
         }
     }
 
@@ -124,8 +133,7 @@ public class AFK implements Listener {
         lastLoc.put(uuid, p.getLocation());
         lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
-            p.sendMessage("Et ole enää afk.");
-            isAfk.remove(uuid);
+            setPlayerAFK(p, false);
         }
     }
 
@@ -136,8 +144,7 @@ public class AFK implements Listener {
         lastLoc.put(uuid, p.getLocation());
         lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
-            p.sendMessage("Et ole enää afk.");
-            isAfk.remove(uuid);
+            setPlayerAFK(p, false);
         }
     }
 
@@ -148,8 +155,7 @@ public class AFK implements Listener {
         lastLoc.put(uuid, p.getLocation());
         lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
-            p.sendMessage("Et ole enää afk.");
-            isAfk.remove(uuid);
+            setPlayerAFK(p, false);
         }
     }
 
@@ -157,7 +163,7 @@ public class AFK implements Listener {
     public void onMove(PlayerQuitEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        isAfk.remove(uuid);
+        setPlayerAFK(p, false);
         lastLoc.remove(uuid);
         lastAction.remove(uuid);
     }
