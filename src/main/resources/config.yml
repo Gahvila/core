@@ -1,3 +1,5 @@
 download-server-username: "admin"
 download-server-password: "1234"
 download-server-url: ""
+server-name: "unknown"
+server-season: 0

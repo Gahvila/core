@@ -160,7 +160,7 @@ public class PlaytimeManager {
         }
 
         if (minutes > 0) {
-            if (result.length() > 0) {
+            if (!result.isEmpty()) {
                 result.append(", ");
             }
             result.append(minutes).append(" minuutti").append(minutes > 1 ? "a" : "");
