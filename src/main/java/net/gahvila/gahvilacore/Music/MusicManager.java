@@ -28,10 +28,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 import static net.gahvila.gahvilacore.Config.ConfigManager.*;
@@ -48,7 +45,7 @@ public class MusicManager {
     public static HashMap<Player, SongPlayer> songPlayers = new HashMap<>();
     public static HashMap<Player, Boolean> speakerEnabled = new HashMap<>();
     public static HashMap<Player, Boolean> autoEnabled = new HashMap<>();
-    public static HashMap<Player, Integer> playerVolume = new HashMap<>();
+    public static HashMap<Player, Byte> playerVolume = new HashMap<>();
 
     public static NamespacedKey titleKey = new NamespacedKey(instance, "song.title");
     public static NamespacedKey tickKey = new NamespacedKey(instance, "song.tick");
@@ -229,6 +226,7 @@ public class MusicManager {
         saveTitleToCookie(player);
         saveTickToCookie(player);
         savePauseToCookie(player);
+        saveVolumeToCookie(player);
     }
 
     public void createESP(Player player, Song song, Short tick) {
@@ -257,6 +255,8 @@ public class MusicManager {
 
         saveTitleToCookie(player);
         saveTickToCookie(player);
+        savePauseToCookie(player);
+        saveVolumeToCookie(player);
     }
 
     //
@@ -299,22 +299,24 @@ public class MusicManager {
     //
     //Volume selection
     //
-    public int getVolume(Player player) {
-        return playerVolume.getOrDefault(player, 5);
+    public byte getVolume(Player player) {
+        return playerVolume.getOrDefault(player, (byte) 5);
     }
 
-    public void setVolume(Player player, int volume) {
-        if (volume >= 10) {
-            playerVolume.put(player, 10);
-        } else playerVolume.put(player, Math.max(volume, 1));
+    public void setVolume(Player player, byte volume) {
+        System.err.println("volume set to " + volume);
+        if (volume >= (byte) 10) {
+            playerVolume.put(player, (byte) 10);
+        } else playerVolume.put(player, (byte) Math.max(volume, 1));
+        saveVolumeToCookie(player);
     }
 
     public void increaseVolume(Player player) {
-        setVolume(player, getVolume(player) + 1);
+        setVolume(player, (byte) (getVolume(player) + 1));
     }
 
     public void reduceVolume(Player player) {
-        setVolume(player, getVolume(player) - 1);
+        setVolume(player, (byte) (getVolume(player) - 1));
     }
 
     public void saveVolume(Player player) {
@@ -322,14 +324,16 @@ public class MusicManager {
         String uuid = player.getUniqueId().toString();
         playerData.set(uuid + "." + "volume", getVolume(player));
     }
-    public int getSavedVolume(Player player) {
+    public byte getSavedVolume(Player player) {
         Json playerData = new Json("playerdata.json", instance.getDataFolder() + "/data/");
         String uuid = player.getUniqueId().toString();
 
         if (!playerData.contains(uuid + "." + "volume")) {
-            return 5;
+            return (byte) 5;
         }
-        return playerData.getInt(uuid + "." + "volume");
+
+        int volume = playerData.getInt(uuid + "." + "volume");
+        return (byte) volume;
     }
 
     //
@@ -404,7 +408,7 @@ public class MusicManager {
     //
     // Utilities
     //
-    public byte volumeConverter(int volume) {
+    public byte volumeConverter(byte volume) {
         return switch(volume) {
             case 1 -> (byte) 10;
             case 2 -> (byte) 20;
@@ -432,48 +436,81 @@ public class MusicManager {
     //
     // cookies
     //
+    private SongPlayer getPlayingSongPlayer(Player player) {
+        SongPlayer songPlayer = getSongPlayer(player);
+        return (songPlayer != null && songPlayer.isPlaying()) ? songPlayer : null;
+    }
+
     public void saveTitleToCookie(Player player) {
-        if (getSongPlayer(player) != null && getSongPlayer(player).isPlaying()) {
-            SongPlayer songPlayer = getSongPlayer(player);
-            player.storeCookie(titleKey, songPlayer.getSong().getTitle().getBytes());
+        SongPlayer songPlayer = getPlayingSongPlayer(player);
+        if (songPlayer != null) {
+            player.storeCookie(titleKey, songPlayer.getSong().getTitle().getBytes(StandardCharsets.UTF_8));
         }
     }
 
     public void saveTickToCookie(Player player) {
-        if (getSongPlayer(player) != null && getSongPlayer(player).isPlaying()) {
-            SongPlayer songPlayer = getSongPlayer(player);
-
-            ByteBuffer buffer = ByteBuffer.allocate(2);
-            buffer.order(ByteOrder.LITTLE_ENDIAN);
+        SongPlayer songPlayer = getPlayingSongPlayer(player);
+        if (songPlayer != null) {
+            ByteBuffer buffer = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);
             buffer.putShort(songPlayer.getTick());
-
             player.storeCookie(tickKey, buffer.array());
         }
     }
 
     public void savePauseToCookie(Player player) {
-        if (getSongPlayer(player) != null) {
-            SongPlayer songPlayer = getSongPlayer(player);
-
-            byte[] byteArray = new byte[1];
-            byteArray[0] = (byte) (songPlayer.isPlaying() ? 1 : 0);
+        SongPlayer songPlayer = getSongPlayer(player);
+        if (songPlayer != null) {
+            byte[] byteArray = {(byte) (songPlayer.isPlaying() ? 1 : 0)};
             player.storeCookie(pauseKey, byteArray);
+        }
+    }
+
+    public void saveVolumeToCookie(Player player) {
+        SongPlayer songPlayer = getPlayingSongPlayer(player);
+        if (songPlayer != null) {
+            byte[] volumeArray = new byte[]{getVolume(player)};
+            player.storeCookie(volumeKey, volumeArray);
         }
     }
 
     private CompletableFuture<String> retrieveTitleCookie(Player player) {
         return player.retrieveCookie(titleKey)
-                .thenApply(bytes -> bytes != null ? new String(bytes, StandardCharsets.UTF_8) : null);
+                .thenApply(bytes -> bytes != null ? new String(bytes, StandardCharsets.UTF_8) : null)
+                .orTimeout(3, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    ex.printStackTrace();
+                    return null;
+                });
     }
 
     private CompletableFuture<Short> retrieveTickCookie(Player player) {
         return player.retrieveCookie(tickKey)
-                .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getShort() : null);
+                .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getShort() : null)
+                .orTimeout(3, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    ex.printStackTrace();
+                    return null;
+                });
     }
 
     private CompletableFuture<Boolean> retrievePauseCookie(Player player) {
         return player.retrieveCookie(pauseKey)
-                .thenApply(bytes -> bytes != null ? bytes[0] == 1 : null);
+                .thenApply(bytes -> bytes != null ? bytes[0] == 1 : null)
+                .orTimeout(3, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    ex.printStackTrace();
+                    return null;
+                });
+    }
+
+    private CompletableFuture<Byte> retrieveVolumeCookie(Player player) {
+        return player.retrieveCookie(volumeKey)
+                .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).get() : null)
+                .orTimeout(3, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    ex.printStackTrace();
+                    return null;
+                });
     }
 
     public void clearCookies(Player player) {
@@ -483,21 +520,33 @@ public class MusicManager {
 
     public void playSongFromCookies(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(instance, task -> {
-            String title = retrieveTitleCookie(player).join();
-            Short tick = retrieveTickCookie(player).join();
-            Boolean pause = retrievePauseCookie(player).join();
+            CompletableFuture<String> titleFuture = retrieveTitleCookie(player);
+            CompletableFuture<Short> tickFuture = retrieveTickCookie(player);
+            CompletableFuture<Boolean> pauseFuture = retrievePauseCookie(player);
+            CompletableFuture<Byte> volumeFuture = retrieveVolumeCookie(player);
 
-            if (title == null || tick == null || pause == null) {
-                return;
-            }
+            CompletableFuture.allOf(titleFuture, tickFuture, pauseFuture, volumeFuture)
+                    .thenRun(() -> {
+                        String title = titleFuture.join();
+                        Short tick = tickFuture.join();
+                        Boolean pause = pauseFuture.join();
+                        Byte volume = volumeFuture.join();
 
-            for (Song song : getSongs()) {
-                if (song.getTitle().equals(title)) {
-                    clearSongPlayer(player);
-                    setVolume(player, 5);
-                    createSP(player, song, tick, pause);
-                }
-            }
+                        if (title == null || tick == null || pause == null) {
+                            return;
+                        }
+
+                        if (volume != null) {
+                            setVolume(player, volume);
+                        }
+
+                        for (Song song : getSongs()) {
+                            if (song.getTitle().equals(title)) {
+                                clearSongPlayer(player);
+                                createSP(player, song, tick, pause);
+                            }
+                        }
+                    });
         });
     }
 
