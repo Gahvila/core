@@ -304,7 +304,6 @@ public class MusicManager {
     }
 
     public void setVolume(Player player, byte volume) {
-        System.err.println("volume set to " + volume);
         if (volume >= (byte) 10) {
             playerVolume.put(player, (byte) 10);
         } else playerVolume.put(player, (byte) Math.max(volume, 1));
