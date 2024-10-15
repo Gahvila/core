@@ -49,6 +49,7 @@ public final class GahvilaCore extends JavaPlugin {
         prefixTypeMenu = new PrefixTypeMenu(prefixManager);
         prefixMainMenu = new PrefixMainMenu();
         prefixColorMenu = new PrefixColorMenu(prefixManager);
+        playtimeManager = new PlaytimeManager();
 
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
 
@@ -128,4 +129,7 @@ public final class GahvilaCore extends JavaPlugin {
         }
     }
 
+    public PlaytimeManager getPlaytimeManager() {
+        return playtimeManager;
+    }
 }
