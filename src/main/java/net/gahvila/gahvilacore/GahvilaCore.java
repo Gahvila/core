@@ -119,8 +119,6 @@ public final class GahvilaCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
-
     }
 
     private void registerListeners(Listener...listeners){

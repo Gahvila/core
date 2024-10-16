@@ -36,7 +36,11 @@ public enum Single {
     DENIM("Denim", "#1560BD"),
     HALFLIFE("Half-Life", "#fb7e14"),
     MUNAKOISO("Munakoiso", "#614051"),
-    VESIMELOONI("Vesimelooni", "#FD4659");
+    VESIMELOONI("Vesimelooni", "#FD4659"),
+    BLURPLE("Blurple", "#7289DA"),
+    NEWBLURPLE("New Blurple", "#5865F2"),
+    TUMMAOLIIVI("Tumma Oliivi", "#4A412A"),
+    LUUMU("Luumu", "#5C3A4D");
 
     private final String displayName;
     private final String color;
