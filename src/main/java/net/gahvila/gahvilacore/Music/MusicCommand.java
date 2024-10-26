@@ -26,7 +26,7 @@ public class MusicCommand {
                         }))
                 .executesPlayer((p, args) -> {
                     p.playSound(p.getLocation(), Sound.ENTITY_LLAMA_SWAG, 0.6F, 1F);
-                    musicMenu.showGUI(p, 0);
+                    musicMenu.showGUI(p, musicManager.getPage(p));
                 })
                 .register();
     }

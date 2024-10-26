@@ -46,6 +46,7 @@ public class MusicManager {
     public static HashMap<Player, Boolean> speakerEnabled = new HashMap<>();
     public static HashMap<Player, Boolean> autoEnabled = new HashMap<>();
     public static HashMap<Player, Byte> playerVolume = new HashMap<>();
+    public static HashMap<Player, Integer> lastMenuPage = new HashMap<>();
 
     public static NamespacedKey titleKey = new NamespacedKey(instance, "song.title");
     public static NamespacedKey tickKey = new NamespacedKey(instance, "song.tick");
@@ -430,6 +431,14 @@ public class MusicManager {
         int seconds = (int) (lengthInSeconds % 60);
 
         return String.format("%d:%02d", minutes, seconds);
+    }
+
+    public Integer getPage(Player player) {
+        return lastMenuPage.getOrDefault(player, 0);
+    }
+
+    public void setPage(Player player, Integer page) {
+        lastMenuPage.put(player, page);
     }
 
     //
