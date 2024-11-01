@@ -15,8 +15,7 @@ public class MusicCommand {
 
     public void registerCommands() {
         new CommandAPICommand("music")
-
-                .withSubcommand(new CommandAPICommand("musicreload")
+                .withSubcommand(new CommandAPICommand("reload")
                         .withPermission("music.reload")
                         .executes((sender, args) -> {
                             sender.sendMessage("Ladataan musiikit uudelleen...");
