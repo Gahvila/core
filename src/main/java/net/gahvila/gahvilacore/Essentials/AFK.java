@@ -90,7 +90,7 @@ public class AFK implements Listener {
     }
 
     @EventHandler
-    public void onMove(AsyncChatEvent e){
+    public void onChat(AsyncChatEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
         lastLoc.put(uuid, p.getLocation());
@@ -116,7 +116,7 @@ public class AFK implements Listener {
     }
 
     @EventHandler
-    public void onMove(PlayerInteractEvent e){
+    public void onInteract(PlayerInteractEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
         lastLoc.put(uuid, p.getLocation());
@@ -127,7 +127,7 @@ public class AFK implements Listener {
     }
 
     @EventHandler
-    public void onMove(BlockBreakEvent e){
+    public void onBlockBreak(BlockBreakEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
         lastLoc.put(uuid, p.getLocation());
@@ -138,7 +138,7 @@ public class AFK implements Listener {
     }
 
     @EventHandler
-    public void onMove(BlockPlaceEvent e){
+    public void onBlockPlace(BlockPlaceEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
         lastLoc.put(uuid, p.getLocation());
@@ -149,7 +149,7 @@ public class AFK implements Listener {
     }
 
     @EventHandler
-    public void onMove(PlayerJoinEvent e){
+    public void onJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
         lastLoc.put(uuid, p.getLocation());
@@ -160,7 +160,7 @@ public class AFK implements Listener {
     }
 
     @EventHandler
-    public void onMove(PlayerQuitEvent e){
+    public void onQuit(PlayerQuitEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
         setPlayerAFK(p, false);

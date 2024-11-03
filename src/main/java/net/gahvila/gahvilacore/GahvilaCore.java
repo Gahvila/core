@@ -2,7 +2,6 @@ package net.gahvila.gahvilacore;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
-import net.gahvila.gahvilacore.Config.ConfigManager;
 import net.gahvila.gahvilacore.Essentials.AFK;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
 import net.gahvila.gahvilacore.Music.MusicCommand;
@@ -115,10 +114,6 @@ public final class GahvilaCore extends JavaPlugin {
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new Placeholders(this, marriageManager, prefixManager).register();
         }
-    }
-
-    @Override
-    public void onDisable() {
     }
 
     private void registerListeners(Listener...listeners){
