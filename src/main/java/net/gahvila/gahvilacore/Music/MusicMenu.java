@@ -24,6 +24,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toUndecoratedMM;
@@ -49,7 +50,7 @@ public class MusicMenu {
                 "1AAAAAAA1",
                 "1AAAAAAA1",
                 "1AAAAAAA1",
-                "111AAA111"
+                "111111111"
         );
         PatternPane border = new PatternPane(0, 0, 9, 5, Pane.Priority.LOWEST, pattern);
         ItemStack background = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
@@ -168,7 +169,7 @@ public class MusicMenu {
                 musicManager.clearSongPlayer(player);
             }
             gui.update();
-        }), 1, 0);
+        }), 0, 0);
 
         ItemStack autoplay = new ItemStack(Material.REDSTONE);
         ItemMeta autoplayMeta = autoplay.getItemMeta();
@@ -298,36 +299,64 @@ public class MusicMenu {
             gui.update();
         }), 4, 0);
 
-        ItemStack previous = new ItemStack(Material.MANGROVE_BUTTON);
-        ItemMeta previousMeta = previous.getItemMeta();
-        previousMeta.displayName(toUndecoratedMM("<b>Takaisin"));
-        previous.setItemMeta(previousMeta);
-        navigationPane.addItem(new GuiItem(previous, event -> {
-            if (pages.getPage() > 0) {
-                pages.setPage(pages.getPage() - 1);
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.7F);
-                gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
+        ItemStack sorting = new ItemStack(Material.NETHER_STAR);
+        ItemMeta sortingMeta = sorting.getItemMeta();
+        sortingMeta.displayName(toUndecoratedMM("<b>Listaus"));
+        sortingMeta.lore(List.of(toUndecoratedMM("<white>Tulossa pian")));
+        sorting.setItemMeta(sortingMeta);
+        navigationPane.addItem(new GuiItem(sorting, event -> {
+            event.setCancelled(true);
+        }), 5, 0);
 
-                musicManager.setPage(player, pages.getPage());
+        ItemStack random = new ItemStack(Material.ENDER_PEARL);
+        ItemMeta randomMeta = random.getItemMeta();
+        randomMeta.displayName(toUndecoratedMM("<b>Satunnainen kappale"));
+        random.setItemMeta(randomMeta);
+        Random rand = new Random();
+        navigationPane.addItem(new GuiItem(random, event -> {
+            if (cooldown.contains(player)) return;
+            cooldown.add(player);
+            Bukkit.getScheduler().runTaskLater(instance, () -> cooldown.remove(player), 10);
 
+            int randomIndex = rand.nextInt(musicManager.getSongs().size());
+            Song randomSong = musicManager.getSongs().get(randomIndex);
+            if (randomSong != null){
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
+                musicManager.clearSongPlayer(player);
+                if (!musicManager.getSpeakerEnabled(player)) {
+                    musicManager.createSP(player, randomSong, null, true);
+                } else if (musicManager.getSpeakerEnabled(player)) {
+                    musicManager.createESP(player, randomSong, null);
+                }
+                player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + randomSong.getTitle() + "</yellow> <white>soimaan.");
                 gui.update();
+            }else {
+                player.closeInventory();
+                Bukkit.getLogger().severe("player attempted to play a song that doesn't exist");
             }
         }), 6, 0);
-        ItemStack next = new ItemStack(Material.WARPED_BUTTON);
-        ItemMeta nextMeta = next.getItemMeta();
-        nextMeta.displayName(toUndecoratedMM("<b>Seuraava"));
-        next.setItemMeta(nextMeta);
-        navigationPane.addItem(new GuiItem(next, event -> {
-            if (pages.getPage() < pages.getPages() - 1) {
-                pages.setPage(pages.getPage() + 1);
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.8F);
-                gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
 
-                musicManager.setPage(player, pages.getPage());
-
-                gui.update();
+        ItemStack pageChange = new ItemStack(Material.MANGROVE_BUTTON);
+        ItemMeta pageChangeMeta = pageChange.getItemMeta();
+        pageChangeMeta.displayName(toUndecoratedMM("<b>Vaihda sivua"));
+        pageChangeMeta.lore(List.of(toUndecoratedMM("<white>Vasen: <yellow>takaisin"), toUndecoratedMM("<white>Oikea: <yellow>seuraava")));
+        pageChange.setItemMeta(pageChangeMeta);
+        navigationPane.addItem(new GuiItem(pageChange, event -> {
+            if (event.getClick().isLeftClick()) {
+                if (pages.getPage() > 0) {
+                    pages.setPage(pages.getPage() - 1);
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.7F);
+                }
+            } else if (event.getClick().isRightClick()) {
+                if (pages.getPage() < pages.getPages() - 1) {
+                    pages.setPage(pages.getPage() + 1);
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.8F);
+                }
             }
-        }), 7, 0);
+            gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
+            musicManager.setPage(player, pages.getPage());
+            gui.update();
+        }), 8, 0);
         gui.addPane(navigationPane);
 
         if (openingPage <= pages.getPages() - 1) {
