@@ -61,6 +61,10 @@ tasks {
         dependsOn(publishToMavenLocal)
     }
 
+    processResources {
+        expand(project.properties)
+    }
+
     java {
         toolchain {
             languageVersion.set(JavaLanguageVersion.of(21))

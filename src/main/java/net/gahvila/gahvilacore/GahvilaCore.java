@@ -9,8 +9,6 @@ import net.gahvila.gahvilacore.Music.MusicEvents;
 import net.gahvila.gahvilacore.Music.MusicManager;
 import net.gahvila.gahvilacore.Music.MusicMenu;
 import net.gahvila.gahvilacore.Placeholder.Placeholders;
-import net.gahvila.gahvilacore.Profiles.Economy.EconomyCommand;
-import net.gahvila.gahvilacore.Profiles.Economy.EconomyManager;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageCommand;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageEvents;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
@@ -77,11 +75,6 @@ public final class GahvilaCore extends JavaPlugin {
         //prefixmenu
         PrefixCommand prefixCommand = new PrefixCommand(prefixTypeMenu, prefixMainMenu, prefixColorMenu, prefixManager);
         prefixCommand.registerCommands();
-
-        //economy
-        EconomyManager economyManager = new EconomyManager();
-        EconomyCommand economyCommand = new EconomyCommand(economyManager);
-        economyCommand.registerCommands();
 
         //playtime
         PlaytimeManager playtimeManager = new PlaytimeManager();
