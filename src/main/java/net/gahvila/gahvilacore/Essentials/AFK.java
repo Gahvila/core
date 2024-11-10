@@ -37,12 +37,13 @@ public class AFK implements Listener {
             playtimeCache.setAfk(afk);
         }
 
+        lastLoc.put(uuid, player.getLocation());
+        lastAction.put(uuid, System.currentTimeMillis());
+
         if (afk) {
             isAfk.put(uuid, true);
             player.sendMessage("Olet nyt afk.");
         } else {
-            lastLoc.put(uuid, player.getLocation());
-            lastAction.put(uuid, System.currentTimeMillis());
             isAfk.remove(uuid);
             player.sendMessage("Et ole enää afk.");
         }
@@ -138,17 +139,16 @@ public class AFK implements Listener {
     public void onJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        if (isAfk.containsKey(uuid)){
-            setPlayerAFK(p, false);
-        }
+        lastLoc.put(uuid, p.getLocation());
+        lastAction.put(uuid, System.currentTimeMillis());
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        setPlayerAFK(p, false);
-        lastLoc.remove(uuid);
-        lastAction.remove(uuid);
+        if (isAfk.containsKey(uuid)){
+            setPlayerAFK(p, false);
+        }
     }
 }
