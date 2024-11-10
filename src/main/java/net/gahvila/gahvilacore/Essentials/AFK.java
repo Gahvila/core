@@ -41,6 +41,8 @@ public class AFK implements Listener {
             isAfk.put(uuid, true);
             player.sendMessage("Olet nyt afk.");
         } else {
+            lastLoc.put(uuid, player.getLocation());
+            lastAction.put(uuid, System.currentTimeMillis());
             isAfk.remove(uuid);
             player.sendMessage("Et ole enää afk.");
         }
@@ -50,11 +52,7 @@ public class AFK implements Listener {
         new CommandAPICommand("afk")
                 .executesPlayer((p, args) -> {
                     UUID uuid = p.getUniqueId();
-                    if (!isAfk.containsKey(uuid)){
-                        setPlayerAFK(p, true);
-                    } else {
-                        setPlayerAFK(p, false);
-                    }
+                    setPlayerAFK(p, !isAfk.containsKey(uuid));
                 })
                 .register();
     }
@@ -82,8 +80,6 @@ public class AFK implements Listener {
     public void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        lastLoc.put(uuid, p.getLocation());
-        lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
             setPlayerAFK(p, false);
         }
@@ -93,8 +89,6 @@ public class AFK implements Listener {
     public void onChat(AsyncChatEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        lastLoc.put(uuid, p.getLocation());
-        lastAction.put(p.getUniqueId(), System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
             e.setCancelled(true);
             p.sendMessage("Suojataksesi sinua laittamasta viestejä vahingossa chattiin, viestin lähetys estettiin koska olet AFK tilassa.");
@@ -108,8 +102,6 @@ public class AFK implements Listener {
         }
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        lastLoc.put(uuid, p.getLocation());
-        lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
             setPlayerAFK(p, false);
         }
@@ -119,8 +111,6 @@ public class AFK implements Listener {
     public void onInteract(PlayerInteractEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        lastLoc.put(uuid, p.getLocation());
-        lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
             setPlayerAFK(p, false);
         }
@@ -130,8 +120,6 @@ public class AFK implements Listener {
     public void onBlockBreak(BlockBreakEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        lastLoc.put(uuid, p.getLocation());
-        lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
             setPlayerAFK(p, false);
         }
@@ -141,8 +129,6 @@ public class AFK implements Listener {
     public void onBlockPlace(BlockPlaceEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        lastLoc.put(uuid, p.getLocation());
-        lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
             setPlayerAFK(p, false);
         }
@@ -152,8 +138,6 @@ public class AFK implements Listener {
     public void onJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
-        lastLoc.put(uuid, p.getLocation());
-        lastAction.put(uuid, System.currentTimeMillis());
         if (isAfk.containsKey(uuid)){
             setPlayerAFK(p, false);
         }
