@@ -1,8 +1,8 @@
 package net.gahvila.gahvilacore.Profiles.Playtime;
 
 import de.leonhard.storage.Json;
+import net.gahvila.gahvilacore.AFK.AfkManager;
 import net.gahvila.gahvilacore.Config.ConfigManager;
-import net.gahvila.gahvilacore.Essentials.AFK;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -22,6 +22,11 @@ import java.util.concurrent.CompletableFuture;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class PlaytimeManager {
+    private final AfkManager afkManager;
+    public PlaytimeManager(AfkManager afkManager) {
+        this.afkManager = afkManager;
+    }
+
     public static final String PLAYTIME_KEY = "playtime-";
     public static final HashMap<UUID, PlaytimeCache> playtimeCache = new HashMap<>();
     private static final String SERVER_NAME = ConfigManager.getServerName();
@@ -44,7 +49,7 @@ public class PlaytimeManager {
             PlaytimeCache playtimeCache = PlaytimeManager.playtimeCache.get(playerUUID);
 
             // Don't update playtime if player is AFK
-            if (AFK.isAfk.getOrDefault(playerUUID, false)) {
+            if (afkManager.isPlayerAfk(playerUUID)) {
                 return;
             }
 

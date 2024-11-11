@@ -1,7 +1,7 @@
 package net.gahvila.gahvilacore.Placeholder;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import net.gahvila.gahvilacore.Essentials.AFK;
+import net.gahvila.gahvilacore.AFK.AfkManager;
 import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
@@ -15,12 +15,14 @@ public class Placeholders extends PlaceholderExpansion {
     private final GahvilaCore plugin;
     private final MarriageManager marriageManager;
     private final PrefixManager prefixManager;
+    private final AfkManager afkManager;
 
 
-    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager, PrefixManager prefixManager) {
+    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager, PrefixManager prefixManager, AfkManager afkManager) {
         this.plugin = plugin;
         this.marriageManager = marriageManager;
         this.prefixManager = prefixManager;
+        this.afkManager = afkManager;
     }
 
 
@@ -56,7 +58,7 @@ public class Placeholders extends PlaceholderExpansion {
             case "prefixplain" -> prefixManager.generatePrefixPlain(op);
             case "prefixandname" -> prefixManager.generatePrefixAndName(op);
             case "prefixwithoutclosing" -> prefixManager.generatePrefixWithoutClosing(op);
-            case "afk" -> String.valueOf(AFK.isAfk.containsKey(player.getUniqueId()));
+            case "afk" -> String.valueOf(afkManager.isPlayerAfk(op));
             default -> null;
         };
     }

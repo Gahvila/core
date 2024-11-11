@@ -2,7 +2,9 @@ package net.gahvila.gahvilacore;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
-import net.gahvila.gahvilacore.Essentials.AFK;
+import net.gahvila.gahvilacore.AFK.AfkCommand;
+import net.gahvila.gahvilacore.AFK.AfkEvents;
+import net.gahvila.gahvilacore.AFK.AfkManager;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
 import net.gahvila.gahvilacore.Music.MusicCommand;
 import net.gahvila.gahvilacore.Music.MusicEvents;
@@ -34,6 +36,7 @@ public final class GahvilaCore extends JavaPlugin {
     private PrefixMainMenu prefixMainMenu;
     private PrefixColorMenu prefixColorMenu;
     private PlaytimeManager playtimeManager;
+    private AfkManager afkManager;
     private PluginManager pluginManager;
 
     @Override
@@ -46,15 +49,16 @@ public final class GahvilaCore extends JavaPlugin {
         prefixTypeMenu = new PrefixTypeMenu(prefixManager);
         prefixMainMenu = new PrefixMainMenu();
         prefixColorMenu = new PrefixColorMenu(prefixManager);
-        playtimeManager = new PlaytimeManager();
+        afkManager = new AfkManager();
+        playtimeManager = new PlaytimeManager(afkManager);
 
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
 
         //afk
-        AFK afk = new AFK(instance);
-        afk.afkScheduler();
-        afk.registerCommands();
-        Bukkit.getPluginManager().registerEvents(afk, this);
+        AfkCommand afkCommand = new AfkCommand(afkManager);
+        afkCommand.registerCommands();
+        registerListeners(new AfkEvents(afkManager));
+        afkManager.startAfkScheduler();
 
         //music
         MusicManager musicManager = new MusicManager();
@@ -77,7 +81,7 @@ public final class GahvilaCore extends JavaPlugin {
         prefixCommand.registerCommands();
 
         //playtime
-        PlaytimeManager playtimeManager = new PlaytimeManager();
+        PlaytimeManager playtimeManager = new PlaytimeManager(afkManager);
         PlaytimeCommand playtimeCommand = new PlaytimeCommand(playtimeManager);
         playtimeCommand.registerCommands();
         registerListeners(new PlaytimeListener(playtimeManager));
@@ -105,7 +109,7 @@ public final class GahvilaCore extends JavaPlugin {
 
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new Placeholders(this, marriageManager, prefixManager).register();
+            new Placeholders(this, marriageManager, prefixManager, afkManager).register();
         }
     }
 
