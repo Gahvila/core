@@ -36,7 +36,6 @@ public final class GahvilaCore extends JavaPlugin {
     private PrefixMainMenu prefixMainMenu;
     private PrefixColorMenu prefixColorMenu;
     private PlaytimeManager playtimeManager;
-    private AfkManager afkManager;
     private PluginManager pluginManager;
 
     @Override
@@ -49,16 +48,15 @@ public final class GahvilaCore extends JavaPlugin {
         prefixTypeMenu = new PrefixTypeMenu(prefixManager);
         prefixMainMenu = new PrefixMainMenu();
         prefixColorMenu = new PrefixColorMenu(prefixManager);
-        afkManager = new AfkManager();
-        playtimeManager = new PlaytimeManager(afkManager);
+        playtimeManager = new PlaytimeManager();
 
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
 
         //afk
-        AfkCommand afkCommand = new AfkCommand(afkManager);
+        AfkCommand afkCommand = new AfkCommand();
         afkCommand.registerCommands();
-        registerListeners(new AfkEvents(afkManager));
-        afkManager.startAfkScheduler();
+        registerListeners(new AfkEvents());
+        AfkManager.startAfkScheduler();
 
         //music
         MusicManager musicManager = new MusicManager();
@@ -81,7 +79,7 @@ public final class GahvilaCore extends JavaPlugin {
         prefixCommand.registerCommands();
 
         //playtime
-        PlaytimeManager playtimeManager = new PlaytimeManager(afkManager);
+        PlaytimeManager playtimeManager = new PlaytimeManager();
         PlaytimeCommand playtimeCommand = new PlaytimeCommand(playtimeManager);
         playtimeCommand.registerCommands();
         registerListeners(new PlaytimeListener(playtimeManager));
@@ -109,7 +107,7 @@ public final class GahvilaCore extends JavaPlugin {
 
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new Placeholders(this, marriageManager, prefixManager, afkManager).register();
+            new Placeholders(this, marriageManager, prefixManager).register();
         }
     }
 

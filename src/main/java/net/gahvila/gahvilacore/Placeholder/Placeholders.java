@@ -15,14 +15,11 @@ public class Placeholders extends PlaceholderExpansion {
     private final GahvilaCore plugin;
     private final MarriageManager marriageManager;
     private final PrefixManager prefixManager;
-    private final AfkManager afkManager;
 
-
-    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager, PrefixManager prefixManager, AfkManager afkManager) {
+    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager, PrefixManager prefixManager) {
         this.plugin = plugin;
         this.marriageManager = marriageManager;
         this.prefixManager = prefixManager;
-        this.afkManager = afkManager;
     }
 
 
@@ -58,7 +55,7 @@ public class Placeholders extends PlaceholderExpansion {
             case "prefixplain" -> prefixManager.generatePrefixPlain(op);
             case "prefixandname" -> prefixManager.generatePrefixAndName(op);
             case "prefixwithoutclosing" -> prefixManager.generatePrefixWithoutClosing(op);
-            case "afk" -> String.valueOf(afkManager.isPlayerAfk(op));
+            case "afk" -> String.valueOf(AfkManager.isPlayerAfk(op));
             default -> null;
         };
     }

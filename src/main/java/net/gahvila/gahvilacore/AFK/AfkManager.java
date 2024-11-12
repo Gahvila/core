@@ -20,7 +20,7 @@ public class AfkManager {
 
     private static final long AFK_TIME_LIMIT = 60000; // AFK timeout (1 min) in milliseconds
 
-    public void setPlayerAFK(Player player, boolean afk) {
+    public static void setPlayerAFK(Player player, boolean afk) {
         UUID uuid = player.getUniqueId();
         PlaytimeCache playtimeCache = PlaytimeManager.playtimeCache.get(uuid);
 
@@ -39,15 +39,15 @@ public class AfkManager {
         }
     }
 
-    public boolean isPlayerAfk(UUID uuid) {
+    public static boolean isPlayerAfk(UUID uuid) {
         return isAfk.containsKey(uuid);
     }
 
-    public boolean isPlayerAfk(Player player) {
+    public static boolean isPlayerAfk(Player player) {
         return isAfk.containsKey(player.getUniqueId());
     }
 
-    public void startAfkScheduler() {
+    public static void startAfkScheduler() {
         Bukkit.getScheduler().runTaskTimer(instance, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 UUID uuid = player.getUniqueId();
@@ -69,7 +69,7 @@ public class AfkManager {
         }, 0, 20);
     }
 
-    public void cleanupPlayerData(UUID uuid) {
+    public static void cleanupPlayerData(UUID uuid) {
         isAfk.remove(uuid);
         lastLoc.remove(uuid);
         lastAction.remove(uuid);

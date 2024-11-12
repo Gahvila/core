@@ -22,10 +22,6 @@ import java.util.concurrent.CompletableFuture;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class PlaytimeManager {
-    private final AfkManager afkManager;
-    public PlaytimeManager(AfkManager afkManager) {
-        this.afkManager = afkManager;
-    }
 
     public static final String PLAYTIME_KEY = "playtime-";
     public static final HashMap<UUID, PlaytimeCache> playtimeCache = new HashMap<>();
@@ -49,7 +45,7 @@ public class PlaytimeManager {
             PlaytimeCache playtimeCache = PlaytimeManager.playtimeCache.get(playerUUID);
 
             // Don't update playtime if player is AFK
-            if (afkManager.isPlayerAfk(playerUUID)) {
+            if (AfkManager.isPlayerAfk(playerUUID)) {
                 return;
             }
 
