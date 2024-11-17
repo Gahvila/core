@@ -11,12 +11,19 @@ import org.bukkit.event.player.*;
 import java.util.UUID;
 
 public class AfkEvents implements Listener {
+
+    private final AfkManager afkManager;
+
+    public AfkEvents(AfkManager afkManager) {
+        this.afkManager = afkManager;
+    }
+
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        if (AfkManager.isPlayerAfk(uuid)) {
-            AfkManager.setPlayerAFK(player, false);
+        if (afkManager.isPlayerAfk(uuid)) {
+            afkManager.setPlayerAFK(player, false);
         }
     }
 
@@ -24,9 +31,12 @@ public class AfkEvents implements Listener {
     public void onPlayerChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        if (AfkManager.isPlayerAfk(uuid)) {
+        if (afkManager.isPlayerAfk(uuid)) {
+            afkManager.setPlayerAFK(player, false);
+            /*
             event.setCancelled(true);
-            player.sendMessage("Viestiä ei lähetetty, koska olet AFK-tilassa.");
+            player.sendMessage("Viestiä ei lähetetty, koska olet AFK-tilassa."); TODO: takas käyttöön kun profiiliasetukset valmiina
+             */
         }
     }
 
@@ -37,8 +47,8 @@ public class AfkEvents implements Listener {
         }
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        if (AfkManager.isPlayerAfk(uuid)) {
-            AfkManager.setPlayerAFK(player, false);
+        if (afkManager.isPlayerAfk(uuid)) {
+            afkManager.setPlayerAFK(player, false);
         }
     }
 
@@ -46,8 +56,8 @@ public class AfkEvents implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        if (AfkManager.isPlayerAfk(uuid)) {
-            AfkManager.setPlayerAFK(player, false);
+        if (afkManager.isPlayerAfk(uuid)) {
+            afkManager.setPlayerAFK(player, false);
         }
     }
 
@@ -55,8 +65,8 @@ public class AfkEvents implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        if (AfkManager.isPlayerAfk(uuid)) {
-            AfkManager.setPlayerAFK(player, false);
+        if (afkManager.isPlayerAfk(uuid)) {
+            afkManager.setPlayerAFK(player, false);
         }
     }
 
@@ -64,8 +74,8 @@ public class AfkEvents implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        if (AfkManager.isPlayerAfk(uuid)) {
-            AfkManager.setPlayerAFK(player, false);
+        if (afkManager.isPlayerAfk(uuid)) {
+            afkManager.setPlayerAFK(player, false);
         }
     }
 
@@ -73,13 +83,13 @@ public class AfkEvents implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        AfkManager.cleanupPlayerData(uuid);
+        afkManager.cleanupPlayerData(uuid);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        AfkManager.cleanupPlayerData(uuid);
+        afkManager.cleanupPlayerData(uuid);
     }
 }

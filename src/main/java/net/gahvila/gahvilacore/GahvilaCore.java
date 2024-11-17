@@ -29,6 +29,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Optional;
+
 public final class GahvilaCore extends JavaPlugin {
     public static GahvilaCore instance;
     private PrefixManager prefixManager;
@@ -36,6 +38,7 @@ public final class GahvilaCore extends JavaPlugin {
     private PrefixMainMenu prefixMainMenu;
     private PrefixColorMenu prefixColorMenu;
     private PlaytimeManager playtimeManager;
+    private AfkManager afkManager;
     private PluginManager pluginManager;
 
     @Override
@@ -48,15 +51,16 @@ public final class GahvilaCore extends JavaPlugin {
         prefixTypeMenu = new PrefixTypeMenu(prefixManager);
         prefixMainMenu = new PrefixMainMenu();
         prefixColorMenu = new PrefixColorMenu(prefixManager);
-        playtimeManager = new PlaytimeManager();
+        afkManager = new AfkManager();
+        playtimeManager = new PlaytimeManager(Optional.of(afkManager));
 
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
 
         //afk
-        AfkCommand afkCommand = new AfkCommand();
+        AfkCommand afkCommand = new AfkCommand(afkManager);
         afkCommand.registerCommands();
-        registerListeners(new AfkEvents());
-        AfkManager.startAfkScheduler();
+        registerListeners(new AfkEvents(afkManager));
+        afkManager.startAfkScheduler();
 
         //music
         MusicManager musicManager = new MusicManager();
@@ -79,7 +83,7 @@ public final class GahvilaCore extends JavaPlugin {
         prefixCommand.registerCommands();
 
         //playtime
-        PlaytimeManager playtimeManager = new PlaytimeManager();
+        PlaytimeManager playtimeManager = new PlaytimeManager(Optional.of(afkManager));
         PlaytimeCommand playtimeCommand = new PlaytimeCommand(playtimeManager);
         playtimeCommand.registerCommands();
         registerListeners(new PlaytimeListener(playtimeManager));
@@ -107,7 +111,7 @@ public final class GahvilaCore extends JavaPlugin {
 
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new Placeholders(this, marriageManager, prefixManager).register();
+            new Placeholders(this, marriageManager, prefixManager, afkManager).register();
         }
     }
 

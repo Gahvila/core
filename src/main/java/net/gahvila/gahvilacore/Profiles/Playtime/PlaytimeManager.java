@@ -16,12 +16,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class PlaytimeManager {
+    private final Optional<AfkManager> afkManager;
+
+    public PlaytimeManager(Optional<AfkManager> afkManager) {
+        this.afkManager = afkManager;
+    }
 
     public static final String PLAYTIME_KEY = "playtime-";
     public static final HashMap<UUID, PlaytimeCache> playtimeCache = new HashMap<>();
@@ -45,7 +51,7 @@ public class PlaytimeManager {
             PlaytimeCache playtimeCache = PlaytimeManager.playtimeCache.get(playerUUID);
 
             // Don't update playtime if player is AFK
-            if (AfkManager.isPlayerAfk(playerUUID)) {
+            if (afkManager.map(manager -> manager.isPlayerAfk(playerUUID)).orElse(false)) {
                 return;
             }
 

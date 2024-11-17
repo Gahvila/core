@@ -3,6 +3,7 @@ version: '${version}'
 main: net.gahvila.gahvilacore.GahvilaCore
 authors: [Jokni, M1xed]
 api-version: '1.21'
+load: STARTUP
 dependencies:
   server:
     NoteBlockAPI:
