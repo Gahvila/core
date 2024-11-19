@@ -16,4 +16,6 @@ dependencies:
       required: true
     CarbonChat:
       required: true
+    packetevents:
+      required: true
 
