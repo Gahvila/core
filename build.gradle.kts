@@ -8,11 +8,12 @@ repositories {
     mavenLocal()
     mavenCentral()
     gradlePluginPortal()
-    maven { url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/") }
-    maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://maven.enginehub.org/repo/") }
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+    maven("https://jitpack.io")
+    maven("https://maven.enginehub.org/repo/")
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.codemc.io/repository/maven-releases/")
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
 }
 
 dependencies {
@@ -23,6 +24,7 @@ dependencies {
     compileOnly("com.github.koca2000:NoteBlockAPI:1.6.2")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.12")
     compileOnly("dev.jorel:commandapi-annotations:9.5.3")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.6.0")
 
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.18-SNAPSHOT")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")

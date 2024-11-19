@@ -1,11 +1,16 @@
 package net.gahvila.gahvilacore;
 
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import net.gahvila.gahvilacore.AFK.AfkCommand;
 import net.gahvila.gahvilacore.AFK.AfkEvents;
 import net.gahvila.gahvilacore.AFK.AfkManager;
+import net.gahvila.gahvilacore.Config.ConfigManager;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
+import net.gahvila.gahvilacore.Gondom.GondomPacketListener;
 import net.gahvila.gahvilacore.Music.MusicCommand;
 import net.gahvila.gahvilacore.Music.MusicEvents;
 import net.gahvila.gahvilacore.Music.MusicManager;
@@ -42,6 +47,16 @@ public final class GahvilaCore extends JavaPlugin {
     private PluginManager pluginManager;
 
     @Override
+    public void onLoad() {
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+
+        PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
+                .checkForUpdates(false)
+                .bStats(true);
+        PacketEvents.getAPI().load();
+    }
+
+    @Override
     public void onEnable() {
         this.saveDefaultConfig();
 
@@ -55,6 +70,9 @@ public final class GahvilaCore extends JavaPlugin {
         playtimeManager = new PlaytimeManager(Optional.of(afkManager));
 
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
+
+        //gondom
+        initializeGondom();
 
         //afk
         AfkCommand afkCommand = new AfkCommand(afkManager);
@@ -120,6 +138,21 @@ public final class GahvilaCore extends JavaPlugin {
             pluginManager.registerEvents(listener, this);
         }
     }
+
+    private void initializeGondom() {
+        //only initialize gondom if its enabled
+        if (ConfigManager.getGondom()) {
+            getLogger().info("Gondom is being initialized...");
+            PacketEvents.getAPI().getEventManager().registerListener(new GondomPacketListener(),
+                    PacketListenerPriority.NORMAL);
+            PacketEvents.getAPI().init();
+
+
+        } else {
+            getLogger().info("Gondom not enabled.");
+        }
+    }
+
 
     public PlaytimeManager getPlaytimeManager() {
         return playtimeManager;

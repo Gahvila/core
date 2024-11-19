@@ -25,4 +25,9 @@ public class ConfigManager {
         Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
         return data.getOrDefault("server-name", "unknown").toLowerCase();
     }
+
+    public static Boolean getGondom() {
+        Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
+        return data.getOrDefault("gondom", false);
+    }
 }
