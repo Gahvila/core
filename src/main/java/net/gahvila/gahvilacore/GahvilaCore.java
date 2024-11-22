@@ -129,7 +129,7 @@ public final class GahvilaCore extends JavaPlugin {
 
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new Placeholders(this, marriageManager, prefixManager, afkManager).register();
+            new Placeholders(this, marriageManager, prefixManager, afkManager, playtimeManager).register();
         }
     }
 

@@ -197,6 +197,22 @@ public class PlaytimeManager {
         return result.toString();
     }
 
+    public static String formatDurationShort(long seconds) {
+        long days = seconds / 86400;
+        long hours = seconds / 3600;
+        long minutes = seconds / 60;
+
+        if (days > 0) {
+            return days + "pv";
+        } else if (hours > 0) {
+            return hours + "t";
+        } else if (minutes > 0) {
+            return minutes + "m";
+        } else {
+            return seconds + "s";
+        }
+    }
+
     public void setHasConverted(Player player) {
         Json playerData = new Json("playerdata.json", instance.getDataFolder() + "/data/");
         String uuid = player.getUniqueId().toString();

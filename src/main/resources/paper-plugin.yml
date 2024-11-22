@@ -17,5 +17,6 @@ dependencies:
     CarbonChat:
       required: true
     packetevents:
+      load: BEFORE
       required: true
 

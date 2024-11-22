@@ -4,10 +4,12 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.gahvila.gahvilacore.AFK.AfkManager;
 import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
+import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeManager;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.util.concurrent.CompletableFuture;
 
 
 public class Placeholders extends PlaceholderExpansion {
@@ -16,13 +18,15 @@ public class Placeholders extends PlaceholderExpansion {
     private final MarriageManager marriageManager;
     private final PrefixManager prefixManager;
     private final AfkManager afkManager;
+    private final PlaytimeManager playtimeManager;
 
 
-    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager, PrefixManager prefixManager, AfkManager afkManager) {
+    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager, PrefixManager prefixManager, AfkManager afkManager, PlaytimeManager playtimeManager) {
         this.plugin = plugin;
         this.marriageManager = marriageManager;
         this.prefixManager = prefixManager;
         this.afkManager = afkManager;
+        this.playtimeManager = playtimeManager;
     }
 
 
@@ -59,7 +63,10 @@ public class Placeholders extends PlaceholderExpansion {
             case "prefixandname" -> prefixManager.generatePrefixAndName(op);
             case "prefixwithoutclosing" -> prefixManager.generatePrefixWithoutClosing(op);
             case "afk" -> String.valueOf(afkManager.isPlayerAfk(op));
+            case "playtime" -> PlaytimeManager.formatDuration(playtimeManager.getPlaytime(player).join());
+            case "playtimeshort" -> PlaytimeManager.formatDurationShort(playtimeManager.getPlaytime(player).join());
             default -> null;
         };
     }
+
 }
