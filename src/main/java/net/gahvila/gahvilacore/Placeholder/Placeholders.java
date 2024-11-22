@@ -15,15 +15,13 @@ import java.util.concurrent.CompletableFuture;
 public class Placeholders extends PlaceholderExpansion {
 
     private final GahvilaCore plugin;
-    private final MarriageManager marriageManager;
     private final PrefixManager prefixManager;
     private final AfkManager afkManager;
     private final PlaytimeManager playtimeManager;
 
 
-    public Placeholders(GahvilaCore plugin, MarriageManager marriageManager, PrefixManager prefixManager, AfkManager afkManager, PlaytimeManager playtimeManager) {
+    public Placeholders(GahvilaCore plugin, PrefixManager prefixManager, AfkManager afkManager, PlaytimeManager playtimeManager) {
         this.plugin = plugin;
-        this.marriageManager = marriageManager;
         this.prefixManager = prefixManager;
         this.afkManager = afkManager;
         this.playtimeManager = playtimeManager;

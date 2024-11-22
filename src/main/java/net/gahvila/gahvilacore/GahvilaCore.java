@@ -91,10 +91,12 @@ public final class GahvilaCore extends JavaPlugin {
         registerListeners(new MusicEvents(musicManager));
 
         //marriage
+        /*
         MarriageManager marriageManager = new MarriageManager();
         MarriageMenu marriageMenu = new MarriageMenu(marriageManager);
         MarriageCommand marriageCommand = new MarriageCommand(marriageMenu, marriageManager);
         marriageCommand.registerCommands();
+         */
 
         //prefixmenu
         PrefixCommand prefixCommand = new PrefixCommand(prefixTypeMenu, prefixMainMenu, prefixColorMenu, prefixManager);
@@ -125,11 +127,11 @@ public final class GahvilaCore extends JavaPlugin {
 
         //events
         Bukkit.getPluginManager().registerEvents(new FullBypass(), this);
-        Bukkit.getPluginManager().registerEvents(new MarriageEvents(marriageManager), this);
+        //Bukkit.getPluginManager().registerEvents(new MarriageEvents(marriageManager), this);
 
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new Placeholders(this, marriageManager, prefixManager, afkManager, playtimeManager).register();
+            new Placeholders(this, prefixManager, afkManager, playtimeManager).register();
         }
     }
 
