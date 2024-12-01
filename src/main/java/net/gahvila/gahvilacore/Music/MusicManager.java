@@ -27,6 +27,8 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.time.Month;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -88,8 +90,9 @@ public class MusicManager {
 
             try {
                 List<String> remoteFiles = getRemoteFileList();
+                Month currentMonth = ZonedDateTime.now().getMonth();
 
-                //create a executor for virtual threads
+                // Create an executor for virtual threads
                 try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                     for (String fileName : remoteFiles) {
                         executor.submit(() -> {
@@ -97,8 +100,13 @@ public class MusicManager {
                                 URL fileUrl = new URL(url + fileName);
                                 Song song = downloadAndParseSong(fileUrl);
                                 if (song != null) {
-                                    concurrentSongs.add(song);
-                                    concurrentNamedSong.put(song.getTitle(), song);
+                                    // Only load "Christmas" songs in December
+                                    boolean isChristmas = song.getDescription() != null &&
+                                            song.getDescription().toLowerCase().contains("christmas");
+                                    if (currentMonth == Month.DECEMBER || !isChristmas) {
+                                        concurrentSongs.add(song);
+                                        concurrentNamedSong.put(song.getTitle(), song);
+                                    }
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -107,10 +115,17 @@ public class MusicManager {
                     }
                 }
 
-
-                //song sorting
+                // Song sorting: Christmas songs first, then by title
                 concurrentSongs.parallelStream()
-                        .sorted((song1, song2) -> song1.getTitle().compareToIgnoreCase(song2.getTitle()))
+                        .sorted((song1, song2) -> {
+                            boolean song1IsChristmas = song1.getDescription() != null &&
+                                    song1.getDescription().toLowerCase().contains("christmas");
+                            boolean song2IsChristmas = song2.getDescription() != null &&
+                                    song2.getDescription().toLowerCase().contains("christmas");
+                            if (song1IsChristmas && !song2IsChristmas) return -1;
+                            if (!song1IsChristmas && song2IsChristmas) return 1;
+                            return song1.getTitle().compareToIgnoreCase(song2.getTitle());
+                        })
                         .forEachOrdered(songs::add);
 
                 namedSong.putAll(concurrentNamedSong);
