@@ -109,7 +109,7 @@ public class PrefixColorMenu {
                 player.closeInventory();
             }else {
                 player.closeInventory();
-                Bukkit.getLogger().severe("player selected nonexistent color");
+                instance.getLogger().severe("player selected nonexistent color");
             }
         });
 

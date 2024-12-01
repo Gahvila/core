@@ -84,7 +84,7 @@ public final class GahvilaCore extends JavaPlugin {
         MusicManager musicManager = new MusicManager();
         MusicMenu musicMenu = new MusicMenu(musicManager);
         musicManager.loadSongs(executionTime -> {
-            Bukkit.getLogger().info("Ladattu musiikit " + executionTime + " millisekuntissa.");
+            this.getLogger().info("Ladattu musiikit " + executionTime + " millisekuntissa.");
         });
         MusicCommand musicCommand = new MusicCommand(musicManager, musicMenu);
         musicCommand.registerCommands();

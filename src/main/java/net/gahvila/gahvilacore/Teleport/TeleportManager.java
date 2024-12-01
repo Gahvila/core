@@ -28,11 +28,11 @@ public class TeleportManager {
     public Location getTeleport(String type) {
         if (!teleportCache.containsKey(type)) {
             putTeleportsIntoCache();
-            Bukkit.getLogger().info("Location '" + type + "' was not found in cache, added.");
+            instance.getLogger().info("Location '" + type + "' was not found in cache, added.");
         }
 
         if (teleportCache.get(type) == null) {
-            Bukkit.getLogger().warning("Location '" + type + "' still not found in cache, reading from disk.");
+            instance.getLogger().warning("Location '" + type + "' still not found in cache, reading from disk.");
             return getTeleportFromStorage(type);
         }
         return teleportCache.get(type);

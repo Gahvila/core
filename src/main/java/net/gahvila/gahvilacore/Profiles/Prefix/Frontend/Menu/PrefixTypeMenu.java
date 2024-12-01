@@ -88,7 +88,7 @@ public class PrefixTypeMenu {
                 player.closeInventory();
             }else {
                 player.closeInventory();
-                Bukkit.getLogger().severe("player selected nonexistent prefix");
+                instance.getLogger().severe("player selected nonexistent prefix");
             }
         });
 

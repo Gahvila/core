@@ -141,7 +141,7 @@ public class MusicMenu {
                 gui.update();
             }else {
                 player.closeInventory();
-                Bukkit.getLogger().severe("player attempted to play a song that doesn't exist");
+                instance.getLogger().severe("player attempted to play a song that doesn't exist");
             }
         });
 
@@ -332,7 +332,7 @@ public class MusicMenu {
                 gui.update();
             }else {
                 player.closeInventory();
-                Bukkit.getLogger().severe("player attempted to play a song that doesn't exist");
+                instance.getLogger().severe("player attempted to play a song that doesn't exist");
             }
         }), 6, 0);
 
