@@ -19,16 +19,23 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
-    compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.27")
+    compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.27") {
+        exclude(group = "it.unimi.dsi", module = "fastutil")
+        exclude(group = "com.google.code.gson", module = "gson")
+    }
     compileOnly("com.github.koca2000:NoteBlockAPI:1.6.2")
-    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.12")
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.13-SNAPSHOT") {
+        exclude(group = "it.unimi.dsi", module = "fastutil")
+        exclude(group = "com.google.code.gson", module = "gson")
+        exclude(group = "com.google.guava", module = "guava")
+    }
     compileOnly("dev.jorel:commandapi-annotations:9.7.0")
     compileOnly("com.github.retrooper:packetevents-spigot:2.7.0-SNAPSHOT")
 
-    implementation("com.github.stefvanschie.inventoryframework:IF:0.10.19-SNAPSHOT")
+    implementation("com.github.stefvanschie.inventoryframework:IF-Paper:0.11.1-SNAPSHOT")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
     implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.7.0")
 
