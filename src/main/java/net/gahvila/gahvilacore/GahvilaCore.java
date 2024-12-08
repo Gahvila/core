@@ -1,25 +1,17 @@
 package net.gahvila.gahvilacore;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
-import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import net.gahvila.gahvilacore.AFK.AfkCommand;
 import net.gahvila.gahvilacore.AFK.AfkEvents;
 import net.gahvila.gahvilacore.AFK.AfkManager;
 import net.gahvila.gahvilacore.Config.ConfigManager;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
-import net.gahvila.gahvilacore.Gondom.GondomPacketListener;
 import net.gahvila.gahvilacore.Music.MusicCommand;
 import net.gahvila.gahvilacore.Music.MusicEvents;
 import net.gahvila.gahvilacore.Music.MusicManager;
 import net.gahvila.gahvilacore.Music.MusicMenu;
 import net.gahvila.gahvilacore.Placeholder.Placeholders;
-import net.gahvila.gahvilacore.Profiles.Marriage.MarriageCommand;
-import net.gahvila.gahvilacore.Profiles.Marriage.MarriageEvents;
-import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
-import net.gahvila.gahvilacore.Profiles.Marriage.MarriageMenu;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeCommand;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeListener;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeManager;
@@ -45,16 +37,6 @@ public final class GahvilaCore extends JavaPlugin {
     private PlaytimeManager playtimeManager;
     private AfkManager afkManager;
     private PluginManager pluginManager;
-
-    @Override
-    public void onLoad() {
-        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
-
-        PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
-                .checkForUpdates(false)
-                .bStats(true);
-        PacketEvents.getAPI().load();
-    }
 
     @Override
     public void onEnable() {
@@ -145,11 +127,7 @@ public final class GahvilaCore extends JavaPlugin {
         //only initialize gondom if its enabled
         if (ConfigManager.getGondom()) {
             getLogger().info("Gondom is being initialized...");
-            PacketEvents.getAPI().getEventManager().registerListener(new GondomPacketListener(),
-                    PacketListenerPriority.NORMAL);
-            PacketEvents.getAPI().init();
-
-
+            //initialize gondom here
         } else {
             getLogger().info("Gondom not enabled.");
         }

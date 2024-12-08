@@ -2,6 +2,7 @@ plugins {
     java
     `maven-publish`
     id("com.gradleup.shadow") version "8.3.5"
+    id("io.papermc.paperweight.userdev") version "1.7.7"
 }
 
 repositories {
@@ -19,6 +20,7 @@ repositories {
 }
 
 dependencies {
+    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
@@ -33,7 +35,8 @@ dependencies {
         exclude(group = "com.google.guava", module = "guava")
     }
     compileOnly("dev.jorel:commandapi-annotations:9.7.0")
-    compileOnly("com.github.retrooper:packetevents-spigot:2.7.0-SNAPSHOT")
+
+    implementation("de.tr7zw:item-nbt-api:2.14.1-SNAPSHOT")
 
     implementation("com.github.stefvanschie.inventoryframework:IF-Paper:0.11.1-SNAPSHOT")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
@@ -65,6 +68,7 @@ tasks {
         relocate("dev.jorel.commandapi", "net.gahvila.gahvilacore.shaded.commandapi")
         relocate("com.github.stefvanschie.inventoryframework", "net.gahvila.gahvilacore.shaded.inventoryframework")
         relocate("de.leonhard.storage", "net.gahvila.gahvilacore.shaded.storage")
+        relocate("de.tr7zw.changeme.nbtapi", "net.gahvila.gahvilacore.shaded.nbtapi")
     }
 
     assemble {
