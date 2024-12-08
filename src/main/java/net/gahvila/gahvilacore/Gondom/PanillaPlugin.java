@@ -146,7 +146,7 @@ public class PanillaPlugin extends JavaPlugin implements IPanilla {
         containerCleaner = new InventoryCleaner(this);
 
         /* Register listeners */
-        getServer().getPluginManager().registerEvents(new JoinQuitListener(this, this), this);
+        getServer().getPluginManager().registerEvents(new JoinQuitListener(this), this);
         getServer().getPluginManager().registerEvents(new TileLootTableListener(), this);
 
         /* Register command */

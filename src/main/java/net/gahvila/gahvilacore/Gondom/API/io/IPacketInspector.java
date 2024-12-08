@@ -3,7 +3,6 @@ package net.gahvila.gahvilacore.Gondom.API.io;
 import net.gahvila.gahvilacore.Gondom.API.IPanilla;
 import net.gahvila.gahvilacore.Gondom.API.IPanillaPlayer;
 import net.gahvila.gahvilacore.Gondom.API.exception.EntityNbtNotPermittedException;
-import net.gahvila.gahvilacore.Gondom.API.exception.LegacyEntityNbtNotPermittedException;
 import net.gahvila.gahvilacore.Gondom.API.exception.NbtNotPermittedException;
 import net.gahvila.gahvilacore.Gondom.API.exception.PacketException;
 
@@ -33,7 +32,7 @@ public interface IPacketInspector {
      */
     void checkPacketPlayOutWindowItems(Object packetHandle) throws NbtNotPermittedException;
 
-    void checkPacketPlayOutSpawnEntity(Object packetHandle) throws EntityNbtNotPermittedException, LegacyEntityNbtNotPermittedException;
+    void checkPacketPlayOutSpawnEntity(Object packetHandle) throws EntityNbtNotPermittedException;
 
     void sendPacketPlayOutSetSlotAir(IPanillaPlayer player, int slot);
 
@@ -75,10 +74,6 @@ public interface IPacketInspector {
                 panilla.getPanillaLogger().log(panilla.getPTranslations().getTranslation("itemEntityStripped", e.getFailedNbt().key), true);
                 throw e;
             }
-        } catch (LegacyEntityNbtNotPermittedException e) {
-            stripNbtFromItemEntityLegacy(e.getEntityId());
-            panilla.getPanillaLogger().log(panilla.getPTranslations().getTranslation("itemEntityStripped", e.getFailedNbt().key), true);
-            throw e;
         }
     }
 

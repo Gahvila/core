@@ -14,10 +14,8 @@ import java.io.IOException;
 public class JoinQuitListener implements Listener {
 
     private final IPanilla panilla;
-    private JavaPlugin panillaPlugin;
 
-    public JoinQuitListener(JavaPlugin panillaPlugin, IPanilla panilla) {
-        this.panillaPlugin = panillaPlugin;
+    public JoinQuitListener(IPanilla panilla) {
         this.panilla = panilla;
     }
 

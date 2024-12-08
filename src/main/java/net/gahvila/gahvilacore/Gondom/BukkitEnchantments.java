@@ -11,13 +11,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class BukkitEnchantments implements IEnchantments {
-
-    private static final boolean is_legacy;
-
-    static {
-        is_legacy = Bukkit.getVersion().contains("1.12") || Bukkit.getVersion().contains("1.8");
-    }
-
     private PConfig pConfig;
 
     public BukkitEnchantments(PConfig pConfig) {
@@ -61,21 +54,17 @@ public class BukkitEnchantments implements IEnchantments {
 
     private Enchantment getBukkitEnchantment(EnchantmentCompat enchCompat) {
         Enchantment bukkitEnchantment = null;
-        if (is_legacy) {
-            bukkitEnchantment = Enchantment.getByName(enchCompat.legacyName);
-        } else {
-            try {
-                Method getByKey = Enchantment.class.getDeclaredMethod("getByKey", NamespacedKey.class);
-                bukkitEnchantment = (Enchantment) getByKey.invoke(null,
-                        new NamespacedKey(enchCompat.namedKey.split(":")[0],
-                                enchCompat.namedKey.split(":")[1]));
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
+        try {
+            Method getByKey = Enchantment.class.getDeclaredMethod("getByKey", NamespacedKey.class);
+            bukkitEnchantment = (Enchantment) getByKey.invoke(null,
+                    new NamespacedKey(enchCompat.namedKey.split(":")[0],
+                            enchCompat.namedKey.split(":")[1]));
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
         }
         return bukkitEnchantment;
     }

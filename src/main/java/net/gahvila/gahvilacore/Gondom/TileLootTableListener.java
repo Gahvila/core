@@ -15,38 +15,18 @@ import org.bukkit.loot.Lootable;
 
 public class TileLootTableListener implements Listener {
 
-    private boolean checkForLootable;
-
-    public TileLootTableListener() {
-        String bVersion = Bukkit.getVersion();
-
-        if (bVersion.contains("1.8") || bVersion.contains("1.12")) {
-            checkForLootable = false;
-        } else {
-            checkForLootable = true;
-        }
-    }
-
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        if (checkForLootable) {
-            fixLootTable(event.getBlock());
-        }
+        fixLootTable(event.getBlock());
     }
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
-        if (checkForLootable) {
-            fixLootTable(event.getClickedBlock());
-        }
+        fixLootTable(event.getClickedBlock());
     }
 
     @EventHandler
     public void onDispense(BlockDispenseEvent event) {
-        if (!checkForLootable) {
-            return;
-        }
-
         ItemStack itemStack = event.getItem();
 
         if (itemStack.getItemMeta() instanceof BlockStateMeta) {

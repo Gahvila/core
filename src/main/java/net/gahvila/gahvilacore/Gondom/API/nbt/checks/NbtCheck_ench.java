@@ -12,16 +12,13 @@ public class NbtCheck_ench extends NbtCheck {
     // 1.12- ench
     // 1.13+ Enchantments
     public NbtCheck_ench() {
-        super("ench", PStrictness.AVERAGE, "Enchantments", "StoredEnchantments");
+        super("StoredEnchantments", PStrictness.AVERAGE, "Enchantments");
     }
 
     private static EnchantmentCompat getEnchCompat(INbtTagCompound enchantment, IPanilla panilla) {
         final EnchantmentCompat enchCompat;
 
-        if (enchantment.hasKeyOfType("id", NbtDataType.INT) || enchantment.hasKeyOfType("id", NbtDataType.SHORT)) {
-            final int id = enchantment.getInt("id");
-            enchCompat = EnchantmentCompat.getByLegacyId(id);
-        } else if (enchantment.hasKeyOfType("id", NbtDataType.STRING)) {
+        if (enchantment.hasKeyOfType("id", NbtDataType.STRING)) {
             final String namedKey = enchantment.getString("id");
             enchCompat = EnchantmentCompat.getByNamedKey(namedKey);
         } else {
