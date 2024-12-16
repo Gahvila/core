@@ -47,7 +47,11 @@ public enum Gradient {
     OMENA("Omena", "#8a0109:#8a0109:#a96632:#8a0109:#8a0109"),
     KARAMELLI("Karamelli", "#80532d:#8c6028:#a0734d:#a97947:#c78752"),
     MUNAKOISO("Munakoiso", "#733542:#603049:#4d2a52:#391f5c:#0c076d"),
-    LIMONADI("Limonadi", "#a4ffb8:#b8fdbe:#c8ffc0:#daffc4:#ecffc8");
+    LIMONADI("Limonadi", "#a4ffb8:#b8fdbe:#c8ffc0:#daffc4:#ecffc8"),
+    JOULU1("Joulu 1", "#ff0000:#ff7878:#ffffff:#74d680:#378b29"),
+    JOULU2("Joulu 2", "#df1103:#d4001a:#b3001b:#aa0000"),
+    LIMETINVIHREA("Limetinvihreä", "#CDFF03:#C2F70F:#B8EF1B:#ADE628:#A3DE34:#98D640"),
+    AURINGONNOUSU("Auringonnousu", "#2D1D7A:#573170:#804565:#AA585B:#D36C50:#FD8046");
 
 
     private final String displayName;
