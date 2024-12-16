@@ -5,11 +5,11 @@ import net.gahvila.gahvilacore.Panilla.API.exception.PacketException;
 import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck;
 import org.bukkit.entity.Player;
 
-public class BukkitPanillaPlayer {
+public class PanillaPlayer {
 
     private final Player handle;
 
-    public BukkitPanillaPlayer(Player handle) {
+    public PanillaPlayer(Player handle) {
         this.handle = handle;
     }
 

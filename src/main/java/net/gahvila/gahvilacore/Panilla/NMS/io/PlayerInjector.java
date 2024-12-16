@@ -5,7 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import net.gahvila.gahvilacore.Panilla.API.io.dplx.PacketInspectorDplx;
-import net.gahvila.gahvilacore.Panilla.BukkitPanillaPlayer;
+import net.gahvila.gahvilacore.Panilla.PanillaPlayer;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -21,7 +21,7 @@ public class PlayerInjector {
 
     String HANDLER_PANILLA_INSPECTOR = "panilla_inspector";
 
-    public Channel getPlayerChannel(BukkitPanillaPlayer player) throws IllegalArgumentException {
+    public Channel getPlayerChannel(PanillaPlayer player) throws IllegalArgumentException {
         CraftPlayer craftPlayer = (CraftPlayer) player.getHandle();
         ServerPlayer entityPlayer = craftPlayer.getHandle();
         return entityPlayer.connection.connection.channel;
@@ -47,28 +47,12 @@ public class PlayerInjector {
         return "packet_handler";
     }
 
-    public void register(PanillaPlugin panilla, BukkitPanillaPlayer player) throws IOException {
+    public void register(PanillaPlugin panilla, PanillaPlayer player) throws IOException {
         Channel pChannel = getPlayerChannel(player);
 
         if (pChannel == null || !pChannel.isRegistered()) {
             return;
         }
-
-        /* Replace Minecraft packet decompressor */
-//        ChannelHandler minecraftDecompressor = pChannel.pipeline().get(getDecompressorHandlerName());
-//
-//        if (minecraftDecompressor != null && !(minecraftDecompressor instanceof PacketDecompressorDplx)) {
-//            PacketDecompressorDplx packetDecompressor = new PacketDecompressorDplx(panilla, player);
-//            pChannel.pipeline().replace(getDecompressorHandlerName(), getDecompressorHandlerName(), packetDecompressor);
-//        }
-
-//        /* Replace Minecraft decoder */
-//        ChannelHandler minecraftDecoder = pChannel.pipeline().get(getDecoderName());
-//
-//        if (minecraftDecoder != null) {
-//            ByteToMessageDecoder decoder = getDecoder();
-//            pChannel.pipeline().replace(getDecoderName(), getDecoderName(), decoder);
-//        }
 
         /* Inject packet inspector */
         ChannelHandler minecraftHandler = pChannel.pipeline().get(getPacketHandlerName());
@@ -79,7 +63,7 @@ public class PlayerInjector {
         }
     }
 
-    public void unregister(final BukkitPanillaPlayer player) throws IOException {
+    public void unregister(final PanillaPlayer player) throws IOException {
         Channel pChannel = getPlayerChannel(player);
 
         if (pChannel == null || !pChannel.isRegistered()) {

@@ -9,7 +9,6 @@ import net.gahvila.gahvilacore.Panilla.NMS.InventoryCleaner;
 import net.gahvila.gahvilacore.Panilla.NMS.io.PacketInspector;
 import net.gahvila.gahvilacore.Panilla.NMS.io.PlayerInjector;
 import net.gahvila.gahvilacore.Panilla.NMS.io.dplx.PacketSerializer;
-import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -30,12 +29,12 @@ public class PanillaPlugin {
 
     private PConfig pConfig;
     private PTranslations pTranslations;
-    private BukkitPanillaLogger panillaLogger;
+    private PanillaLogger panillaLogger;
     private DefaultProtocolConstants protocolConstants;
     private PlayerInjector playerInjector = new PlayerInjector();
     private PacketInspector packetInspector;
     private InventoryCleaner containerCleaner;
-    private BukkitEnchantments enchantments;
+    private PanillaEnchantments enchantments;
     private PanillaCommand panillaCommand;
 
     public PConfig getPConfig() {
@@ -46,7 +45,7 @@ public class PanillaPlugin {
         return pTranslations;
     }
 
-    public BukkitPanillaLogger getPanillaLogger() {
+    public PanillaLogger getPanillaLogger() {
         return panillaLogger;
     }
 
@@ -66,7 +65,7 @@ public class PanillaPlugin {
         return containerCleaner;
     }
 
-    public BukkitEnchantments getEnchantments() {
+    public PanillaEnchantments getEnchantments() {
         return enchantments;
     }
 
@@ -96,7 +95,7 @@ public class PanillaPlugin {
         // Load the config file
         @NotNull YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
-        pConfig = new BukkitPConfig();
+        pConfig = new PConfig() {};
 
         pConfig.language = config.getString("language", pConfig.language);
         pConfig.consoleLogging = config.getBoolean("logging.console", pConfig.consoleLogging);
@@ -127,8 +126,8 @@ public class PanillaPlugin {
     public void loadPanilla(GahvilaCore gahvilaCore) {
         loadConfig();
 
-        panillaLogger = new BukkitPanillaLogger(this, gahvilaCore.getLogger());
-        enchantments = new BukkitEnchantments(pConfig);
+        panillaLogger = new PanillaLogger(this, gahvilaCore.getLogger());
+        enchantments = new PanillaEnchantments(pConfig);
 
         packetSerializerClass = PacketSerializer.class;
         protocolConstants = new DefaultProtocolConstants() {};
@@ -147,7 +146,7 @@ public class PanillaPlugin {
         /* Inject already online players in case of reload */
         for (Player player : Bukkit.getOnlinePlayers()) {
             try {
-                playerInjector.register(this, new BukkitPanillaPlayer(player));
+                playerInjector.register(this, new PanillaPlayer(player));
             } catch (IOException e) {
                 // Ignore
             }
@@ -158,7 +157,7 @@ public class PanillaPlugin {
         /* Uninject any online players */
         for (Player player : Bukkit.getOnlinePlayers()) {
             try {
-                playerInjector.unregister(new BukkitPanillaPlayer(player));
+                playerInjector.unregister(new PanillaPlayer(player));
             } catch (IOException e) {
                 // Ignore
             }

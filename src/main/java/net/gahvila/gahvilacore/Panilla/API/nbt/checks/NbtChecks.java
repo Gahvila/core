@@ -74,8 +74,8 @@ public final class NbtChecks {
         return checks;
     }
 
-    public static void checkPacketPlayIn(int slot, NbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
-                                         PanillaPlugin panilla) throws NbtNotPermittedException {
+    public static void checkServerbound(int slot, NbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
+                                        PanillaPlugin panilla) throws NbtNotPermittedException {
         List<FailedNbt> failedNbtList = checkAll(tag, nmsItemClassName, panilla);
 
         FailedNbt lastNonCritical = null;
@@ -93,8 +93,8 @@ public final class NbtChecks {
         }
     }
 
-    public static void checkPacketPlayOut(int slot, NbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
-                                          PanillaPlugin panilla) throws NbtNotPermittedException {
+    public static void checkClientbound(int slot, NbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
+                                        PanillaPlugin panilla) throws NbtNotPermittedException {
         FailedNbtList failedNbtList = checkAll(tag, nmsItemClassName, panilla);
 
         if (failedNbtList.containsCritical()) {

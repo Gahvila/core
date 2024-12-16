@@ -7,12 +7,12 @@ import org.bukkit.entity.Player;
 
 import java.util.logging.Logger;
 
-public class BukkitPanillaLogger {
+public class PanillaLogger {
 
     private final PanillaPlugin panilla;
     private final Logger jLogger;
 
-    public BukkitPanillaLogger(PanillaPlugin panilla, Logger jLogger) {
+    public PanillaLogger(PanillaPlugin panilla, Logger jLogger) {
         this.panilla = panilla;
         this.jLogger = jLogger;
     }

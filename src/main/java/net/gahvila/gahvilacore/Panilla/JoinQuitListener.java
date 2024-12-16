@@ -1,6 +1,5 @@
 package net.gahvila.gahvilacore.Panilla;
 
-import net.gahvila.gahvilacore.GahvilaCore;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
@@ -18,12 +17,8 @@ public class JoinQuitListener implements Listener {
     }
 
     @EventHandler
-    public void onPreJoin(AsyncPlayerPreLoginEvent event) {
-    }
-
-    @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        BukkitPanillaPlayer pplayer = new BukkitPanillaPlayer(event.getPlayer());
+        PanillaPlayer pplayer = new PanillaPlayer(event.getPlayer());
         panilla.getInventoryCleaner().clean(pplayer);
         try {
             panilla.getPlayerInjector().register(panilla, pplayer);
@@ -34,7 +29,7 @@ public class JoinQuitListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        BukkitPanillaPlayer pplayer = new BukkitPanillaPlayer(event.getPlayer());
+        PanillaPlayer pplayer = new PanillaPlayer(event.getPlayer());
         try {
             panilla.getPlayerInjector().unregister(pplayer);
         } catch (IOException e) {

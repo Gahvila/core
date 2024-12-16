@@ -3,7 +3,7 @@ package net.gahvila.gahvilacore.Panilla.NMS.io;
 import de.tr7zw.changeme.nbtapi.NBT;
 import net.gahvila.gahvilacore.Panilla.API.exception.*;
 import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtChecks;
-import net.gahvila.gahvilacore.Panilla.BukkitPanillaPlayer;
+import net.gahvila.gahvilacore.Panilla.PanillaPlayer;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 import net.minecraft.core.component.TypedDataComponent;
@@ -32,32 +32,32 @@ public class PacketInspector {
         this.panilla = panilla;
     }
 
-    public void checkPlayIn(PanillaPlugin panilla, BukkitPanillaPlayer player, Object packetHandle) throws PacketException {
+    public void checkServerbound(PanillaPlugin panilla, PanillaPlayer player, Object packetHandle) throws PacketException {
         try {
-            checkPacketPlayInClickContainer(packetHandle);
+            checkServerboundContainerClickPacket(packetHandle);
         } catch (NbtNotPermittedException e) {
             if (!player.canBypassChecks(panilla, e)) {
-                sendPacketPlayOutSetSlotAir(player, e.getItemSlot());
+                sendClientboundContainerSetSlotPacketAir(player, e.getItemSlot());
             }
             throw e;
         }
 
         try {
-            checkPacketPlayInSetCreativeSlot(packetHandle);
+            checkServerboundSetCreativeModeSlotPacket(packetHandle);
         } catch (NbtNotPermittedException e) {
             if (!player.canBypassChecks(panilla, e)) {
-                sendPacketPlayOutSetSlotAir(player, e.getItemSlot());
+                sendClientboundContainerSetSlotPacketAir(player, e.getItemSlot());
             }
             throw e;
         }
     }
 
-    public void checkPlayOut(PanillaPlugin panilla, Object packetHandle) throws PacketException {
-        checkPacketPlayOutSetSlot(packetHandle);
-        checkPacketPlayOutWindowItems(packetHandle);
+    public void checkClientbound(PanillaPlugin panilla, Object packetHandle) throws PacketException {
+        checkClientboundContainerSetSlotPacket(packetHandle);
+        checkClientboundContainerSetContentPacket(packetHandle);
 
         try {
-            checkPacketPlayOutSpawnEntity(packetHandle);
+            checkClientboundAddEntityPacket(packetHandle);
         } catch (EntityNbtNotPermittedException e) {
             if (!panilla.getPConfig().disabledWorlds.contains(e.getWorld())) {
                 stripNbtFromItemEntity(e.getEntityId());
@@ -67,7 +67,7 @@ public class PacketInspector {
         }
     }
 
-    public void checkPacketPlayInClickContainer(Object packetHandle) throws NbtNotPermittedException {
+    public void checkServerboundContainerClickPacket(Object packetHandle) throws NbtNotPermittedException {
         if (!(packetHandle instanceof ServerboundContainerClickPacket packet)) return;
         int windowId = packet.getContainerId();
         if (windowId != 0 && panilla.getPConfig().ignoreNonPlayerInventories) return;
@@ -80,10 +80,10 @@ public class PacketInspector {
         String itemClass = item.getClass().getName();
         String packetClass = "PacketPlayInWindowClick";
 
-        NbtChecks.checkPacketPlayIn(slot, tag, itemClass, packetClass, panilla);
+        NbtChecks.checkServerbound(slot, tag, itemClass, packetClass, panilla);
     }
 
-    public void checkPacketPlayInSetCreativeSlot(Object packetHandle) throws NbtNotPermittedException {
+    public void checkServerboundSetCreativeModeSlotPacket(Object packetHandle) throws NbtNotPermittedException {
         if (!(packetHandle instanceof ServerboundSetCreativeModeSlotPacket packet)) return;
 
         int slot = packet.slotNum();
@@ -94,10 +94,10 @@ public class PacketInspector {
         String itemClass = item.getClass().getName();
         String packetClass = "PacketPlayInSetCreativeSlot";
 
-        NbtChecks.checkPacketPlayIn(slot, tag, itemClass, packetClass, panilla);
+        NbtChecks.checkServerbound(slot, tag, itemClass, packetClass, panilla);
     }
 
-    public void checkPacketPlayOutSetSlot(Object packetHandle) throws NbtNotPermittedException {
+    public void checkClientboundContainerSetSlotPacket(Object packetHandle) throws NbtNotPermittedException {
         if (!(packetHandle instanceof ClientboundContainerSetSlotPacket packet)) return;
 
         int windowId = packet.getContainerId();
@@ -119,10 +119,10 @@ public class PacketInspector {
         String itemClass = item.getClass().getSimpleName();
         String packetClass = packet.getClass().getSimpleName();
 
-        NbtChecks.checkPacketPlayOut(slot, tag, itemClass, packetClass, panilla);
+        NbtChecks.checkClientbound(slot, tag, itemClass, packetClass, panilla);
     }
 
-    public void checkPacketPlayOutWindowItems(Object packetHandle) throws NbtNotPermittedException {
+    public void checkClientboundContainerSetContentPacket(Object packetHandle) throws NbtNotPermittedException {
         if (!(packetHandle instanceof ClientboundContainerSetContentPacket packet)) return;
 
         int windowId = packet.getContainerId();
@@ -143,11 +143,11 @@ public class PacketInspector {
             String itemClass = itemStack.getClass().getSimpleName();
             String packetClass = packet.getClass().getSimpleName();
 
-            NbtChecks.checkPacketPlayOut(0, tag, itemClass, packetClass, panilla); // TODO: set slot?
+            NbtChecks.checkClientbound(0, tag, itemClass, packetClass, panilla); // TODO: set slot?
         }
     }
 
-    public void checkPacketPlayOutSpawnEntity(Object packetHandle) throws EntityNbtNotPermittedException {
+    public void checkClientboundAddEntityPacket(Object packetHandle) throws EntityNbtNotPermittedException {
         if ((!(packetHandle instanceof ClientboundAddEntityPacket packet))) return;
 
         UUID entityId = packet.getUUID();
@@ -197,7 +197,7 @@ public class PacketInspector {
         }
     }
 
-    public void sendPacketPlayOutSetSlotAir(BukkitPanillaPlayer player, int slot) {
+    public void sendClientboundContainerSetSlotPacketAir(PanillaPlayer player, int slot) {
         CraftPlayer craftPlayer = (CraftPlayer) player.getHandle();
         ServerPlayer entityPlayer = craftPlayer.getHandle();
         ClientboundContainerSetSlotPacket packet = new ClientboundContainerSetSlotPacket(entityPlayer.containerMenu.containerId, entityPlayer.containerMenu.incrementStateId(), slot, new ItemStack(Blocks.AIR));
@@ -218,10 +218,6 @@ public class PacketInspector {
             Iterator<TypedDataComponent<?>> iter = itemStack.getComponents().iterator();
             while (iter.hasNext()) iter.remove();
         }
-    }
-
-    public void stripNbtFromItemEntityLegacy(int entityId) {
-        throw new RuntimeException("cannot use #stripNbtFromItemEntityLegacy on 1.20.6");
     }
 
     public void validateBaseComponentParse(String string) throws Exception {

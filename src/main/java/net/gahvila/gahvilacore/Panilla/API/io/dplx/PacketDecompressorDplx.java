@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import net.gahvila.gahvilacore.Panilla.BukkitPanillaPlayer;
+import net.gahvila.gahvilacore.Panilla.PanillaPlayer;
 import net.gahvila.gahvilacore.Panilla.NMS.io.dplx.PacketSerializer;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
@@ -14,12 +14,12 @@ import java.util.zip.Inflater;
 public class PacketDecompressorDplx extends ByteToMessageDecoder {
 
     private final PanillaPlugin panilla;
-    private final BukkitPanillaPlayer player;
+    private final PanillaPlayer player;
     private final int minBytes;
     private final int maxBytes;
     private final Inflater inflater;
 
-    public PacketDecompressorDplx(PanillaPlugin panilla, BukkitPanillaPlayer player) {
+    public PacketDecompressorDplx(PanillaPlugin panilla, PanillaPlayer player) {
         this.panilla = panilla;
         this.player = player;
         this.minBytes = panilla.getProtocolConstants().minPacketSize();

@@ -8,10 +8,10 @@ import org.bukkit.enchantments.Enchantment;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class BukkitEnchantments {
+public class PanillaEnchantments {
     private PConfig pConfig;
 
-    public BukkitEnchantments(PConfig pConfig) {
+    public PanillaEnchantments(PConfig pConfig) {
         this.pConfig = pConfig;
     }
 
