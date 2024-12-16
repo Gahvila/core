@@ -22,7 +22,7 @@ import java.util.Map;
 
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
-public class PanillaPlugin {
+public class Panilla {
 
     private static final String SERVER_IMP = Bukkit.getServer().getClass().getSimpleName();
     private static Class<? extends PacketSerializer> packetSerializerClass;

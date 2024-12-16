@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 public class NbtCheck_pages extends NbtCheck {
 
@@ -41,7 +41,7 @@ public class NbtCheck_pages extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         NbtTagList pages = tag.getList("pages", NbtDataType.STRING);
 
         if (pages.size() > panilla.getProtocolConstants().maxBookPages()) {

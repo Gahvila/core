@@ -8,7 +8,7 @@ import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 public class NbtCheck_display extends NbtCheck {
 
@@ -29,7 +29,7 @@ public class NbtCheck_display extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         NbtTagCompound display = tag.getCompound(getName());
 
         if (display.hasKeyOfType("Name", NbtDataType.STRING)) {

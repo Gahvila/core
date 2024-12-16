@@ -7,7 +7,7 @@ import net.gahvila.gahvilacore.AFK.AfkEvents;
 import net.gahvila.gahvilacore.AFK.AfkManager;
 import net.gahvila.gahvilacore.Config.ConfigManager;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 import net.gahvila.gahvilacore.Music.MusicCommand;
 import net.gahvila.gahvilacore.Music.MusicEvents;
 import net.gahvila.gahvilacore.Music.MusicManager;
@@ -26,10 +26,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.logging.Logger;
 
 public final class GahvilaCore extends JavaPlugin {
     public static GahvilaCore instance;
@@ -40,7 +38,7 @@ public final class GahvilaCore extends JavaPlugin {
     private PlaytimeManager playtimeManager;
     private AfkManager afkManager;
     private PluginManager pluginManager;
-    private PanillaPlugin panillaPlugin;
+    private Panilla panilla;
 
     @Override
     public void onEnable() {
@@ -123,7 +121,7 @@ public final class GahvilaCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        panillaPlugin.disablePanilla();
+        panilla.disablePanilla();
     }
 
     private void registerListeners(Listener...listeners){
@@ -136,8 +134,8 @@ public final class GahvilaCore extends JavaPlugin {
         //only initialize panilla if its enabled
         if (ConfigManager.getPanilla()) {
             getLogger().info("Panilla is being initialized...");
-            panillaPlugin = new PanillaPlugin();
-            panillaPlugin.loadPanilla(this);
+            panilla = new Panilla();
+            panilla.loadPanilla(this);
         } else {
             getLogger().info("Panilla not enabled.");
         }

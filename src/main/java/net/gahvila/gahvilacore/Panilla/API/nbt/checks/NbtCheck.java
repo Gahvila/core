@@ -2,7 +2,7 @@ package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 public abstract class NbtCheck {
 
@@ -28,7 +28,7 @@ public abstract class NbtCheck {
         return aliases;
     }
 
-    public abstract NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla);
+    public abstract NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla);
 
     public enum NbtCheckResult {
         PASS,

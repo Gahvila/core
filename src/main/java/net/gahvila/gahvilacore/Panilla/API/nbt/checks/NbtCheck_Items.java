@@ -4,7 +4,7 @@ import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbt;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 // Similar to BlockEntityTag
 // Used mainly for Bundles (1.17)
@@ -15,7 +15,7 @@ public class NbtCheck_Items extends NbtCheck {
     }
 
     @Override
-    public NbtCheck.NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheck.NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         NbtTagList itemsTagList = tag.getList(getName());
 
         // Bundles should only have 64 items

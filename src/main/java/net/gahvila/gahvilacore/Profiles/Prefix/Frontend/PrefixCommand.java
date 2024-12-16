@@ -42,7 +42,7 @@ public class PrefixCommand {
                                     if (player.hasPermission(single.getPermissionNode())) {
                                         prefixManager.setPrefixType(player, PrefixTypes.SINGLE);
                                         prefixManager.setSingle(player, single);
-                                        player.sendRichMessage("<white>single: " + single.name() + "</white>");
+                                        player.sendRichMessage("<white>Asetit itsellesi väriksi</white> <" + single.getColor() + ">" + single.getDisplayName() + "<white>.</white>");
                                     } else {
                                         player.sendMessage("Ei oikeuksia.");
                                     }
@@ -54,7 +54,7 @@ public class PrefixCommand {
                                     if (player.hasPermission(gradient.getPermissionNode())) {
                                         prefixManager.setPrefixType(player, PrefixTypes.GRADIENT);
                                         prefixManager.setGradient(player, gradient);
-                                        player.sendRichMessage("<white>gradient: " + gradient.name() + "</white>");
+                                        player.sendRichMessage("<white>Asetit itsellesi liukuväriksi</white> <gradient:" + gradient.getGradient() + ">" + gradient.getDisplayName() + "<white>.</white>");
                                     } else {
                                         player.sendMessage("Ei oikeuksia.");
                                     }
@@ -73,7 +73,7 @@ public class PrefixCommand {
                             Prefix prefix = Prefix.valueOf(args.getRaw("prefix"));
                             if (player.hasPermission(prefix.getPermissionNode())) {
                                 prefixManager.setPrefix(player, prefix);
-                                player.sendRichMessage("<white>prefix: " + prefix.name() + "</white>");
+                                player.sendRichMessage("<white>Asetit itsellesi etuliitteeksi " + prefixManager.generatePrefix(player) + ".</white>");
                             } else {
                                 player.sendMessage("Ei oikeuksia.");
                             }

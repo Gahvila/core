@@ -6,7 +6,7 @@ import net.gahvila.gahvilacore.Panilla.API.exception.NbtNotPermittedException;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +75,7 @@ public final class NbtChecks {
     }
 
     public static void checkServerbound(int slot, NbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
-                                        PanillaPlugin panilla) throws NbtNotPermittedException {
+                                        Panilla panilla) throws NbtNotPermittedException {
         List<FailedNbt> failedNbtList = checkAll(tag, nmsItemClassName, panilla);
 
         FailedNbt lastNonCritical = null;
@@ -94,7 +94,7 @@ public final class NbtChecks {
     }
 
     public static void checkClientbound(int slot, NbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
-                                        PanillaPlugin panilla) throws NbtNotPermittedException {
+                                        Panilla panilla) throws NbtNotPermittedException {
         FailedNbtList failedNbtList = checkAll(tag, nmsItemClassName, panilla);
 
         if (failedNbtList.containsCritical()) {
@@ -108,7 +108,7 @@ public final class NbtChecks {
         }
     }
 
-    private static boolean tagMeetsKeyThreshold(NbtTagCompound tag, PanillaPlugin panilla) {
+    private static boolean tagMeetsKeyThreshold(NbtTagCompound tag, Panilla panilla) {
         int maxNonMinecraftKeys = panilla.getPConfig().maxNonMinecraftNbtKeys;
 
         if (tag.getNonMinecraftKeys().size() > maxNonMinecraftKeys) {
@@ -128,7 +128,7 @@ public final class NbtChecks {
         return true;
     }
 
-    public static FailedNbtList checkAll(NbtTagCompound tag, String nmsItemClassName, PanillaPlugin panilla) {
+    public static FailedNbtList checkAll(NbtTagCompound tag, String nmsItemClassName, Panilla panilla) {
         FailedNbtList failedNbtList = new FailedNbtList();
         if (!tagMeetsKeyThreshold(tag, panilla)) {
             failedNbtList.add(FailedNbt.FAIL_KEY_THRESHOLD);

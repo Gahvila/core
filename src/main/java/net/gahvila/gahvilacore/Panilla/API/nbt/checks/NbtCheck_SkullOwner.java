@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 public class NbtCheck_SkullOwner extends NbtCheck {
 
@@ -25,7 +25,7 @@ public class NbtCheck_SkullOwner extends NbtCheck {
     }
 
     @Override
-    public NbtCheck.NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheck.NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         NbtTagCompound skullOwner = tag.getCompound("minecraft:profile");
 
         if (skullOwner.hasKey("name")) {

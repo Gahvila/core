@@ -6,7 +6,7 @@ import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -19,7 +19,7 @@ public class NbtCheck_EntityData extends NbtCheck {
         super("minecraft:entity_data", PStrictness.LENIENT);
     }
 
-    private static FailedNbt checkItems(NbtTagList items, String nmsItemClassName, PanillaPlugin panilla) {
+    private static FailedNbt checkItems(NbtTagList items, String nmsItemClassName, Panilla panilla) {
         FailedNbt failedNbt = null;
 
         for (int i = 0; i < items.size(); i++) {
@@ -40,7 +40,7 @@ public class NbtCheck_EntityData extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         NbtCheckResult result = NbtCheckResult.PASS;
 
         PStrictness strictness = panilla.getPConfig().strictness;

@@ -2,7 +2,7 @@ package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 public class NbtCheck_SkullProfile extends NbtCheck {
 
@@ -12,7 +12,7 @@ public class NbtCheck_SkullProfile extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         NbtTagCompound skullProfile = tag.getCompound("SkullProfile");
 
         // Avoid "Name and ID cannot both be blank" in GameProfile constructor

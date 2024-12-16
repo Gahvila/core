@@ -100,11 +100,9 @@ public class PrefixColorMenu {
             if (data != null) {
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
                 if (prefixManager.getPrefixType(player) == PrefixTypes.GRADIENT) {
-                    prefixManager.setGradient(player, Gradient.valueOf(data));
-                    player.sendRichMessage("<white>gradient: " + data + "</white>");
+                    player.performCommand("prefix setcolor gradient " + data);
                 } else {
-                    prefixManager.setSingle(player, Single.valueOf(data));
-                    player.sendRichMessage("<white>single: " + data + "</white>");
+                    player.performCommand("prefix setcolor single " + data);
                 }
                 player.closeInventory();
             }else {

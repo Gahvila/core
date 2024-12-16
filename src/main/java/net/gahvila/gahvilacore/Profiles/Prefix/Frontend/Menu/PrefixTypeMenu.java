@@ -83,8 +83,7 @@ public class PrefixTypeMenu {
             String data = event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING);
             if (data != null) {
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
-                prefixManager.setPrefix(player, Prefix.valueOf(data));
-                player.sendRichMessage("<white>prefix: " + data + "</white>");
+                player.performCommand("prefix setprefix " + data);
                 player.closeInventory();
             }else {
                 player.closeInventory();

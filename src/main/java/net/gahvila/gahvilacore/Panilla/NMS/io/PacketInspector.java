@@ -5,7 +5,7 @@ import net.gahvila.gahvilacore.Panilla.API.exception.*;
 import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtChecks;
 import net.gahvila.gahvilacore.Panilla.PanillaPlayer;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
@@ -26,13 +26,13 @@ import java.util.UUID;
 
 public class PacketInspector {
 
-    private final PanillaPlugin panilla;
+    private final Panilla panilla;
 
-    public PacketInspector(PanillaPlugin panilla) {
+    public PacketInspector(Panilla panilla) {
         this.panilla = panilla;
     }
 
-    public void checkServerbound(PanillaPlugin panilla, PanillaPlayer player, Object packetHandle) throws PacketException {
+    public void checkServerbound(Panilla panilla, PanillaPlayer player, Object packetHandle) throws PacketException {
         try {
             checkServerboundContainerClickPacket(packetHandle);
         } catch (NbtNotPermittedException e) {
@@ -52,7 +52,7 @@ public class PacketInspector {
         }
     }
 
-    public void checkClientbound(PanillaPlugin panilla, Object packetHandle) throws PacketException {
+    public void checkClientbound(Panilla panilla, Object packetHandle) throws PacketException {
         checkClientboundContainerSetSlotPacket(packetHandle);
         checkClientboundContainerSetContentPacket(packetHandle);
 

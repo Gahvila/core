@@ -29,7 +29,7 @@ public class PanillaPlayer {
         return handle.hasPermission(node);
     }
 
-    public boolean canBypassChecks(PanillaPlugin panilla, PacketException e) {
+    public boolean canBypassChecks(Panilla panilla, PacketException e) {
         if (e.getFailedNbt().result == NbtCheck.NbtCheckResult.CRITICAL) {
             return false;   // to prevent crash exploits
         }

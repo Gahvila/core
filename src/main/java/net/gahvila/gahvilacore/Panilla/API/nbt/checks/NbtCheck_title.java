@@ -2,7 +2,7 @@ package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 public class NbtCheck_title extends NbtCheck {
 
@@ -11,7 +11,7 @@ public class NbtCheck_title extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         final int titleLength = tag.getString("title").length();
 
         if (panilla.getPConfig().strictness == PStrictness.STRICT) {

@@ -4,7 +4,7 @@ import net.gahvila.gahvilacore.Panilla.API.EnchantmentCompat;
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 public class NbtCheck_Enchantments extends NbtCheck {
 
@@ -13,7 +13,7 @@ public class NbtCheck_Enchantments extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         String using = null;
 
         if (tag.hasKeyOfType(getName(), NbtDataType.COMPOUND)) {

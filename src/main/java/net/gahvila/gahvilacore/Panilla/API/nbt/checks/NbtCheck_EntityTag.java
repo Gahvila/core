@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 public class NbtCheck_EntityTag extends NbtCheck {
 
@@ -20,7 +20,7 @@ public class NbtCheck_EntityTag extends NbtCheck {
         super("EntityTag", PStrictness.LENIENT);
     }
 
-    private static FailedNbt checkItems(NbtTagList items, String nmsItemClassName, PanillaPlugin panilla) {
+    private static FailedNbt checkItems(NbtTagList items, String nmsItemClassName, Panilla panilla) {
         FailedNbt failedNbt = null;
 
         for (int i = 0; i < items.size(); i++) {
@@ -41,7 +41,7 @@ public class NbtCheck_EntityTag extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         NbtCheckResult result = NbtCheckResult.PASS;
 
         PStrictness strictness = panilla.getPConfig().strictness;

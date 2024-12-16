@@ -6,7 +6,7 @@ import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtChecks;
 import net.gahvila.gahvilacore.Panilla.PanillaPlayer;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -16,9 +16,9 @@ import java.util.Iterator;
 
 public class InventoryCleaner {
 
-    private final PanillaPlugin panilla;
+    private final Panilla panilla;
 
-    public InventoryCleaner(PanillaPlugin panilla) {
+    public InventoryCleaner(Panilla panilla) {
         this.panilla = panilla;
     }
 

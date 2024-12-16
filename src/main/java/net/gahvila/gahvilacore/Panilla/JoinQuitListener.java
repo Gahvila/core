@@ -2,7 +2,6 @@ package net.gahvila.gahvilacore.Panilla;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -10,9 +9,9 @@ import java.io.IOException;
 
 public class JoinQuitListener implements Listener {
 
-    private final PanillaPlugin panilla;
+    private final Panilla panilla;
 
-    public JoinQuitListener(PanillaPlugin panilla) {
+    public JoinQuitListener(Panilla panilla) {
         this.panilla = panilla;
     }
 

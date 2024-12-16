@@ -3,7 +3,7 @@ package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 import static net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck_Container.checkItem;
 
@@ -14,7 +14,7 @@ public class NbtCheck_BlockEntityData extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         tag = tag.getCompound(getName());
 
         if (tag.hasKey("front_text") || tag.hasKey("back_text")) return NbtCheckResult.FAIL;

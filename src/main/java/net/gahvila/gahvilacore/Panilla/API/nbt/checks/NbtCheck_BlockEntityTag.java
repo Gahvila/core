@@ -7,7 +7,7 @@ import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
         super("BlockEntityTag", PStrictness.LENIENT);
     }
 
-    public static FailedBlockEntityTagItemsNbt checkItems(String nbtTagName, NbtTagList items, String itemName, PanillaPlugin panilla) {
+    public static FailedBlockEntityTagItemsNbt checkItems(String nbtTagName, NbtTagList items, String itemName, Panilla panilla) {
         int charCount = NbtCheck_pages.getCharCountForItems(items);
 
         if (charCount > 100_000) {
@@ -44,7 +44,7 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
         return new FailedBlockEntityTagItemsNbt(nbtTagName, NbtCheckResult.PASS);
     }
 
-    public static FailedNbtList checkItem(NbtTagCompound item, String itemName, PanillaPlugin panilla) {
+    public static FailedNbtList checkItem(NbtTagCompound item, String itemName, Panilla panilla) {
         if (item.hasKey("tag")) {
             return NbtChecks.checkAll(item.getCompound("tag"), itemName, panilla);
         } else {
@@ -53,7 +53,7 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, Panilla panilla) {
         NbtCheckResult result = NbtCheckResult.PASS;
         NbtTagCompound blockEntityTag = tag.getCompound(getName());
 

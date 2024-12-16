@@ -7,14 +7,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import net.gahvila.gahvilacore.Panilla.PanillaLogger;
 import net.gahvila.gahvilacore.Panilla.PanillaPlayer;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 
 public class PacketInspectorDplx extends ChannelDuplexHandler {
 
-    private final PanillaPlugin panilla;
+    private final Panilla panilla;
     private final PanillaPlayer player;
 
-    public PacketInspectorDplx(PanillaPlugin panilla, PanillaPlayer player) {
+    public PacketInspectorDplx(Panilla panilla, PanillaPlayer player) {
         this.panilla = panilla;
         this.player = player;
     }

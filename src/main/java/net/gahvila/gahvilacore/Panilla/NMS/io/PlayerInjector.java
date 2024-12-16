@@ -6,7 +6,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import net.gahvila.gahvilacore.Panilla.API.io.dplx.PacketInspectorDplx;
 import net.gahvila.gahvilacore.Panilla.PanillaPlayer;
-import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
+import net.gahvila.gahvilacore.Panilla.Panilla;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
@@ -47,7 +47,7 @@ public class PlayerInjector {
         return "packet_handler";
     }
 
-    public void register(PanillaPlugin panilla, PanillaPlayer player) throws IOException {
+    public void register(Panilla panilla, PanillaPlayer player) throws IOException {
         Channel pChannel = getPlayerChannel(player);
 
         if (pChannel == null || !pChannel.isRegistered()) {

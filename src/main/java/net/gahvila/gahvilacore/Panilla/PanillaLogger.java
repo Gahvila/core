@@ -9,10 +9,10 @@ import java.util.logging.Logger;
 
 public class PanillaLogger {
 
-    private final PanillaPlugin panilla;
+    private final Panilla panilla;
     private final Logger jLogger;
 
-    public PanillaLogger(PanillaPlugin panilla, Logger jLogger) {
+    public PanillaLogger(Panilla panilla, Logger jLogger) {
         this.panilla = panilla;
         this.jLogger = jLogger;
     }
