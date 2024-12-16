@@ -35,9 +35,7 @@ public class NbtCheck_Enchantments extends NbtCheck {
             NbtTagCompound levels = enchantments.getCompound("levels");
             for (String key : levels.getKeys()) {
                 int lvl = levels.getInt(key);
-                System.out.println("lvl: " + lvl);
                 EnchantmentCompat compat = EnchantmentCompat.getByNamedKey(key);
-                System.out.println("cp: " + compat);
                 if (lvl > panilla.getEnchantments().getMaxLevel(compat)) {
                     return NbtCheckResult.FAIL;
                 }
@@ -48,7 +46,6 @@ public class NbtCheck_Enchantments extends NbtCheck {
 
                 for (String other : levels.getKeys()) {
                     EnchantmentCompat compatOther = EnchantmentCompat.getByNamedKey(other);
-                    System.out.println("co: " + compatOther);
                     if (compatOther != compat) {
                         if (panilla.getEnchantments().conflicting(compatOther, compat)) {
                             return NbtCheckResult.FAIL;
