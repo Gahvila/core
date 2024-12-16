@@ -7,6 +7,7 @@ import net.gahvila.gahvilacore.AFK.AfkEvents;
 import net.gahvila.gahvilacore.AFK.AfkManager;
 import net.gahvila.gahvilacore.Config.ConfigManager;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
+import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 import net.gahvila.gahvilacore.Music.MusicCommand;
 import net.gahvila.gahvilacore.Music.MusicEvents;
 import net.gahvila.gahvilacore.Music.MusicManager;
@@ -25,8 +26,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public final class GahvilaCore extends JavaPlugin {
     public static GahvilaCore instance;
@@ -37,6 +40,7 @@ public final class GahvilaCore extends JavaPlugin {
     private PlaytimeManager playtimeManager;
     private AfkManager afkManager;
     private PluginManager pluginManager;
+    private PanillaPlugin panillaPlugin;
 
     @Override
     public void onEnable() {
@@ -53,8 +57,8 @@ public final class GahvilaCore extends JavaPlugin {
 
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
 
-        //gondom
-        initializeGondom();
+        //panilla
+        initializePanilla();
 
         //afk
         AfkCommand afkCommand = new AfkCommand(afkManager);
@@ -117,22 +121,27 @@ public final class GahvilaCore extends JavaPlugin {
         }
     }
 
+    @Override
+    public void onDisable() {
+        panillaPlugin.disablePanilla();
+    }
+
     private void registerListeners(Listener...listeners){
         for(Listener listener : listeners){
             pluginManager.registerEvents(listener, this);
         }
     }
 
-    private void initializeGondom() {
-        //only initialize gondom if its enabled
-        if (ConfigManager.getGondom()) {
-            getLogger().info("Gondom is being initialized...");
-            //initialize gondom here
+    private void initializePanilla() {
+        //only initialize panilla if its enabled
+        if (ConfigManager.getPanilla()) {
+            getLogger().info("Panilla is being initialized...");
+            panillaPlugin = new PanillaPlugin();
+            panillaPlugin.loadPanilla(this);
         } else {
-            getLogger().info("Gondom not enabled.");
+            getLogger().info("Panilla not enabled.");
         }
     }
-
 
     public PlaytimeManager getPlaytimeManager() {
         return playtimeManager;

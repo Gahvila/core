@@ -26,8 +26,8 @@ public class ConfigManager {
         return data.getOrDefault("server-name", "unknown").toLowerCase();
     }
 
-    public static Boolean getGondom() {
+    public static Boolean getPanilla() {
         Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
-        return data.getOrDefault("gondom", false);
+        return data.getOrDefault("panilla", false);
     }
 }
