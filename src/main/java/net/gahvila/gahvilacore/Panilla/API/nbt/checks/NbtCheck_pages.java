@@ -1,11 +1,12 @@
 package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
 
 import java.util.Arrays;
+
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 public class NbtCheck_pages extends NbtCheck {
@@ -40,8 +41,8 @@ public class NbtCheck_pages extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
-        INbtTagList pages = tag.getList("pages", NbtDataType.STRING);
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+        NbtTagList pages = tag.getList("pages", NbtDataType.STRING);
 
         if (pages.size() > panilla.getProtocolConstants().maxBookPages()) {
             return NbtCheckResult.CRITICAL; // too many pages
@@ -52,7 +53,7 @@ public class NbtCheck_pages extends NbtCheck {
             final String pageContent;
 
             if (pages.isCompound(i)) {
-                INbtTagCompound page = pages.getCompound(i);
+                NbtTagCompound page = pages.getCompound(i);
                 if (page.hasKey("text")) {
                     pageContent = page.getString("text");
                 } else {
@@ -60,7 +61,7 @@ public class NbtCheck_pages extends NbtCheck {
                 }
 
                 if (page.hasKey("hoverEvent")) {
-                    INbtTagCompound hoverEvent = page.getCompound("hoverEvent");
+                    NbtTagCompound hoverEvent = page.getCompound("hoverEvent");
 
                     if (hoverEvent.getStringSizeBytes() > 32000) {
                         return NbtCheckResult.CRITICAL;
@@ -107,14 +108,14 @@ public class NbtCheck_pages extends NbtCheck {
         return NbtCheckResult.PASS;
     }
 
-    private static int getCharCountForItem(INbtTagCompound item) {
+    private static int getCharCountForItem(NbtTagCompound item) {
         int charCount = 0;
 
         if (item.hasKey("tag")) {
-            INbtTagCompound tag = item.getCompound("tag");
+            NbtTagCompound tag = item.getCompound("tag");
 
             if (tag.hasKey("pages")) {
-                INbtTagList pages = tag.getList("pages", NbtDataType.STRING);
+                NbtTagList pages = tag.getList("pages", NbtDataType.STRING);
 
                 for (int i = 0; i < pages.size(); i++) {
                     final String page = pages.getString(i);
@@ -128,7 +129,7 @@ public class NbtCheck_pages extends NbtCheck {
     }
 
     // Gets the amount of characters of books within in a list of items
-    public static int getCharCountForItems(INbtTagList items) {
+    public static int getCharCountForItems(NbtTagList items) {
         int charCount = 0;
 
         for (int i = 0; i < items.size(); i++) {

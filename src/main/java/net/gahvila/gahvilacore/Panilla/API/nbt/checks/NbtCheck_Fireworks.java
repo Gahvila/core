@@ -1,30 +1,30 @@
 package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 public class NbtCheck_Fireworks extends NbtCheck {
 
     public NbtCheck_Fireworks() {
-        super("Fireworks", PStrictness.AVERAGE);
+        super("minecraft:fireworks", PStrictness.AVERAGE);
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
         NbtCheckResult result = NbtCheckResult.PASS;
-        INbtTagCompound fireworks = tag.getCompound("Fireworks");
+        NbtTagCompound fireworks = tag.getCompound("minecraft:fireworks");
 
-        int flight = fireworks.getInt("Flight");
+        int flight = fireworks.getInt("flight_duration");
 
         if (flight > panilla.getProtocolConstants().maxFireworksFlight()
                 || flight < panilla.getProtocolConstants().minFireworksFlight()) {
             result = NbtCheckResult.FAIL;
         }
 
-        INbtTagList explosions = fireworks.getList("Explosions", NbtDataType.COMPOUND);
+        NbtTagList explosions = fireworks.getList("explosions", NbtDataType.COMPOUND);
 
         if (explosions != null
                 && explosions.size() > panilla.getProtocolConstants().maxFireworksExplosions()) {

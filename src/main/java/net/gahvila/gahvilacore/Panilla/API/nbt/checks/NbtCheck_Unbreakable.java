@@ -1,7 +1,7 @@
 package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 public class NbtCheck_Unbreakable extends NbtCheck {
@@ -11,7 +11,7 @@ public class NbtCheck_Unbreakable extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
         return NbtCheckResult.FAIL;
     }
 

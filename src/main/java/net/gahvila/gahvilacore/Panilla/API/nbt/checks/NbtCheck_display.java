@@ -5,9 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 public class NbtCheck_display extends NbtCheck {
@@ -29,8 +29,8 @@ public class NbtCheck_display extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
-        INbtTagCompound display = tag.getCompound(getName());
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+        NbtTagCompound display = tag.getCompound(getName());
 
         if (display.hasKeyOfType("Name", NbtDataType.STRING)) {
             String name = display.getString("Name");
@@ -78,7 +78,7 @@ public class NbtCheck_display extends NbtCheck {
         }
 
         if (display.hasKeyOfType("Lore", NbtDataType.LIST)) {
-            INbtTagList lore = display.getList("Lore");
+            NbtTagList lore = display.getList("Lore");
 
             if (lore.size() > panilla.getProtocolConstants().NOT_PROTOCOL_maxLoreLines()) {
                 return NbtCheckResult.CRITICAL; // can cause crashes

@@ -3,10 +3,9 @@ package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbt;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
 import net.gahvila.gahvilacore.Panilla.API.exception.NbtNotPermittedException;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.paper1_20_6.*;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 import java.util.HashMap;
@@ -18,34 +17,24 @@ public final class NbtChecks {
     private static final Map<String, NbtCheck> checks = new HashMap<>();
 
     static {
-        // 1.20.6
+        // vanilla
+        register(new NbtCheck_Enchantments());
         register(new NbtCheck_BlockEntityData());
         register(new NbtCheck_Container());
         register(new NbtCheck_ContainerLoot());
-        register(new NbtCheck_CustomModelData_1_20_6());
         register(new NbtCheck_CustomName());
-        register(new NbtCheck_CustomPotionEffects_1_20_6());
         register(new NbtCheck_Fireworks());
         register(new NbtCheck_Lock());
         register(new NbtCheck_Lore());
         register(new NbtCheck_PaperRange());
-        register(new NbtCheck_SkullOwner1_20_6());
         register(new NbtCheck_WritableBookContent());
         register(new NbtCheck_WrittenBookContent());
         register(new NbtCheck_EntityData());
-        register(new NbtCheck_ChargedProjectiles_1_20_6());
-        register(new NbtCheck_Enchantments_1_20_6());
-        // non-vanilla
-        register(new NbtCheck_weBrushJson1_20_6());
-
-        // other
-        // vanilla
         register(new NbtCheck_Unbreakable());
         register(new NbtCheck_CanDestroy());
         register(new NbtCheck_CanPlaceOn());
         register(new NbtCheck_BlockEntityTag());
         register(new NbtCheck_BlockStateTag());
-        register(new NbtCheck_ench());
         register(new NbtCheck_RepairCost());
         register(new NbtCheck_AttributeModifiers());
         register(new NbtCheck_CustomPotionEffects());
@@ -85,7 +74,7 @@ public final class NbtChecks {
         return checks;
     }
 
-    public static void checkPacketPlayIn(int slot, INbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
+    public static void checkPacketPlayIn(int slot, NbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
                                          PanillaPlugin panilla) throws NbtNotPermittedException {
         List<FailedNbt> failedNbtList = checkAll(tag, nmsItemClassName, panilla);
 
@@ -104,7 +93,7 @@ public final class NbtChecks {
         }
     }
 
-    public static void checkPacketPlayOut(int slot, INbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
+    public static void checkPacketPlayOut(int slot, NbtTagCompound tag, String nmsItemClassName, String nmsPacketClassName,
                                           PanillaPlugin panilla) throws NbtNotPermittedException {
         FailedNbtList failedNbtList = checkAll(tag, nmsItemClassName, panilla);
 
@@ -119,7 +108,7 @@ public final class NbtChecks {
         }
     }
 
-    private static boolean tagMeetsKeyThreshold(INbtTagCompound tag, PanillaPlugin panilla) {
+    private static boolean tagMeetsKeyThreshold(NbtTagCompound tag, PanillaPlugin panilla) {
         int maxNonMinecraftKeys = panilla.getPConfig().maxNonMinecraftNbtKeys;
 
         if (tag.getNonMinecraftKeys().size() > maxNonMinecraftKeys) {
@@ -128,7 +117,7 @@ public final class NbtChecks {
 
         for (String key : tag.getKeys()) {
             if (tag.hasKeyOfType(key, NbtDataType.COMPOUND)) {
-                INbtTagCompound subTag = tag.getCompound(key);
+                NbtTagCompound subTag = tag.getCompound(key);
 
                 if (!tagMeetsKeyThreshold(subTag, panilla)) {
                     return false;
@@ -139,7 +128,7 @@ public final class NbtChecks {
         return true;
     }
 
-    public static FailedNbtList checkAll(INbtTagCompound tag, String nmsItemClassName, PanillaPlugin panilla) {
+    public static FailedNbtList checkAll(NbtTagCompound tag, String nmsItemClassName, PanillaPlugin panilla) {
         FailedNbtList failedNbtList = new FailedNbtList();
         if (!tagMeetsKeyThreshold(tag, panilla)) {
             failedNbtList.add(FailedNbt.FAIL_KEY_THRESHOLD);
@@ -151,7 +140,7 @@ public final class NbtChecks {
             }
 
             if (tag.hasKeyOfType(key, NbtDataType.LIST)) {
-                INbtTagList list = tag.getList(key);
+                NbtTagList list = tag.getList(key);
 
                 if (list.size() > 128) {
                     failedNbtList.add(new FailedNbt((key), NbtCheck.NbtCheckResult.CRITICAL));

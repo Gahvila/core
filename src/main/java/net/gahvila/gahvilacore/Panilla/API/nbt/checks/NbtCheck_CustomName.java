@@ -1,12 +1,11 @@
-package net.gahvila.gahvilacore.Panilla.API.nbt.checks.paper1_20_6;
+package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 import static net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck_display.PARSER;
@@ -28,7 +27,7 @@ public class NbtCheck_CustomName extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
         if (tag.hasKeyOfType(getName(), NbtDataType.STRING)) {
             String name = tag.getString(getName());
 

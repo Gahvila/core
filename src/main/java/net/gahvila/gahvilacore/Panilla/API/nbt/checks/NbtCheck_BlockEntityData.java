@@ -1,12 +1,11 @@
-package net.gahvila.gahvilacore.Panilla.API.nbt.checks.paper1_20_6;
+package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
-import static net.gahvila.gahvilacore.Panilla.API.nbt.checks.paper1_20_6.NbtCheck_Container.checkItem;
+import static net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck_Container.checkItem;
 
 public class NbtCheck_BlockEntityData extends NbtCheck {
 
@@ -15,14 +14,14 @@ public class NbtCheck_BlockEntityData extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
         tag = tag.getCompound(getName());
 
         if (tag.hasKey("front_text") || tag.hasKey("back_text")) return NbtCheckResult.FAIL;
         if (itemName.contains("campfire")) return NbtCheckResult.FAIL;
         if (tag.hasKey("cursors")) return NbtCheckResult.FAIL;
         if (itemName.equals("jukebox")) {
-            INbtTagCompound item = tag.getCompound("RecordItem");
+            NbtTagCompound item = tag.getCompound("RecordItem");
 
             FailedNbtList failedNbtList = checkItem(item, itemName, panilla);
 

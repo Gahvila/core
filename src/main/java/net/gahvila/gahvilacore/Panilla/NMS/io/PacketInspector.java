@@ -2,7 +2,6 @@ package net.gahvila.gahvilacore.Panilla.NMS.io;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import net.gahvila.gahvilacore.Panilla.API.exception.*;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtChecks;
 import net.gahvila.gahvilacore.Panilla.BukkitPanillaPlayer;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
@@ -172,7 +171,7 @@ public class PacketInspector {
             return;
         }
 
-        INbtTagCompound tag = new NbtTagCompound(NBT.itemStackToNBT(itemStack.getBukkitStack()).getCompound("components"));
+        NbtTagCompound tag = new NbtTagCompound(NBT.itemStackToNBT(itemStack.getBukkitStack()).getCompound("components"));
         String itemName = itemStack.getItem().getDescriptionId();
         String worldName = "";
 

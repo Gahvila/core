@@ -35,7 +35,7 @@ prevent-fawe-brush-nbt: false
 
 # This can help with ensuring custom GUI's in plugins don't get flagged
 # This may also marginally improve performance
-ignore-non-player-inventories: false
+ignore-non-player-inventories: true
 
 # When true, this will prevent any BlockEntityTag NBT regardless of strictness
 # This will break things like ShulkerBoxes

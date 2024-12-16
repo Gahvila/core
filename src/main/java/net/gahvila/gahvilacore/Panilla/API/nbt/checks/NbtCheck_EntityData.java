@@ -1,13 +1,11 @@
-package net.gahvila.gahvilacore.Panilla.API.nbt.checks.paper1_20_6;
+package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbt;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtChecks;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 import java.util.Locale;
@@ -21,11 +19,11 @@ public class NbtCheck_EntityData extends NbtCheck {
         super("minecraft:entity_data", PStrictness.LENIENT);
     }
 
-    private static FailedNbt checkItems(INbtTagList items, String nmsItemClassName, PanillaPlugin panilla) {
+    private static FailedNbt checkItems(NbtTagList items, String nmsItemClassName, PanillaPlugin panilla) {
         FailedNbt failedNbt = null;
 
         for (int i = 0; i < items.size(); i++) {
-            INbtTagCompound item = items.getCompound(i);
+            NbtTagCompound item = items.getCompound(i);
 
             if (item.hasKey("components")) {
                 FailedNbtList failedNbtList = NbtChecks.checkAll(item.getCompound("components"), nmsItemClassName, panilla);
@@ -42,12 +40,12 @@ public class NbtCheck_EntityData extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
         NbtCheckResult result = NbtCheckResult.PASS;
 
         PStrictness strictness = panilla.getPConfig().strictness;
 
-        INbtTagCompound entityTag = tag.getCompound(getName());
+        NbtTagCompound entityTag = tag.getCompound(getName());
 
         if (strictness == PStrictness.STRICT) {
             for (String armorStandTag : ARMOR_STAND_TAGS) {
@@ -108,7 +106,7 @@ public class NbtCheck_EntityData extends NbtCheck {
         }
 
         if (entityTag.hasKey("ArmorItems")) {
-            INbtTagList items = entityTag.getList("ArmorItems", NbtDataType.COMPOUND);
+            NbtTagList items = entityTag.getList("ArmorItems", NbtDataType.COMPOUND);
 
             FailedNbt failedNbt = checkItems(items, itemName, panilla);
 
@@ -122,7 +120,7 @@ public class NbtCheck_EntityData extends NbtCheck {
         }
 
         if (entityTag.hasKey("HandItems")) {
-            INbtTagList items = entityTag.getList("HandItems", NbtDataType.COMPOUND);
+            NbtTagList items = entityTag.getList("HandItems", NbtDataType.COMPOUND);
 
             FailedNbt failedNbt = checkItems(items, itemName, panilla);
 
@@ -217,7 +215,7 @@ public class NbtCheck_EntityData extends NbtCheck {
             }
 
             if (entityTag.hasKeyOfType("ActiveEffects", NbtDataType.LIST)) {
-                INbtTagList effectsList = entityTag.getList("ActiveEffects");
+                NbtTagList effectsList = entityTag.getList("ActiveEffects");
                 NbtCheckResult effectsResult = checkEffectsTag(effectsList);
                 if (effectsResult == NbtCheckResult.CRITICAL) {
                     return NbtCheckResult.CRITICAL;
@@ -230,9 +228,9 @@ public class NbtCheck_EntityData extends NbtCheck {
         return result;
     }
 
-    private static NbtCheckResult checkEffectsTag(INbtTagList effectsList) {
+    private static NbtCheckResult checkEffectsTag(NbtTagList effectsList) {
         for (int i = 0; i < effectsList.size(); i++) {
-            INbtTagCompound effect = effectsList.getCompound(i);
+            NbtTagCompound effect = effectsList.getCompound(i);
 
             if (effect.hasKeyOfType("Amplifier", NbtDataType.BYTE)) {
                 short amplifier = effect.getByte("Amplifier");

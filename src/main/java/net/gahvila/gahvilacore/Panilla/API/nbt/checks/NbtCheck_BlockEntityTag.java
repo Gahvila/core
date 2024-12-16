@@ -4,9 +4,9 @@ import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedBlockEntityTagItemsNbt;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbt;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 import java.util.HashMap;
@@ -18,7 +18,7 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
         super("BlockEntityTag", PStrictness.LENIENT);
     }
 
-    public static FailedBlockEntityTagItemsNbt checkItems(String nbtTagName, INbtTagList items, String itemName, PanillaPlugin panilla) {
+    public static FailedBlockEntityTagItemsNbt checkItems(String nbtTagName, NbtTagList items, String itemName, PanillaPlugin panilla) {
         int charCount = NbtCheck_pages.getCharCountForItems(items);
 
         if (charCount > 100_000) {
@@ -44,7 +44,7 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
         return new FailedBlockEntityTagItemsNbt(nbtTagName, NbtCheckResult.PASS);
     }
 
-    public static FailedNbtList checkItem(INbtTagCompound item, String itemName, PanillaPlugin panilla) {
+    public static FailedNbtList checkItem(NbtTagCompound item, String itemName, PanillaPlugin panilla) {
         if (item.hasKey("tag")) {
             return NbtChecks.checkAll(item.getCompound("tag"), itemName, panilla);
         } else {
@@ -53,9 +53,9 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
         NbtCheckResult result = NbtCheckResult.PASS;
-        INbtTagCompound blockEntityTag = tag.getCompound(getName());
+        NbtTagCompound blockEntityTag = tag.getCompound(getName());
 
         int sizeBytes = blockEntityTag.getStringSizeBytes();
         int maxSizeBytes = panilla.getProtocolConstants().NOT_PROTOCOL_maxBlockEntityTagLengthBytes();
@@ -125,7 +125,7 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
                 result = NbtCheckResult.FAIL;
             }
 
-            INbtTagList items = blockEntityTag.getList("Items", NbtDataType.COMPOUND);
+            NbtTagList items = blockEntityTag.getList("Items", NbtDataType.COMPOUND);
             FailedBlockEntityTagItemsNbt failedNbt = checkItems(getName(), items, itemName, panilla);
 
             // Only remove NBT from shulkerbox if it contains a CRITICAL item
@@ -142,7 +142,7 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
         // Breaking this furnace in the world will cause a client crash
         // https://github.com/ds58/Panilla/issues/120
         if (blockEntityTag.hasKey("RecipesUsed")) {
-            INbtTagCompound recipesUsed = blockEntityTag.getCompound("RecipesUsed");
+            NbtTagCompound recipesUsed = blockEntityTag.getCompound("RecipesUsed");
 
             if (recipesUsed.hasKeyOfType("minecraft:bow", NbtDataType.INT)) {
                 return NbtCheckResult.CRITICAL;
@@ -151,7 +151,7 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
 
         // check the item within a JukeBox
         if (blockEntityTag.hasKey("RecordItem")) {
-            INbtTagCompound item = blockEntityTag.getCompound("RecordItem");
+            NbtTagCompound item = blockEntityTag.getCompound("RecordItem");
 
             FailedNbtList failedNbtList = checkItem(item, itemName, panilla);
 

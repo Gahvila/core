@@ -1,15 +1,12 @@
-package net.gahvila.gahvilacore.Panilla.API.nbt.checks.paper1_20_6;
+package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedBlockEntityTagItemsNbt;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbt;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck_pages;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtChecks;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 import java.util.HashMap;
@@ -21,7 +18,7 @@ public class NbtCheck_Container extends NbtCheck {
         super("minecraft:container", PStrictness.LENIENT);
     }
 
-    public static FailedBlockEntityTagItemsNbt checkItems(String nbtTagName, INbtTagList items, String itemName, PanillaPlugin panilla) {
+    public static FailedBlockEntityTagItemsNbt checkItems(String nbtTagName, NbtTagList items, String itemName, PanillaPlugin panilla) {
         int charCount = NbtCheck_pages.getCharCountForItems(items);
 
         if (charCount > 100_000) {
@@ -47,7 +44,7 @@ public class NbtCheck_Container extends NbtCheck {
         return new FailedBlockEntityTagItemsNbt(nbtTagName, NbtCheckResult.PASS);
     }
 
-    public static FailedNbtList checkItem(INbtTagCompound item, String itemName, PanillaPlugin panilla) {
+    public static FailedNbtList checkItem(NbtTagCompound item, String itemName, PanillaPlugin panilla) {
         if (item.hasKey("tag")) {
             return NbtChecks.checkAll(item.getCompound("tag"), itemName, panilla);
         } else {
@@ -56,8 +53,8 @@ public class NbtCheck_Container extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
-        INbtTagList items = tag.getList(getName(), NbtDataType.COMPOUND);
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+        NbtTagList items = tag.getList(getName(), NbtDataType.COMPOUND);
 
         int sizeBytes = 0;
         for (int i = 0; i < items.size(); i++) sizeBytes += items.getCompound(i).getStringSizeBytes();

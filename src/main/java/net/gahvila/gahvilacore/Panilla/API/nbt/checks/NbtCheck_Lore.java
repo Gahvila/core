@@ -1,10 +1,9 @@
-package net.gahvila.gahvilacore.Panilla.API.nbt.checks.paper1_20_6;
+package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 public class NbtCheck_Lore extends NbtCheck {
@@ -14,9 +13,9 @@ public class NbtCheck_Lore extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
         if (tag.hasKeyOfType(getName(), NbtDataType.LIST)) {
-            INbtTagList lore = tag.getList(getName());
+            NbtTagList lore = tag.getList(getName());
 
             if (lore.size() > panilla.getProtocolConstants().NOT_PROTOCOL_maxLoreLines()) {
                 return NbtCheckResult.CRITICAL; // can cause crashes

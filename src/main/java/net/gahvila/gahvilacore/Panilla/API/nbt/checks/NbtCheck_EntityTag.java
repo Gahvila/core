@@ -3,12 +3,13 @@ package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbt;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
 
 import java.util.Locale;
 import java.util.UUID;
+
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 public class NbtCheck_EntityTag extends NbtCheck {
@@ -19,11 +20,11 @@ public class NbtCheck_EntityTag extends NbtCheck {
         super("EntityTag", PStrictness.LENIENT);
     }
 
-    private static FailedNbt checkItems(INbtTagList items, String nmsItemClassName, PanillaPlugin panilla) {
+    private static FailedNbt checkItems(NbtTagList items, String nmsItemClassName, PanillaPlugin panilla) {
         FailedNbt failedNbt = null;
 
         for (int i = 0; i < items.size(); i++) {
-            INbtTagCompound item = items.getCompound(i);
+            NbtTagCompound item = items.getCompound(i);
 
             if (item.hasKey("tag")) {
                 FailedNbtList failedNbtList = NbtChecks.checkAll(item.getCompound("tag"), nmsItemClassName, panilla);
@@ -40,12 +41,12 @@ public class NbtCheck_EntityTag extends NbtCheck {
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
         NbtCheckResult result = NbtCheckResult.PASS;
 
         PStrictness strictness = panilla.getPConfig().strictness;
 
-        INbtTagCompound entityTag = tag.getCompound(getName());
+        NbtTagCompound entityTag = tag.getCompound(getName());
 
         if (strictness == PStrictness.STRICT) {
             for (String armorStandTag : ARMOR_STAND_TAGS) {
@@ -106,7 +107,7 @@ public class NbtCheck_EntityTag extends NbtCheck {
         }
 
         if (entityTag.hasKey("ArmorItems")) {
-            INbtTagList items = entityTag.getList("ArmorItems", NbtDataType.COMPOUND);
+            NbtTagList items = entityTag.getList("ArmorItems", NbtDataType.COMPOUND);
 
             FailedNbt failedNbt = checkItems(items, itemName, panilla);
 
@@ -120,7 +121,7 @@ public class NbtCheck_EntityTag extends NbtCheck {
         }
 
         if (entityTag.hasKey("HandItems")) {
-            INbtTagList items = entityTag.getList("HandItems", NbtDataType.COMPOUND);
+            NbtTagList items = entityTag.getList("HandItems", NbtDataType.COMPOUND);
 
             FailedNbt failedNbt = checkItems(items, itemName, panilla);
 
@@ -215,7 +216,7 @@ public class NbtCheck_EntityTag extends NbtCheck {
             }
 
             if (entityTag.hasKeyOfType("Effects", NbtDataType.LIST)) {
-                INbtTagList effectsList = entityTag.getList("Effects");
+                NbtTagList effectsList = entityTag.getList("Effects");
                 NbtCheckResult effectsResult = checkEffectsTag(effectsList);
                 if (effectsResult == NbtCheckResult.CRITICAL) {
                     return NbtCheckResult.CRITICAL;
@@ -225,7 +226,7 @@ public class NbtCheck_EntityTag extends NbtCheck {
             }
 
             if (entityTag.hasKeyOfType("effects", NbtDataType.LIST)) {
-                INbtTagList effectsList = entityTag.getList("effects");
+                NbtTagList effectsList = entityTag.getList("effects");
                 NbtCheckResult effectsResult = checkEffectsTag(effectsList);
                 if (effectsResult == NbtCheckResult.CRITICAL) {
                     return NbtCheckResult.CRITICAL;
@@ -238,9 +239,9 @@ public class NbtCheck_EntityTag extends NbtCheck {
         return result;
     }
 
-    private static NbtCheckResult checkEffectsTag(INbtTagList effectsList) {
+    private static NbtCheckResult checkEffectsTag(NbtTagList effectsList) {
         for (int i = 0; i < effectsList.size(); i++) {
-            INbtTagCompound effect = effectsList.getCompound(i);
+            NbtTagCompound effect = effectsList.getCompound(i);
 
             if (effect.hasKeyOfType("amplifier", NbtDataType.BYTE)) {
                 short amplifier = effect.getByte("amplifier");

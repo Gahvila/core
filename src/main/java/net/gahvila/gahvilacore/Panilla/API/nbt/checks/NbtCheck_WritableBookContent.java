@@ -1,12 +1,11 @@
-package net.gahvila.gahvilacore.Panilla.API.nbt.checks.paper1_20_6;
+package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagCompound;
-import net.gahvila.gahvilacore.Panilla.API.nbt.INbtTagList;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
+import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagList;
 import net.gahvila.gahvilacore.Panilla.PanillaPlugin;
 
 import java.nio.charset.StandardCharsets;
@@ -14,32 +13,17 @@ import java.nio.charset.StandardCharsets;
 import static net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck_pages.MOJANG_CRASH_TRANSLATIONS;
 import static net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck_pages.createCharMap;
 
-public class NbtCheck_WrittenBookContent extends NbtCheck {
+public class NbtCheck_WritableBookContent extends NbtCheck {
 
-    public NbtCheck_WrittenBookContent() {
-        super("minecraft:written_book_content", PStrictness.AVERAGE);
+    public NbtCheck_WritableBookContent() {
+        super("minecraft:writable_book_content", PStrictness.AVERAGE);
     }
 
     @Override
-    public NbtCheckResult check(INbtTagCompound tag, String itemName, PanillaPlugin panilla) {
-        tag = tag.getCompound("minecraft:written_book_content");
+    public NbtCheckResult check(NbtTagCompound tag, String itemName, PanillaPlugin panilla) {
+        tag = tag.getCompound("minecraft:writable_book_content");
 
-        final int titleLength = tag.getCompound("title").getString("raw").length();
-
-        if (panilla.getPConfig().strictness == PStrictness.STRICT) {
-            if (titleLength > panilla.getProtocolConstants().maxBookTitleLength()) {
-                return NbtCheckResult.CRITICAL;
-            }
-        } else {
-            if (titleLength > panilla.getProtocolConstants().NOT_PROTOCOL_maxItemNameLength()) {
-                return NbtCheckResult.CRITICAL;
-            }
-        }
-
-        if (tag.getString("author").length() > panilla.getProtocolConstants().maxUsernameLength())
-            return NbtCheckResult.FAIL;
-
-        INbtTagList pages = tag.getList("pages", NbtDataType.COMPOUND);
+        NbtTagList pages = tag.getList("pages", NbtDataType.COMPOUND);
 
         if (pages.size() > panilla.getProtocolConstants().maxBookPages()) {
             return NbtCheckResult.CRITICAL; // too many pages
