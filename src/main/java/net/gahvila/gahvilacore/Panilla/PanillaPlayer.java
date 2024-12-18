@@ -2,7 +2,7 @@ package net.gahvila.gahvilacore.Panilla;
 
 import net.gahvila.gahvilacore.Panilla.API.config.PConfig;
 import net.gahvila.gahvilacore.Panilla.API.exception.PacketException;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck;
+import net.gahvila.gahvilacore.Panilla.API.nbt.NbtCheck;
 import org.bukkit.entity.Player;
 
 public class PanillaPlayer {

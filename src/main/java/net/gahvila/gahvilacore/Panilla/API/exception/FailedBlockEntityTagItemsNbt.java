@@ -1,6 +1,6 @@
 package net.gahvila.gahvilacore.Panilla.API.exception;
 
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtCheck;
+import net.gahvila.gahvilacore.Panilla.API.nbt.NbtCheck;
 
 import java.util.HashMap;
 import java.util.Map;

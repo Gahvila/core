@@ -3,7 +3,7 @@ package net.gahvila.gahvilacore.Panilla.NMS;
 import de.tr7zw.changeme.nbtapi.NBT;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbt;
 import net.gahvila.gahvilacore.Panilla.API.exception.FailedNbtList;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtChecks;
+import net.gahvila.gahvilacore.Panilla.API.nbt.NbtChecks;
 import net.gahvila.gahvilacore.Panilla.PanillaPlayer;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.Panilla;

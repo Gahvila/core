@@ -3,7 +3,7 @@ package net.gahvila.gahvilacore.Panilla.NMS.nbt;
 import de.tr7zw.changeme.nbtapi.NBTType;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
-import net.gahvila.gahvilacore.Panilla.API.nbt.checks.NbtChecks;
+import net.gahvila.gahvilacore.Panilla.API.nbt.NbtChecks;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
