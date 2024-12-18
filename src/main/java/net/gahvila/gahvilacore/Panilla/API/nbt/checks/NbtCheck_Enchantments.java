@@ -1,10 +1,14 @@
 package net.gahvila.gahvilacore.Panilla.API.nbt.checks;
 
-import net.gahvila.gahvilacore.Panilla.API.EnchantmentCompat;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import net.gahvila.gahvilacore.Panilla.API.config.PStrictness;
 import net.gahvila.gahvilacore.Panilla.API.nbt.NbtDataType;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.Panilla;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 
 public class NbtCheck_Enchantments extends NbtCheck {
 
@@ -35,7 +39,7 @@ public class NbtCheck_Enchantments extends NbtCheck {
             NbtTagCompound levels = enchantments.getCompound("levels");
             for (String key : levels.getKeys()) {
                 int lvl = levels.getInt(key);
-                EnchantmentCompat compat = EnchantmentCompat.getByNamedKey(key);
+                Enchantment compat = getByNamedKey(key);
                 if (lvl > panilla.getEnchantments().getMaxLevel(compat)) {
                     return NbtCheckResult.FAIL;
                 }
@@ -45,7 +49,7 @@ public class NbtCheck_Enchantments extends NbtCheck {
                 }
 
                 for (String other : levels.getKeys()) {
-                    EnchantmentCompat compatOther = EnchantmentCompat.getByNamedKey(other);
+                    Enchantment compatOther = getByNamedKey(other);
                     if (compatOther != compat) {
                         if (panilla.getEnchantments().conflicting(compatOther, compat)) {
                             return NbtCheckResult.FAIL;
@@ -58,4 +62,19 @@ public class NbtCheck_Enchantments extends NbtCheck {
         return NbtCheckResult.PASS;
     }
 
+    public static Enchantment getByNamedKey(String namedKey) {
+        try {
+            NamespacedKey key = NamespacedKey.fromString(namedKey);
+            if (key == null) {
+                throw new IllegalArgumentException("Invalid enchantment key format: " + namedKey);
+            }
+
+            return RegistryAccess.registryAccess()
+                    .getRegistry(RegistryKey.ENCHANTMENT)
+                    .get(key);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            Bukkit.getLogger().warning("Invalid enchantment key: " + namedKey);
+            return null;
+        }
+    }
 }

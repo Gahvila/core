@@ -41,8 +41,10 @@ public class InventoryCleaner {
             for (FailedNbt failedNbt : failedNbtList) {
                 if (FailedNbt.failsThreshold(failedNbt)) {
                     Iterator<TypedDataComponent<?>> iter = itemStack.getComponents().iterator();
-                    while (iter.hasNext()) iter.remove();
-
+                    while (iter.hasNext()) {
+                        iter.next(); // Move to the next element
+                        iter.remove(); // Remove the current element
+                    }
                     break;
                 } else if (FailedNbt.fails(failedNbt)) {
                     NBT.modifyComponents(itemStack.getBukkitStack(), s -> {
@@ -53,5 +55,4 @@ public class InventoryCleaner {
             }
         }
     }
-
 }

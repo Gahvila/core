@@ -21,7 +21,6 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.27") {
@@ -36,7 +35,7 @@ dependencies {
     }
     compileOnly("dev.jorel:commandapi-annotations:9.7.0")
 
-    implementation("de.tr7zw:item-nbt-api:2.14.1-SNAPSHOT")
+    implementation("de.tr7zw:item-nbt-api:2.14.1")
 
     implementation("com.github.stefvanschie.inventoryframework:IF-Paper:0.11.1-SNAPSHOT")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
