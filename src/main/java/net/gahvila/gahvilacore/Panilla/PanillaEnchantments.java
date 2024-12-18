@@ -15,8 +15,6 @@ public class PanillaEnchantments {
             return Integer.MAX_VALUE; // unknown enchantment
         } else if (pConfig.overrideMinecraftMaxEnchantmentLevels) {
             String enchantmentName = String.valueOf(enchantment.getKey()).split(":")[1];
-            System.err.println(enchantmentName);
-
             if (pConfig.minecraftMaxEnchantmentLevelOverrides.containsKey(enchantmentName)) {
                 return pConfig.minecraftMaxEnchantmentLevelOverrides.get(enchantmentName);
             }
