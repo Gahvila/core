@@ -69,7 +69,7 @@ public class NbtCheck_display extends NbtCheck {
             if (panilla.getPConfig().strictness.ordinal() >= PStrictness.STRICT.ordinal()) {
                 maxNameLength = panilla.getProtocolConstants().maxAnvilRenameChars();
             } else {
-                maxNameLength = panilla.getProtocolConstants().NOT_PROTOCOL_maxItemNameLength();
+                maxNameLength = panilla.getProtocolConstants().maxItemNameLength();
             }
 
             if (name.length() > maxNameLength) {
@@ -80,14 +80,14 @@ public class NbtCheck_display extends NbtCheck {
         if (display.hasKeyOfType("Lore", NbtDataType.LIST)) {
             NbtTagList lore = display.getList("Lore");
 
-            if (lore.size() > panilla.getProtocolConstants().NOT_PROTOCOL_maxLoreLines()) {
+            if (lore.size() > panilla.getProtocolConstants().maxLoreLines()) {
                 return NbtCheckResult.CRITICAL; // can cause crashes
             }
 
             for (int i = 0; i < lore.size(); i++) {
                 String line = lore.getString(i);
 
-                if (line.length() > panilla.getProtocolConstants().NOT_PROTOCOL_maxLoreLineLength()) {
+                if (line.length() > panilla.getProtocolConstants().maxLoreLineLength()) {
                     return NbtCheckResult.CRITICAL; // can cause crashes
                 }
             }

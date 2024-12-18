@@ -78,9 +78,8 @@ public class PacketInspector {
 
         NbtTagCompound tag = new NbtTagCompound(NBT.itemStackToNBT(item.getBukkitStack()).getCompound("components"));
         String itemClass = item.getClass().getName();
-        String packetClass = "PacketPlayInWindowClick";
 
-        NbtChecks.checkServerbound(slot, tag, itemClass, packetClass, panilla);
+        NbtChecks.checkServerbound(slot, tag, itemClass, packet.getClass().getSimpleName(), panilla);
     }
 
     public void checkServerboundSetCreativeModeSlotPacket(Object packetHandle) throws NbtNotPermittedException {
@@ -92,9 +91,8 @@ public class PacketInspector {
 
         NbtTagCompound tag = new NbtTagCompound(NBT.itemStackToNBT(item.getBukkitStack()).getCompound("components"));
         String itemClass = item.getClass().getName();
-        String packetClass = "PacketPlayInSetCreativeSlot";
 
-        NbtChecks.checkServerbound(slot, tag, itemClass, packetClass, panilla);
+        NbtChecks.checkServerbound(slot, tag, itemClass, packet.getClass().getSimpleName(), panilla);
     }
 
     public void checkClientboundContainerSetSlotPacket(Object packetHandle) throws NbtNotPermittedException {
@@ -117,9 +115,8 @@ public class PacketInspector {
 
         NbtTagCompound tag = new NbtTagCompound(NBT.itemStackToNBT(item.getBukkitStack()).getCompound("components"));
         String itemClass = item.getClass().getSimpleName();
-        String packetClass = packet.getClass().getSimpleName();
 
-        NbtChecks.checkClientbound(slot, tag, itemClass, packetClass, panilla);
+        NbtChecks.checkClientbound(slot, tag, itemClass, packet.getClass().getSimpleName(), panilla);
     }
 
     public void checkClientboundContainerSetContentPacket(Object packetHandle) throws NbtNotPermittedException {
@@ -134,16 +131,17 @@ public class PacketInspector {
 
         List<ItemStack> itemStacks = packet.getItems();
 
-        for (ItemStack itemStack : itemStacks) {
+        for (int slotIndex = 0; slotIndex < itemStacks.size(); slotIndex++) {
+            ItemStack itemStack = itemStacks.get(slotIndex);
+
             if (!itemStack.isEmpty() || itemStack.getComponents().isEmpty()) {
                 continue;
             }
 
             NbtTagCompound tag = new NbtTagCompound(NBT.itemStackToNBT(itemStack.asBukkitCopy()).getCompound("components"));
             String itemClass = itemStack.getClass().getSimpleName();
-            String packetClass = packet.getClass().getSimpleName();
 
-            NbtChecks.checkClientbound(0, tag, itemClass, packetClass, panilla); // TODO: set slot?
+            NbtChecks.checkClientbound(slotIndex, tag, itemClass, packet.getClass().getSimpleName(), panilla);
         }
     }
 

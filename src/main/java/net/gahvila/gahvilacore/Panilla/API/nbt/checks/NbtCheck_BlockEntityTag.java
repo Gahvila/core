@@ -58,7 +58,7 @@ public class NbtCheck_BlockEntityTag extends NbtCheck {
         NbtTagCompound blockEntityTag = tag.getCompound(getName());
 
         int sizeBytes = blockEntityTag.getStringSizeBytes();
-        int maxSizeBytes = panilla.getProtocolConstants().NOT_PROTOCOL_maxBlockEntityTagLengthBytes();
+        int maxSizeBytes = panilla.getProtocolConstants().maxBlockEntityTagLengthBytes();
 
         // ensure BlockEntityTag isn't huge
         if (sizeBytes > maxSizeBytes) {

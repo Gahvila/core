@@ -58,7 +58,7 @@ public class NbtCheck_EntityTag extends NbtCheck {
 
         if (entityTag.hasKey("CustomName")) {
             String customName = entityTag.getString("CustomName");
-            if (customName.length() > panilla.getProtocolConstants().NOT_PROTOCOL_maxEntityTagCustomNameLength()) {
+            if (customName.length() > panilla.getProtocolConstants().maxEntityTagCustomNameLength()) {
                 return NbtCheckResult.CRITICAL;
             }
             try {

@@ -19,7 +19,7 @@ public class NbtCheck_title extends NbtCheck {
                 return NbtCheckResult.CRITICAL;
             }
         } else {
-            if (titleLength > panilla.getProtocolConstants().NOT_PROTOCOL_maxItemNameLength()) {
+            if (titleLength > panilla.getProtocolConstants().maxItemNameLength()) {
                 return NbtCheckResult.CRITICAL;
             }
         }

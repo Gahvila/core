@@ -17,14 +17,14 @@ public class NbtCheck_Lore extends NbtCheck {
         if (tag.hasKeyOfType(getName(), NbtDataType.LIST)) {
             NbtTagList lore = tag.getList(getName());
 
-            if (lore.size() > panilla.getProtocolConstants().NOT_PROTOCOL_maxLoreLines()) {
+            if (lore.size() > panilla.getProtocolConstants().maxLoreLines()) {
                 return NbtCheckResult.CRITICAL; // can cause crashes
             }
 
             for (int i = 0; i < lore.size(); i++) {
                 String line = lore.getString(i);
 
-                if (line.length() > panilla.getProtocolConstants().NOT_PROTOCOL_maxLoreLineLength()) {
+                if (line.length() > panilla.getProtocolConstants().maxLoreLineLength()) {
                     return NbtCheckResult.CRITICAL; // can cause crashes
                 }
             }

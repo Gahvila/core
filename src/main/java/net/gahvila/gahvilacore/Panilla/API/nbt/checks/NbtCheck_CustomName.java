@@ -65,7 +65,7 @@ public class NbtCheck_CustomName extends NbtCheck {
             if (panilla.getPConfig().strictness.ordinal() >= PStrictness.STRICT.ordinal()) {
                 maxNameLength = panilla.getProtocolConstants().maxAnvilRenameChars();
             } else {
-                maxNameLength = panilla.getProtocolConstants().NOT_PROTOCOL_maxItemNameLength();
+                maxNameLength = panilla.getProtocolConstants().maxItemNameLength();
             }
 
             if (name.length() > maxNameLength) {

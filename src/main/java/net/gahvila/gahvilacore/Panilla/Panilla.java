@@ -30,7 +30,7 @@ public class Panilla {
     private PConfig pConfig;
     private PTranslations pTranslations;
     private PanillaLogger panillaLogger;
-    private DefaultProtocolConstants protocolConstants;
+    private ProtocolConstants protocolConstants;
     private PlayerInjector playerInjector = new PlayerInjector();
     private PacketInspector packetInspector;
     private InventoryCleaner containerCleaner;
@@ -49,7 +49,7 @@ public class Panilla {
         return panillaLogger;
     }
 
-    public DefaultProtocolConstants getProtocolConstants() {
+    public ProtocolConstants getProtocolConstants() {
         return protocolConstants;
     }
 
@@ -130,7 +130,7 @@ public class Panilla {
         enchantments = new PanillaEnchantments(pConfig);
 
         packetSerializerClass = PacketSerializer.class;
-        protocolConstants = new DefaultProtocolConstants() {};
+        protocolConstants = new ProtocolConstants() {};
         playerInjector = new PlayerInjector();
         packetInspector = new PacketInspector(this);
         containerCleaner = new InventoryCleaner(this);
