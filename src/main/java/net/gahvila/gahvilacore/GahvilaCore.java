@@ -121,7 +121,7 @@ public final class GahvilaCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        panilla.disablePanilla();
+        if (panilla != null) panilla.disablePanilla();
     }
 
     private void registerListeners(Listener...listeners){
