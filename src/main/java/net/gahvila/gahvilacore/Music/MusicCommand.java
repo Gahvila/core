@@ -25,13 +25,17 @@ public class MusicCommand {
                         .withArguments(customSongArgument("title"))
                         .executesPlayer((player, args) -> {
                             Song song = musicManager.getSong(args.getRaw("title"));
-                            musicManager.clearSongPlayer(player);
-                            if (!musicManager.getSpeakerEnabled(player)) {
-                                musicManager.createSP(player, song, null, true);
-                            } else if (musicManager.getSpeakerEnabled(player)) {
-                                musicManager.createESP(player, song, null);
+                            if (song != null) {
+                                musicManager.clearSongPlayer(player);
+                                if (!musicManager.getSpeakerEnabled(player)) {
+                                    musicManager.createSP(player, song, null, true);
+                                } else if (musicManager.getSpeakerEnabled(player)) {
+                                    musicManager.createESP(player, song, null);
+                                }
+                                player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + song.getTitle() + "</yellow> <white>soimaan.");
+                            } else {
+                                player.sendRichMessage("Kelvoton nimi.");
                             }
-                            player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + song.getTitle() + "</yellow> <white>soimaan.");
                         }))
                 .withSubcommand(new CommandAPICommand("pause")
                         .executesPlayer((player, args) -> {
