@@ -40,7 +40,7 @@ public class MusicMenu {
     }
 
     public void showGUI(Player player, int openingPage) {
-        ChestGui gui = new ChestGui(5, ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko")));
+        ChestGui gui = new ChestGui(6, ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko")));
         gui.show(player);
 
         gui.setOnGlobalClick(event -> event.setCancelled(true));
@@ -50,9 +50,10 @@ public class MusicMenu {
                 "1AAAAAAA1",
                 "1AAAAAAA1",
                 "1AAAAAAA1",
+                "1AAAAAAA1",
                 "111111111"
         );
-        PatternPane border = new PatternPane(0, 0, 9, 5, Pane.Priority.LOWEST, pattern);
+        PatternPane border = new PatternPane(0, 0, 9, 6, Pane.Priority.LOWEST, pattern);
         ItemStack background = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
         ItemMeta backgroundMeta = background.getItemMeta();
         backgroundMeta.displayName(toUndecoratedMM(""));
@@ -61,7 +62,7 @@ public class MusicMenu {
         border.bindItem('1', new GuiItem(background));
         gui.addPane(border);
 
-        PaginatedPane pages = new PaginatedPane(1, 1, 7, 3);
+        PaginatedPane pages = new PaginatedPane(1, 1, 7, 4);
         List<ItemStack> items = new ArrayList<>();
         NamespacedKey key = new NamespacedKey(instance, "aula");
 
@@ -145,7 +146,7 @@ public class MusicMenu {
             }
         });
 
-        StaticPane navigationPane = new StaticPane(0, 4, 9, 1);
+        StaticPane navigationPane = new StaticPane(0, 5, 9, 1);
 
 
         ItemStack pause = new ItemStack(Material.BARRIER);
@@ -220,7 +221,7 @@ public class MusicMenu {
                 autoplay.lore(List.of(toUndecoratedMM("<gray>Toistaa jatkuvasti"), toUndecoratedMM("<gray>uusia kappaleita."), toUndecoratedMM("<green>Päällä")));
             }
             gui.update();
-        }), 2, 0);
+        }), 1, 0);
 
         ItemStack speaker = new ItemStack(Material.NOTE_BLOCK);
         ItemMeta speakerMeta = speaker.getItemMeta();
@@ -263,7 +264,7 @@ public class MusicMenu {
                 speaker.lore(List.of(toUndecoratedMM("<gray>Soittaa kappaleesi ympärillä"), toUndecoratedMM("<gray>oleville pelaajille."), toUndecoratedMM("<green>Päällä")));
             }
             gui.update();
-        }), 3, 0);
+        }), 2, 0);
 
         ItemStack volume = new ItemStack(Material.BELL);
         ItemMeta volumeMeta = volume.getItemMeta();
@@ -297,7 +298,7 @@ public class MusicMenu {
             volumeMeta.displayName(toUndecoratedMM("<b>Volyymi</b>: <yellow>" + musicManager.getVolume(player) + "</yellow><gray>/</gray><yellow>10</yellow>"));
             volume.setItemMeta(volumeMeta);
             gui.update();
-        }), 4, 0);
+        }), 3, 0);
 
         ItemStack sorting = new ItemStack(Material.NETHER_STAR);
         ItemMeta sortingMeta = sorting.getItemMeta();
@@ -309,7 +310,7 @@ public class MusicMenu {
             player.playSound(player.getLocation(), Sound.UI_LOOM_SELECT_PATTERN, 0.8F, 1F);
             player.closeInventory();
             showGUI(player, 0);
-        }), 5, 0);
+        }), 4, 0);
 
         ItemStack random = new ItemStack(Material.ENDER_PEARL);
         ItemMeta randomMeta = random.getItemMeta();
@@ -337,28 +338,37 @@ public class MusicMenu {
                 player.closeInventory();
                 instance.getLogger().severe("player attempted to play a song that doesn't exist");
             }
-        }), 6, 0);
+        }), 5, 0);
 
-        ItemStack pageChange = new ItemStack(Material.MANGROVE_BUTTON);
-        ItemMeta pageChangeMeta = pageChange.getItemMeta();
-        pageChangeMeta.displayName(toUndecoratedMM("<b>Vaihda sivua"));
-        pageChangeMeta.lore(List.of(toUndecoratedMM("<white>Vasen: <yellow>takaisin"), toUndecoratedMM("<white>Oikea: <yellow>seuraava")));
-        pageChange.setItemMeta(pageChangeMeta);
-        navigationPane.addItem(new GuiItem(pageChange, event -> {
-            if (event.getClick().isLeftClick()) {
-                if (pages.getPage() > 0) {
-                    pages.setPage(pages.getPage() - 1);
-                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.7F);
-                }
-            } else if (event.getClick().isRightClick()) {
-                if (pages.getPage() < pages.getPages() - 1) {
-                    pages.setPage(pages.getPage() + 1);
-                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.8F);
-                }
+        ItemStack previous = new ItemStack(Material.MANGROVE_BUTTON);
+        ItemMeta previousMeta = previous.getItemMeta();
+        previousMeta.displayName(toUndecoratedMM("<b>Takaisin"));
+        previous.setItemMeta(previousMeta);
+        navigationPane.addItem(new GuiItem(previous, event -> {
+            if (pages.getPage() > 0) {
+                pages.setPage(pages.getPage() - 1);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.7F);
+                gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
+
+                musicManager.setPage(player, pages.getPage());
+
+                gui.update();
             }
-            gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
-            musicManager.setPage(player, pages.getPage());
-            gui.update();
+        }), 7, 0);
+        ItemStack next = new ItemStack(Material.WARPED_BUTTON);
+        ItemMeta nextMeta = next.getItemMeta();
+        nextMeta.displayName(toUndecoratedMM("<b>Seuraava"));
+        next.setItemMeta(nextMeta);
+        navigationPane.addItem(new GuiItem(next, event -> {
+            if (pages.getPage() < pages.getPages() - 1) {
+                pages.setPage(pages.getPage() + 1);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.8F);
+                gui.setTitle(ComponentHolder.of(toUndecoratedMM("<dark_purple><b>Musiikkivalikko</b></dark_purple> <dark_gray>(<yellow>" + (pages.getPage() + 1) + "</yellow><dark_gray>/</dark_gray><yellow>" + pages.getPages() + "</yellow><dark_gray>)</dark_gray>")));
+
+                musicManager.setPage(player, pages.getPage());
+
+                gui.update();
+            }
         }), 8, 0);
         gui.addPane(navigationPane);
 
