@@ -11,6 +11,7 @@ repositories {
     gradlePluginPortal()
     maven("https://jitpack.io")
     maven("https://maven.enginehub.org/repo/")
+    maven("https://repo.gahvila.net/snapshots/")
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://repo.codemc.io/repository/maven-snapshots/")
@@ -37,7 +38,7 @@ dependencies {
 
     implementation("de.tr7zw:item-nbt-api:2.14.1")
 
-    implementation("com.github.stefvanschie.inventoryframework:IF-Paper:0.11.1-SNAPSHOT")
+    implementation("net.gahvila:inventoryframework:0.11.1-SNAPSHOT")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
     implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.7.0")
 
@@ -53,7 +54,7 @@ java.sourceCompatibility = JavaVersion.VERSION_21
 publishing {
     repositories {
         maven {
-            name = "gahvila-snapshots"
+            name = "gahvila"
             url = uri("https://repo.gahvila.net/snapshots/")
             credentials(PasswordCredentials::class)
             authentication {
@@ -79,14 +80,13 @@ tasks {
     shadowJar {
         archiveFileName.set("${rootProject.name}-${version}.jar")
         relocate("dev.jorel.commandapi", "net.gahvila.gahvilacore.shaded.commandapi")
-        relocate("com.github.stefvanschie.inventoryframework", "net.gahvila.gahvilacore.shaded.inventoryframework")
+        relocate("net.gahvila.inventoryframework", "net.gahvila.gahvilacore.shaded.inventoryframework")
         relocate("de.leonhard.storage", "net.gahvila.gahvilacore.shaded.storage")
         relocate("de.tr7zw.changeme.nbtapi", "net.gahvila.gahvilacore.shaded.nbtapi")
     }
 
     assemble {
         dependsOn(shadowJar)
-        dependsOn(publishToMavenLocal)
     }
 
     processResources {

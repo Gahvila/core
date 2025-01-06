@@ -1,14 +1,14 @@
 package net.gahvila.gahvilacore.Music;
 
 import com.destroystokyo.paper.MaterialTags;
-import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder;
-import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
-import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
-import com.github.stefvanschie.inventoryframework.pane.Pane;
-import com.github.stefvanschie.inventoryframework.pane.PatternPane;
-import com.github.stefvanschie.inventoryframework.pane.StaticPane;
-import com.github.stefvanschie.inventoryframework.pane.util.Pattern;
+import net.gahvila.inventoryframework.adventuresupport.ComponentHolder;
+import net.gahvila.inventoryframework.gui.GuiItem;
+import net.gahvila.inventoryframework.gui.type.ChestGui;
+import net.gahvila.inventoryframework.pane.PaginatedPane;
+import net.gahvila.inventoryframework.pane.Pane;
+import net.gahvila.inventoryframework.pane.PatternPane;
+import net.gahvila.inventoryframework.pane.StaticPane;
+import net.gahvila.inventoryframework.pane.util.Pattern;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
