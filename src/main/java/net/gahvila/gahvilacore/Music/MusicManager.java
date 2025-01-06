@@ -190,7 +190,7 @@ public class MusicManager {
         Comparator<Song> comparator = switch (sorting) {
             case ALPHABETICAL -> Comparator.comparing(Song::getTitle, String.CASE_INSENSITIVE_ORDER);
             case ARTIST -> Comparator.comparing(Song::getOriginalAuthor, String.CASE_INSENSITIVE_ORDER);
-            case LENGTH -> Comparator.comparingInt(Song::getLength);
+            case LENGTH -> Comparator.comparingDouble(song -> (double) song.getLength() / song.getSpeed());
         };
 
         return songs.stream()
