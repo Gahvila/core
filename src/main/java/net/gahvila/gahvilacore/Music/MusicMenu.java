@@ -73,10 +73,10 @@ public class MusicMenu {
         discs.remove(Material.MUSIC_DISC_RELIC);
         discs.remove(Material.MUSIC_DISC_PIGSTEP);
 
-        if (musicManager.getLoadState() && !musicManager.getSongs().isEmpty()) {
+        if (musicManager.getLoadState() && !musicManager.getSongsSorted(player).isEmpty()) {
             int discsSize = discs.size();
 
-            for (Song song : musicManager.getSongs()) {
+            for (Song song : musicManager.getSongsSorted(player)) {
                 int hash = Math.abs((song.getAuthor() + song.getTitle()).hashCode());
                 Material disc = discs.get(hash % discsSize);
                 ItemStack item = new ItemStack(disc);
@@ -302,10 +302,13 @@ public class MusicMenu {
         ItemStack sorting = new ItemStack(Material.NETHER_STAR);
         ItemMeta sortingMeta = sorting.getItemMeta();
         sortingMeta.displayName(toUndecoratedMM("<b>Listaus"));
-        sortingMeta.lore(List.of(toUndecoratedMM("<white>Tulossa pian")));
+        sortingMeta.displayName(toUndecoratedMM("<white><b>Järjestys: " + musicManager.getSorting(player).getDisplayName()));
         sorting.setItemMeta(sortingMeta);
         navigationPane.addItem(new GuiItem(sorting, event -> {
-            event.setCancelled(true);
+            musicManager.changeSorting(player);
+            player.playSound(player.getLocation(), Sound.UI_LOOM_SELECT_PATTERN, 0.8F, 1F);
+            player.closeInventory();
+            showGUI(player, 0);
         }), 5, 0);
 
         ItemStack random = new ItemStack(Material.ENDER_PEARL);

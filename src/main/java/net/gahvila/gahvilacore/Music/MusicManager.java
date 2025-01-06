@@ -11,8 +11,15 @@ import com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder;
 import de.leonhard.storage.Json;
 import net.draycia.carbon.api.CarbonChatProvider;
 import net.draycia.carbon.api.users.CarbonPlayer;
+import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Single;
 import net.gahvila.gahvilacore.Utils.WorldGuardRegionChecker;
 import net.kyori.adventure.bossbar.BossBar;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.types.MetaNode;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -32,6 +39,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static net.gahvila.gahvilacore.Config.ConfigManager.*;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
@@ -92,7 +100,6 @@ public class MusicManager {
                 List<String> remoteFiles = getRemoteFileList();
                 Month currentMonth = ZonedDateTime.now().getMonth();
 
-                // Create an executor for virtual threads
                 try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                     for (String fileName : remoteFiles) {
                         executor.submit(() -> {
@@ -100,7 +107,6 @@ public class MusicManager {
                                 URL fileUrl = new URL(url + fileName);
                                 Song song = downloadAndParseSong(fileUrl);
                                 if (song != null) {
-                                    // Only load "Christmas" songs in December
                                     boolean isChristmas = song.getDescription() != null &&
                                             song.getDescription().toLowerCase().contains("christmas");
                                     if (currentMonth == Month.DECEMBER || !isChristmas) {
@@ -115,19 +121,7 @@ public class MusicManager {
                     }
                 }
 
-                // Song sorting: Christmas songs first, then by title
-                concurrentSongs.parallelStream()
-                        .sorted((song1, song2) -> {
-                            boolean song1IsChristmas = song1.getDescription() != null &&
-                                    song1.getDescription().toLowerCase().contains("christmas");
-                            boolean song2IsChristmas = song2.getDescription() != null &&
-                                    song2.getDescription().toLowerCase().contains("christmas");
-                            if (song1IsChristmas && !song2IsChristmas) return -1;
-                            if (!song1IsChristmas && song2IsChristmas) return 1;
-                            return song1.getTitle().compareToIgnoreCase(song2.getTitle());
-                        })
-                        .forEachOrdered(songs::add);
-
+                songs.addAll(concurrentSongs);
                 namedSong.putAll(concurrentNamedSong);
 
             } catch (Exception e) {
@@ -142,6 +136,7 @@ public class MusicManager {
             });
         });
     }
+
 
     private List<String> getRemoteFileList() throws Exception {
         URL directoryUrl = new URL(url);
@@ -187,6 +182,20 @@ public class MusicManager {
 
     public ArrayList<Song> getSongs() {
         return songs;
+    }
+
+    public List<Song> getSongsSorted(Player player) {
+        MusicSorting sorting = getSorting(player);
+
+        Comparator<Song> comparator = switch (sorting) {
+            case ALPHABETICAL -> Comparator.comparing(Song::getTitle, String.CASE_INSENSITIVE_ORDER);
+            case ARTIST -> Comparator.comparing(Song::getOriginalAuthor, String.CASE_INSENSITIVE_ORDER);
+            case LENGTH -> Comparator.comparingInt(Song::getLength);
+        };
+
+        return songs.stream()
+                .sorted(comparator)
+                .toList();
     }
 
     public Song getSong(String name){
@@ -608,5 +617,47 @@ public class MusicManager {
 
     public boolean isFavorited(Player player, Song song) {
         return favorited.getOrDefault(player, new ArrayList<>()).contains(song);
+    }
+
+    /**
+     * Music sorting
+     */
+    public void changeSorting(Player player) {
+        MusicSorting currentSorting = getSorting(player);
+
+        MusicSorting[] values = MusicSorting.values();
+
+        int nextOrdinal = (currentSorting.ordinal() + 1) % values.length;
+        MusicSorting nextSorting = values[nextOrdinal];
+
+        setData(player, "single", nextSorting.name());
+    }
+
+    public MusicSorting getSorting(Player player) {
+        LuckPerms api = LuckPermsProvider.get();
+
+        CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
+        String singleValue = metaData.getMetaValue("single");
+
+        if (singleValue == null) return MusicSorting.ALPHABETICAL;
+
+        try {
+            return MusicSorting.valueOf(singleValue);
+        } catch (IllegalArgumentException e) {
+            return MusicSorting.ALPHABETICAL;
+        }
+    }
+
+
+    /**
+     * LuckPerms data saving
+     */
+    private void setData(Player player, String key, String value) {
+        LuckPerms api = LuckPermsProvider.get();
+        User user = api.getPlayerAdapter(Player.class).getUser(player);
+        MetaNode node = MetaNode.builder(key, value).build();
+        user.data().clear(NodeType.META.predicate(mn -> mn.getMetaKey().equals(key)));
+        user.data().add(node);
+        api.getUserManager().saveUser(user);
     }
 }
