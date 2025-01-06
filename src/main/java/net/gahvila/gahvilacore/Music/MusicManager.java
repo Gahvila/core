@@ -630,19 +630,19 @@ public class MusicManager {
         int nextOrdinal = (currentSorting.ordinal() + 1) % values.length;
         MusicSorting nextSorting = values[nextOrdinal];
 
-        setData(player, "single", nextSorting.name());
+        setData(player, "musicsorting", nextSorting.name());
     }
 
     public MusicSorting getSorting(Player player) {
         LuckPerms api = LuckPermsProvider.get();
 
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
-        String singleValue = metaData.getMetaValue("single");
+        String sortingValue = metaData.getMetaValue("musicsorting");
 
-        if (singleValue == null) return MusicSorting.ALPHABETICAL;
+        if (sortingValue == null) return MusicSorting.ALPHABETICAL;
 
         try {
-            return MusicSorting.valueOf(singleValue);
+            return MusicSorting.valueOf(sortingValue);
         } catch (IllegalArgumentException e) {
             return MusicSorting.ALPHABETICAL;
         }
