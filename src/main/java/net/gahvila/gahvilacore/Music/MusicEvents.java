@@ -1,8 +1,5 @@
 package net.gahvila.gahvilacore.Music;
 
-import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
-import com.xxmicloxx.NoteBlockAPI.event.SongNextEvent;
-import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,7 +25,7 @@ public class MusicEvents implements Listener {
         musicManager.setAutoEnabled(player, musicManager.getSavedAutoState(player));
         musicManager.setVolume(player, musicManager.getSavedVolume(player));
 
-        musicManager.playSongFromCookies(player);
+        //musicManager.playSongFromCookies(player);
     }
 
     @EventHandler
@@ -44,6 +41,7 @@ public class MusicEvents implements Listener {
         MusicManager.playerVolume.remove(player);
     }
 
+    /*
     @EventHandler
     public void songNextEvent(SongNextEvent event) {
         SongPlayer songPlayer = event.getSongPlayer();
@@ -71,4 +69,6 @@ public class MusicEvents implements Listener {
             }
         }
     }
+
+     */
 }

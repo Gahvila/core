@@ -1,18 +1,12 @@
 package net.gahvila.gahvilacore.Music;
 
-import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.RepeatMode;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoStereoMode;
-import com.xxmicloxx.NoteBlockAPI.songplayer.EntitySongPlayer;
-import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
-import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
-import com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder;
+import cz.koca2000.nbs4j.Song;
 import de.leonhard.storage.Json;
-import net.draycia.carbon.api.CarbonChatProvider;
-import net.draycia.carbon.api.users.CarbonPlayer;
-import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Single;
-import net.gahvila.gahvilacore.Utils.WorldGuardRegionChecker;
+import net.gahvila.gahvilacore.nbsminecraft.NBSAPI;
+import net.gahvila.gahvilacore.nbsminecraft.platform.bukkit.player.BukkitSongPlayer;
+import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
+import net.gahvila.gahvilacore.nbsminecraft.player.emitter.GlobalSoundEmitter;
+import net.gahvila.gahvilacore.nbsminecraft.utils.AudioListener;
 import net.kyori.adventure.bossbar.BossBar;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -22,7 +16,6 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 
 import java.io.BufferedReader;
@@ -39,7 +32,6 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static net.gahvila.gahvilacore.Config.ConfigManager.*;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
@@ -107,11 +99,11 @@ public class MusicManager {
                                 URL fileUrl = new URL(url + fileName);
                                 Song song = downloadAndParseSong(fileUrl);
                                 if (song != null) {
-                                    boolean isChristmas = song.getDescription() != null &&
-                                            song.getDescription().toLowerCase().contains("christmas");
+                                    song.getMetadata().getDescription();
+                                    boolean isChristmas = song.getMetadata().getDescription().toLowerCase().contains("christmas");
                                     if (currentMonth == Month.DECEMBER || !isChristmas) {
                                         concurrentSongs.add(song);
-                                        concurrentNamedSong.put(song.getTitle(), song);
+                                        concurrentNamedSong.put(song.getMetadata().getTitle(), song);
                                     }
                                 }
                             } catch (Exception e) {
@@ -176,7 +168,7 @@ public class MusicManager {
         }
 
         try (InputStream in = connection.getInputStream()) {
-            return NBSDecoder.parse(in);
+            return NBSAPI.INSTANCE.readSongInputStream(in);
         }
     }
 
@@ -188,9 +180,9 @@ public class MusicManager {
         MusicSorting sorting = getSorting(player);
 
         Comparator<Song> comparator = switch (sorting) {
-            case ALPHABETICAL -> Comparator.comparing(Song::getTitle, String.CASE_INSENSITIVE_ORDER);
-            case ARTIST -> Comparator.comparing(Song::getOriginalAuthor, String.CASE_INSENSITIVE_ORDER);
-            case LENGTH -> Comparator.comparingDouble(song -> (double) song.getLength() / song.getSpeed());
+            case ALPHABETICAL -> Comparator.comparing(song -> song.getMetadata().getTitle(), String.CASE_INSENSITIVE_ORDER);
+            case ARTIST -> Comparator.comparing(song -> song.getMetadata().getOriginalAuthor(), String.CASE_INSENSITIVE_ORDER);
+            case LENGTH -> Comparator.comparingDouble(song -> (double) song.getSongLengthInSeconds());
         };
 
         return songs.stream()
@@ -218,65 +210,27 @@ public class MusicManager {
         if (!songPlayers.containsKey(player)) return;
         if (songPlayers.get(player) == null) songPlayers.remove(player);
         SongPlayer songPlayer = songPlayers.get(player);
-        songPlayer.destroy();
+        songPlayer.stop();
         songPlayers.remove(player);
         clearCookies(player);
     }
 
-    public void createSP(Player player, Song song, Short tick, Boolean playing) {
+    public void createSongPlayer(Player player, Song song, int tick, Boolean playing){
         clearSongPlayer(player);
-        Playlist playlist = new Playlist(song);
-        RadioSongPlayer rsp = new RadioSongPlayer(playlist);
-        rsp.setChannelMode(new MonoStereoMode());
-        rsp.setVolume(volumeConverter(getVolume(player)));
-        rsp.addPlayer(player);
-        if (tick != null){
-            rsp.setTick(tick);
-        }
-        rsp.setPlaying(playing);
-        if (getAutoEnabled(player)) {
-            ArrayList<Song> songs = getSongs();
-            for (Song playlistSong : songs) {
-                playlist.add(playlistSong);
-            }
-            rsp.setRandom(true);
-            rsp.setRepeatMode(RepeatMode.ALL);
-        } else {
-            rsp.setRandom(false);
-            rsp.setRepeatMode(RepeatMode.NO);
-        }
-        saveSongPlayer(player, rsp);
-        Bukkit.getScheduler().runTaskLater(instance, () -> songPlayerSchedule(player, rsp), 3);
-
-        saveTitleToCookie(player);
-        saveTickToCookie(player);
-        savePauseToCookie(player);
-        saveVolumeToCookie(player);
-    }
-
-    public void createESP(Player player, Song song, Short tick) {
-        clearSongPlayer(player);
-        EntitySongPlayer esp = new EntitySongPlayer(song);
-        esp.setEntity(player);
-        esp.setVolume((byte) 45);
-        esp.setDistance(24);
-        if (tick != null){
-            esp.setTick(tick);
-        }
-        esp.setPlaying(true);
-
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")){
-                if(Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
-                    CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(onlinePlayer.getUniqueId()).getNow(null);
-                    if (!carbonPlayer.ignoring(esp.getEntity().getUniqueId())) {
-                        esp.addPlayer(onlinePlayer);
-                    }
-                }
-            }
-        }
-        saveSongPlayer(player, esp);
-        Bukkit.getScheduler().runTaskLater(instance, () -> songPlayerSchedule(player, esp), 3);
+        SongPlayer songPlayer = new BukkitSongPlayer.Builder()
+                .soundEmitter(new GlobalSoundEmitter())
+                .transposeNotes(false)
+                .build();
+        songPlayer.playSong(song);
+        songs.forEach(songPlayer::queueSong);
+        songPlayer.loopQueue(true);
+        songPlayer.shuffleQueue();
+        songPlayer.addListener(new AudioListener(player.getEntityId(), player.getUniqueId(), 1.0f));
+        songPlayer.setTick(tick);
+        songPlayer.play();
+        //songPlayer.setVolume(getVolume(player));
+        songPlayers.put(player, songPlayer);
+        songPlayerSchedule(player, songPlayer);
 
         saveTitleToCookie(player);
         saveTickToCookie(player);
@@ -364,13 +318,15 @@ public class MusicManager {
     // Miscallaneous
     //
     public void songPlayerSchedule(Player player, SongPlayer songPlayer) {
-        double length = songPlayer.getSong().getLength();
-        BossBar progressBar = BossBar.bossBar(toMM("<aqua>" + songPlayer.getSong().getOriginalAuthor() + " - " +
-                songPlayer.getSong().getTitle() + "</aqua>"), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
+        /*
+        Song currentSong = songPlayer.getCurrentSong();
+        double length = currentSong.getSongLengthInSeconds();
+        BossBar progressBar = BossBar.bossBar(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
+                currentSong.getMetadata().getTitle() + "</aqua>"), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
         player.showBossBar(progressBar);
         Bukkit.getScheduler().runTaskTimerAsynchronously(instance, task -> {
             saveTickToCookie(player);
-            double progress = (double) songPlayer.getTick() / length;
+            double progress = (double) songPlayer.getTick() / songPlayer.getSongDuration();
             if (progress >= 1.0 || progress < 0){
                 progressBar.removeViewer(player);
                 task.cancel();
@@ -379,16 +335,18 @@ public class MusicManager {
             progressBar.progress((float) progress);
 
             if (!songPlayer.isPlaying()){
-                progressBar.name(toMM("<red>" + songPlayer.getSong().getOriginalAuthor() + " - " +
-                        songPlayer.getSong().getTitle() + "</red>"));
+                progressBar.name(toMM("<red>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
+                        currentSong.getMetadata().getTitle() + "</red>"));
                 progressBar.color(BossBar.Color.RED);
             } else {
-                progressBar.name(toMM("<aqua>" + songPlayer.getSong().getOriginalAuthor() + " - " +
-                        songPlayer.getSong().getTitle() + "</aqua>"));
+                progressBar.name(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
+                        currentSong.getMetadata().getTitle() + "</aqua>"));
                 progressBar.color(BossBar.Color.BLUE);
             }
         }, 0, 1);
+         */
 
+        /*
         if (songPlayer instanceof EntitySongPlayer){
             boolean carbonEnabled = Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null;
             boolean wgEnabled = Bukkit.getServer().getPluginManager().getPlugin("WorldGuard") != null;
@@ -427,6 +385,7 @@ public class MusicManager {
                 }
             }, 10L, 10);
         }
+         */
     }
 
     //
@@ -449,11 +408,10 @@ public class MusicManager {
     }
 
     public String songLength(Song song) {
-        float lengthInSeconds = song.getLength() / song.getSpeed();
+        float lengthInSeconds = (float) song.getSongLengthInSeconds();
 
         int minutes = (int) (lengthInSeconds / 60);
         int seconds = (int) (lengthInSeconds % 60);
-
         return String.format("%d:%02d", minutes, seconds);
     }
 
@@ -476,15 +434,15 @@ public class MusicManager {
     public void saveTitleToCookie(Player player) {
         SongPlayer songPlayer = getPlayingSongPlayer(player);
         if (songPlayer != null) {
-            player.storeCookie(titleKey, songPlayer.getSong().getTitle().getBytes(StandardCharsets.UTF_8));
+            player.storeCookie(titleKey, songPlayer.getCurrentSong().getMetadata().getTitle().getBytes(StandardCharsets.UTF_8));
         }
     }
 
     public void saveTickToCookie(Player player) {
         SongPlayer songPlayer = getPlayingSongPlayer(player);
         if (songPlayer != null) {
-            ByteBuffer buffer = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);
-            buffer.putShort(songPlayer.getTick());
+            ByteBuffer buffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+            buffer.putInt(songPlayer.getTick());
             player.storeCookie(tickKey, buffer.array());
         }
     }
@@ -515,9 +473,9 @@ public class MusicManager {
                 });
     }
 
-    private CompletableFuture<Short> retrieveTickCookie(Player player) {
+    private CompletableFuture<Integer> retrieveTickCookie(Player player) {
         return player.retrieveCookie(tickKey)
-                .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getShort() : null)
+                .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt() : null)
                 .orTimeout(3, TimeUnit.SECONDS)
                 .exceptionally(ex -> {
                     ex.printStackTrace();
@@ -553,14 +511,14 @@ public class MusicManager {
     public void playSongFromCookies(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(instance, task -> {
             CompletableFuture<String> titleFuture = retrieveTitleCookie(player);
-            CompletableFuture<Short> tickFuture = retrieveTickCookie(player);
+            CompletableFuture<Integer> tickFuture = retrieveTickCookie(player);
             CompletableFuture<Boolean> pauseFuture = retrievePauseCookie(player);
             CompletableFuture<Byte> volumeFuture = retrieveVolumeCookie(player);
 
             CompletableFuture.allOf(titleFuture, tickFuture, pauseFuture, volumeFuture)
                     .thenRun(() -> {
                         String title = titleFuture.join();
-                        Short tick = tickFuture.join();
+                        Integer tick = tickFuture.join();
                         Boolean pause = pauseFuture.join();
                         Byte volume = volumeFuture.join();
 
@@ -573,9 +531,9 @@ public class MusicManager {
                         }
 
                         for (Song song : getSongs()) {
-                            if (song.getTitle().equals(title)) {
+                            if (song.getMetadata().getTitle().equals(title)) {
                                 clearSongPlayer(player);
-                                createSP(player, song, tick, pause);
+                                createSongPlayer(player, song, tick, pause);
                             }
                         }
                     });

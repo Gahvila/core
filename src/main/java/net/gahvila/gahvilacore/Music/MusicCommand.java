@@ -1,8 +1,6 @@
 package net.gahvila.gahvilacore.Music;
 
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
-import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
+import cz.koca2000.nbs4j.Song;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
 import org.bukkit.Sound;
@@ -28,11 +26,11 @@ public class MusicCommand {
                             if (song != null) {
                                 musicManager.clearSongPlayer(player);
                                 if (!musicManager.getSpeakerEnabled(player)) {
-                                    musicManager.createSP(player, song, null, true);
+                                    musicManager.createSongPlayer(player, song, 0, true);
                                 } else if (musicManager.getSpeakerEnabled(player)) {
-                                    musicManager.createESP(player, song, null);
+                                    musicManager.createSongPlayer(player, song, 0, true);
                                 }
-                                player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + song.getTitle() + "</yellow> <white>soimaan.");
+                                player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + song.getMetadata().getTitle() + "</yellow> <white>soimaan.");
                             } else {
                                 player.sendRichMessage("Kelvoton nimi.");
                             }
@@ -41,8 +39,12 @@ public class MusicCommand {
                         .executesPlayer((player, args) -> {
                             if (musicManager.getSongPlayer(player) != null) {
                                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 1F);
-                                musicManager.getSongPlayer(player).setPlaying(!musicManager.getSongPlayer(player).isPlaying());
-                                musicManager.savePauseToCookie(player);
+                                if (musicManager.getSongPlayer(player).isPlaying()) {
+                                    musicManager.getSongPlayer(player).pause();
+                                } else {
+                                    musicManager.getSongPlayer(player).play();
+                                }
+                                //musicManager.savePauseToCookie(player);
                                 player.sendMessage("Vaihdettu.");
                             } else {
                                 player.sendMessage("Ei vaihdettu.");
@@ -60,10 +62,13 @@ public class MusicCommand {
                             int volumeInt = (int) args.get("volume");
                             musicManager.setVolume(player, (byte) volumeInt);
                             if (musicManager.getSongPlayer(player) != null) {
+                                /*
                                 SongPlayer sp = musicManager.getSongPlayer(player);
                                 if (sp instanceof RadioSongPlayer){
                                     sp.setVolume(musicManager.volumeConverter(musicManager.getVolume(player)));
                                 }
+
+                                 */
                             }
                             player.sendRichMessage("Äänenvoimakkuus asetettu: <yellow>" + volumeInt + "</yellow>.");
                         }))
@@ -86,7 +91,7 @@ public class MusicCommand {
         return new CustomArgument<>(new GreedyStringArgument(nodeName), info -> {
 
             List<String> songNames = musicManager.getSongs().stream()
-                    .map(Song::getTitle)
+                    .map(song -> song.getMetadata().getTitle())
                     .toList();
 
             if (songNames.isEmpty()) {
@@ -96,7 +101,7 @@ public class MusicCommand {
             }
         }).replaceSuggestions(ArgumentSuggestions.strings(info -> {
             List<String> songNames = musicManager.getSongs().stream()
-                    .map(Song::getTitle)
+                    .map(song -> song.getMetadata().getTitle())
                     .toList();
 
             return songNames.toArray(new String[0]);

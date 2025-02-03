@@ -18,6 +18,8 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
     maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+    maven("https://repo.lushplugins.org/snapshots")
+
 }
 
 dependencies {
@@ -28,7 +30,6 @@ dependencies {
         exclude(group = "it.unimi.dsi", module = "fastutil")
         exclude(group = "com.google.code.gson", module = "gson")
     }
-    compileOnly("com.github.koca2000:NoteBlockAPI:1.6.2")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.13-SNAPSHOT") {
         exclude(group = "it.unimi.dsi", module = "fastutil")
         exclude(group = "com.google.code.gson", module = "gson")
@@ -41,6 +42,8 @@ dependencies {
     implementation("net.gahvila:inventoryframework:0.11.1-SNAPSHOT")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
     implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.7.0")
+
+    implementation("com.github.koca2000:NBS4j:a15f8d8a19")
 
     annotationProcessor("dev.jorel:commandapi-annotations:9.7.0")
 }

@@ -6,8 +6,6 @@ api-version: '1.21'
 load: STARTUP
 dependencies:
   server:
-    NoteBlockAPI:
-      required: true
     WorldGuard:
       required: false
     LuckPerms:

@@ -1,6 +1,8 @@
 package net.gahvila.gahvilacore.Music;
 
 import com.destroystokyo.paper.MaterialTags;
+import cz.koca2000.nbs4j.Song;
+import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
 import net.gahvila.inventoryframework.adventuresupport.ComponentHolder;
 import net.gahvila.inventoryframework.gui.GuiItem;
 import net.gahvila.inventoryframework.gui.type.ChestGui;
@@ -9,9 +11,6 @@ import net.gahvila.inventoryframework.pane.Pane;
 import net.gahvila.inventoryframework.pane.PatternPane;
 import net.gahvila.inventoryframework.pane.StaticPane;
 import net.gahvila.inventoryframework.pane.util.Pattern;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
-import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -78,20 +77,20 @@ public class MusicMenu {
             int discsSize = discs.size();
 
             for (Song song : musicManager.getSongsSorted(player)) {
-                int hash = Math.abs((song.getAuthor() + song.getTitle()).hashCode());
+                int hash = Math.abs((song.getMetadata().getAuthor() + song.getMetadata().getTitle()).hashCode());
                 Material disc = discs.get(hash % discsSize);
                 ItemStack item = new ItemStack(disc);
                 ItemMeta meta = item.getItemMeta();
-                meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, song.getTitle());
+                meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, song.getMetadata().getTitle());
                 if (musicManager.isFavorited(player, song)){
-                    meta.displayName(toUndecoratedMM("<white>" + song.getTitle() + "</white> <yellow><b>⭐</b></yellow>"));
+                    meta.displayName(toUndecoratedMM("<white>" + song.getMetadata().getTitle() + "</white> <yellow><b>⭐</b></yellow>"));
                     meta.setEnchantmentGlintOverride(true);
                 } else {
-                    meta.displayName(toUndecoratedMM("<white>" + song.getTitle()));
+                    meta.displayName(toUndecoratedMM("<white>" + song.getMetadata().getTitle()));
                     meta.setEnchantmentGlintOverride(false);
                 }
                 meta.lore(List.of(
-                        toUndecoratedMM("<gray>" + song.getOriginalAuthor()),
+                        toUndecoratedMM("<gray>" + song.getMetadata().getOriginalAuthor()),
                         toUndecoratedMM("<gray>" + musicManager.songLength(song))
                 ));
                 JukeboxPlayableComponent component = meta.getJukeboxPlayable();
@@ -134,9 +133,9 @@ public class MusicMenu {
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
                 musicManager.clearSongPlayer(player);
                 if (!musicManager.getSpeakerEnabled(player)) {
-                    musicManager.createSP(player, song, null, true);
+                    musicManager.createSongPlayer(player, song, 0, true);
                 } else if (musicManager.getSpeakerEnabled(player)) {
-                    musicManager.createESP(player, song, null);
+                    musicManager.createSongPlayer(player, song, 0, true);
                 }
                 player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + songName + "</yellow> <white>soimaan.");
                 gui.update();
@@ -162,7 +161,11 @@ public class MusicMenu {
             if (event.getClick().isLeftClick()) {
                 if (musicManager.getSongPlayer(player) != null) {
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 1F);
-                    musicManager.getSongPlayer(player).setPlaying(!musicManager.getSongPlayer(player).isPlaying());
+                    if (musicManager.getSongPlayer(player).isPlaying()) {
+                        musicManager.getSongPlayer(player).pause();
+                    } else {
+                        musicManager.getSongPlayer(player).play();
+                    }
                     musicManager.savePauseToCookie(player);
                 }
             } else if (event.getClick().isRightClick()) {
@@ -193,12 +196,12 @@ public class MusicMenu {
                 if (musicManager.getSpeakerEnabled(player)){
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createESP(player, sp.getSong(), sp.getTick());
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), 0, true);
                     }
                 } else {
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createSP(player, sp.getSong(), sp.getTick(), true);
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), 0, true);
                     }
                 }
                 autoplay.lore(List.of(toUndecoratedMM("<gray>Toistaa jatkuvasti"), toUndecoratedMM("<gray>uusia kappaleita."), toUndecoratedMM("<red>Pois päältä")));
@@ -207,12 +210,12 @@ public class MusicMenu {
                     player.sendRichMessage("<red>Jatkuva toisto ei ole käytössä kaiutintilan päällä ollessa!");
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createESP(player, sp.getSong(), sp.getTick());
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), 0, true);
                     }
                 } else {
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createSP(player, sp.getSong(), sp.getTick(), true);
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), 0, true);
                     }
                 }
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.8F);
@@ -244,7 +247,7 @@ public class MusicMenu {
                 if (musicManager.getSongPlayer(player) != null) {
                     SongPlayer sp = musicManager.getSongPlayer(player);
                     if (sp.isPlaying()){
-                        musicManager.createSP(player, sp.getSong(), sp.getTick(), true);
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), sp.getTick(), true);
                     }
                 }
                 speaker.lore(List.of(toUndecoratedMM("<gray>Soittaa kappaleesi ympärillä"), toUndecoratedMM("<gray>oleville pelaajille."), toUndecoratedMM("<red>Pois päältä")));
@@ -258,7 +261,7 @@ public class MusicMenu {
                 if (musicManager.getSongPlayer(player) != null) {
                     SongPlayer sp = musicManager.getSongPlayer(player);
                     if (sp.isPlaying()){
-                        musicManager.createESP(player, sp.getSong(), sp.getTick());
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), sp.getTick(), true);
                     }
                 }
                 speaker.lore(List.of(toUndecoratedMM("<gray>Soittaa kappaleesi ympärillä"), toUndecoratedMM("<gray>oleville pelaajille."), toUndecoratedMM("<green>Päällä")));
@@ -290,9 +293,12 @@ public class MusicMenu {
 
             if (musicManager.getSongPlayer(player) != null) {
                 SongPlayer sp = musicManager.getSongPlayer(player);
+                /*
                 if (sp instanceof RadioSongPlayer){
                     sp.setVolume(musicManager.volumeConverter(musicManager.getVolume(player)));
                 }
+
+                 */
             }
 
             volumeMeta.displayName(toUndecoratedMM("<b>Volyymi</b>: <yellow>" + musicManager.getVolume(player) + "</yellow><gray>/</gray><yellow>10</yellow>"));
@@ -328,11 +334,11 @@ public class MusicMenu {
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.6F, 1F);
                 musicManager.clearSongPlayer(player);
                 if (!musicManager.getSpeakerEnabled(player)) {
-                    musicManager.createSP(player, randomSong, null, true);
+                    musicManager.createSongPlayer(player, randomSong, 0, true);
                 } else if (musicManager.getSpeakerEnabled(player)) {
-                    musicManager.createESP(player, randomSong, null);
+                    musicManager.createSongPlayer(player, randomSong, 0, true);
                 }
-                player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + randomSong.getTitle() + "</yellow> <white>soimaan.");
+                player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + randomSong.getMetadata().getTitle() + "</yellow> <white>soimaan.");
                 gui.update();
             }else {
                 player.closeInventory();
