@@ -22,8 +22,11 @@ public class PitchUtils {
         key += (int) (pitch / 100);
         pitch %= 100;
 
-
-        key = adjustKey(key);
+        if (key < 9) key -= -15;
+        else if (key < 33) key -= 9;
+        else if (key < 57) key -= 33;
+        else if (key < 81) key -= 57;
+        else if (key < 105) key -= 81;
 
         return (float) Math.pow(2, ((key * 100 + pitch) - 1200d) / 1200d);
     }
@@ -49,16 +52,20 @@ public class PitchUtils {
      */
     public static float getTransposedPitch(Note note) {
         int key = note.getKey();
-        float pitch = note.getPitch() / 100F;
+        float pitch = note.getPitch();
 
         // Apply key to pitch
         pitch += key * 100;
 
-        // Transposes Notes
-        pitch = ((pitch - 3300) % 1200 + 1200) % 1200;
+        // Ensure pitch is within the valid range
+        while (pitch < 3300) pitch += 1200;
+        while (pitch > 5700) pitch -= 1200;
 
-        return (float) Math.pow(2, (pitch - 1200d) / 1200d);
+        pitch -= 3300;
+
+        return (float) Math.pow(2, pitch / 1200d);
     }
+
 
     /**
      * Add an octave suffix to provide support for custom resource packs providing

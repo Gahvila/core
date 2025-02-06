@@ -5,8 +5,10 @@ import de.leonhard.storage.Json;
 import net.gahvila.gahvilacore.nbsminecraft.NBSAPI;
 import net.gahvila.gahvilacore.nbsminecraft.platform.bukkit.player.BukkitSongPlayer;
 import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
+import net.gahvila.gahvilacore.nbsminecraft.player.emitter.EntitySoundEmitter;
 import net.gahvila.gahvilacore.nbsminecraft.player.emitter.GlobalSoundEmitter;
 import net.gahvila.gahvilacore.nbsminecraft.utils.AudioListener;
+import net.gahvila.gahvilacore.nbsminecraft.utils.EntityReference;
 import net.kyori.adventure.bossbar.BossBar;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -217,15 +219,29 @@ public class MusicManager {
 
     public void createSongPlayer(Player player, Song song, int tick, Boolean playing){
         clearSongPlayer(player);
-        SongPlayer songPlayer = new BukkitSongPlayer.Builder()
-                .soundEmitter(new GlobalSoundEmitter())
-                .transposeNotes(false)
-                .build();
+        SongPlayer songPlayer;
+
+        if (getSpeakerEnabled(player)) {
+            EntityReference entityReference = new EntityReference(player.getEntityId(), player.getUniqueId());
+            songPlayer = new BukkitSongPlayer.Builder()
+                    .soundEmitter(new EntitySoundEmitter(entityReference))
+                    .transposeNotes(false)
+                    .build();
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                songPlayer.addListener(new AudioListener(p.getEntityId(), p.getUniqueId()));
+            }
+            songPlayer.setVolume(10);
+        } else {
+            songPlayer = new BukkitSongPlayer.Builder()
+                    .soundEmitter(new GlobalSoundEmitter())
+                    .transposeNotes(false)
+                    .build();
+        }
         songPlayer.playSong(song);
         songs.forEach(songPlayer::queueSong);
         songPlayer.loopQueue(true);
         songPlayer.shuffleQueue();
-        songPlayer.addListener(new AudioListener(player.getEntityId(), player.getUniqueId(), 1.0f));
+        songPlayer.addListener(new AudioListener(player.getEntityId(), player.getUniqueId()));
         songPlayer.setTick(tick);
         songPlayer.play();
         //songPlayer.setVolume(getVolume(player));
@@ -320,7 +336,7 @@ public class MusicManager {
     public void songPlayerSchedule(Player player, SongPlayer songPlayer) {
         /*
         Song currentSong = songPlayer.getCurrentSong();
-        double length = currentSong.getSongLengthInSeconds();
+        double length = songLength()
         BossBar progressBar = BossBar.bossBar(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
                 currentSong.getMetadata().getTitle() + "</aqua>"), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
         player.showBossBar(progressBar);

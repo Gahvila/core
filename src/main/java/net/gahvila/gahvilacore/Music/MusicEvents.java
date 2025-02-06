@@ -25,7 +25,7 @@ public class MusicEvents implements Listener {
         musicManager.setAutoEnabled(player, musicManager.getSavedAutoState(player));
         musicManager.setVolume(player, musicManager.getSavedVolume(player));
 
-        //musicManager.playSongFromCookies(player);
+        musicManager.playSongFromCookies(player);
     }
 
     @EventHandler

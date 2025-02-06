@@ -196,12 +196,12 @@ public class MusicMenu {
                 if (musicManager.getSpeakerEnabled(player)){
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createSongPlayer(player, sp.getCurrentSong(), 0, true);
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), sp.getTick(), true);
                     }
                 } else {
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createSongPlayer(player, sp.getCurrentSong(), 0, true);
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), sp.getTick(), true);
                     }
                 }
                 autoplay.lore(List.of(toUndecoratedMM("<gray>Toistaa jatkuvasti"), toUndecoratedMM("<gray>uusia kappaleita."), toUndecoratedMM("<red>Pois päältä")));
@@ -210,12 +210,12 @@ public class MusicMenu {
                     player.sendRichMessage("<red>Jatkuva toisto ei ole käytössä kaiutintilan päällä ollessa!");
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createSongPlayer(player, sp.getCurrentSong(), 0, true);
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), sp.getTick(), true);
                     }
                 } else {
                     if (musicManager.getSongPlayer(player) != null) {
                         SongPlayer sp = musicManager.getSongPlayer(player);
-                        musicManager.createSongPlayer(player, sp.getCurrentSong(), 0, true);
+                        musicManager.createSongPlayer(player, sp.getCurrentSong(), sp.getTick(), true);
                     }
                 }
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 0.8F);
