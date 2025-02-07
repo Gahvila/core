@@ -252,13 +252,15 @@ public class SongPlayer {
                 }
 
                 float volume = (layer.getVolume() * this.volume * note.getVolume()) / 1_000_000F;
-                float pitch;
+                float pitch = PitchUtils.getPitchInOctave(note);
+                /*
                 if (transposeNotes) {
                     pitch = PitchUtils.getTransposedPitch(note);
                 } else {
                     sound = PitchUtils.addOctaveSuffix(sound, note.getKey());
                     pitch = PitchUtils.getPitchInOctave(note);
                 }
+                 */
 
                 for (AudioListener listener : listeners.values()) {
                     soundEmitter.playSound(platform, listener, sound, soundCategory, volume, pitch);
