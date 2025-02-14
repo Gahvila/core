@@ -19,7 +19,8 @@ import java.util.logging.Logger;
 public class NBSAPI {
     public static final NBSAPI INSTANCE = new NBSAPI();
 
-    private final ScheduledExecutorService threads = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService threads =
+            Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
 
     /**
      * @return the thread pool used to send sounds to players

@@ -1,0 +1,3 @@
+This project includes code from NBSMinecraft (https://github.com/RegrowthMC/NBSMinecraft),
+which is licensed under the GNU General Public License v3.0.
+See the LICENSE file in the original project for details.

@@ -41,7 +41,7 @@ public class BukkitPlatform extends AbstractPlatform {
             return;
         }
 
-        Entity entity = findEntity(listener.uuid());
+        Entity entity = findEntity(entityReference.uuid());
         if (entity == null) {
             return;
         }

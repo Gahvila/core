@@ -1,5 +1,8 @@
 package net.gahvila.gahvilacore.Music;
 
+import net.gahvila.gahvilacore.nbsminecraft.events.SongEndEvent;
+import net.gahvila.gahvilacore.nbsminecraft.events.SongNextEvent;
+import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,17 +44,16 @@ public class MusicEvents implements Listener {
         MusicManager.playerVolume.remove(player);
     }
 
-    /*
     @EventHandler
     public void songNextEvent(SongNextEvent event) {
         SongPlayer songPlayer = event.getSongPlayer();
-        Set<UUID> playerUUIDs = songPlayer.getPlayerUUIDs();
+        Set<UUID> playerUUIDs = songPlayer.getListeners().keySet();
         for (UUID uuid : playerUUIDs) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
                 musicManager.saveTitleToCookie(player);
                 musicManager.saveTickToCookie(player);
-                player.sendRichMessage("Nyt soi: <yellow>" + songPlayer.getSong().getTitle());
+                player.sendRichMessage("Nyt soi: <yellow>" + songPlayer.getCurrentSong().getMetadata().getTitle());
                 musicManager.songPlayerSchedule(player, songPlayer);
             }
         }
@@ -60,7 +62,7 @@ public class MusicEvents implements Listener {
     @EventHandler
     public void onSongStop(SongEndEvent event) {
         SongPlayer songPlayer = event.getSongPlayer();
-        Set<UUID> playerUUIDs = songPlayer.getPlayerUUIDs();
+        Set<UUID> playerUUIDs = songPlayer.getListeners().keySet();
         for (UUID uuid : playerUUIDs) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
@@ -69,6 +71,4 @@ public class MusicEvents implements Listener {
             }
         }
     }
-
-     */
 }

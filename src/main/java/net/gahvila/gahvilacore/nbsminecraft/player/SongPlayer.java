@@ -3,7 +3,10 @@ package net.gahvila.gahvilacore.nbsminecraft.player;
 import cz.koca2000.nbs4j.Layer;
 import cz.koca2000.nbs4j.Note;
 import cz.koca2000.nbs4j.Song;
+import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.nbsminecraft.NBSAPI;
+import net.gahvila.gahvilacore.nbsminecraft.events.SongEndEvent;
+import net.gahvila.gahvilacore.nbsminecraft.events.SongNextEvent;
 import net.gahvila.gahvilacore.nbsminecraft.platform.AbstractPlatform;
 import net.gahvila.gahvilacore.nbsminecraft.player.emitter.GlobalSoundEmitter;
 import net.gahvila.gahvilacore.nbsminecraft.player.emitter.SoundEmitter;
@@ -13,12 +16,16 @@ import net.gahvila.gahvilacore.nbsminecraft.utils.AudioListener;
 import net.gahvila.gahvilacore.nbsminecraft.utils.Instruments;
 import net.gahvila.gahvilacore.nbsminecraft.utils.PitchUtils;
 import net.gahvila.gahvilacore.nbsminecraft.utils.SoundCategory;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static net.gahvila.gahvilacore.GahvilaCore.instance;
 
 public class SongPlayer {
     private final AbstractPlatform platform;
@@ -31,7 +38,7 @@ public class SongPlayer {
 
     private Song song = null;
     private boolean playing = true;
-    private int songTick = 0;
+    private long songTick = 0;
     private long songStartTime = -1;
 
     private SongPlayer(AbstractPlatform platform, SoundEmitter soundEmitter, SongQueue queue, SoundCategory soundCategory, int volume, boolean transposeNotes) {
@@ -50,6 +57,13 @@ public class SongPlayer {
      */
     public SongQueue getQueue() {
         return queue;
+    }
+
+    /**
+     * returns all audio listeners
+     */
+    public Map<UUID, AudioListener> getListeners() {
+        return listeners;
     }
 
     /**
@@ -201,15 +215,22 @@ public class SongPlayer {
     /**
      * Get the tick position of the song
      */
-    public int getTick() {
+    public long getTick() {
         return songTick;
     }
 
     /**
      * Set the tick position of the song
      */
-    public void setTick(int tick) {
+    public void setTick(long tick) {
         this.songTick = tick;
+    }
+
+    /**
+     * Get the SoundEmitter of the SongPlayer
+     */
+    public SoundEmitter getSoundEmitter() {
+        return soundEmitter;
     }
 
     /**
@@ -231,7 +252,12 @@ public class SongPlayer {
 
         if (song == null) {
             if (!queue.isEmpty()) {
+                SongNextEvent event = new SongNextEvent(this);
+                Bukkit.getScheduler().runTask(instance, () -> Bukkit.getPluginManager().callEvent(event));
                 playSong(queue.poll());
+            } else {
+                SongEndEvent event = new SongEndEvent(this);
+                Bukkit.getScheduler().runTask(instance, () -> Bukkit.getPluginManager().callEvent(event));
             }
 
             return;
@@ -253,14 +279,6 @@ public class SongPlayer {
 
                 float volume = (layer.getVolume() * this.volume * note.getVolume()) / 1_000_000F;
                 float pitch = PitchUtils.getPitchInOctave(note);
-                /*
-                if (transposeNotes) {
-                    pitch = PitchUtils.getTransposedPitch(note);
-                } else {
-                    sound = PitchUtils.addOctaveSuffix(sound, note.getKey());
-                    pitch = PitchUtils.getPitchInOctave(note);
-                }
-                 */
 
                 for (AudioListener listener : listeners.values()) {
                     soundEmitter.playSound(platform, listener, sound, soundCategory, volume, pitch);
@@ -276,6 +294,14 @@ public class SongPlayer {
     }
 
     private void onSongFinish() {
+        if (!queue.isEmpty()) {
+            SongNextEvent event = new SongNextEvent(this);
+            Bukkit.getScheduler().runTask(instance, () -> Bukkit.getPluginManager().callEvent(event));
+            playSong(queue.poll());
+        } else {
+            SongEndEvent event = new SongEndEvent(this);
+            Bukkit.getScheduler().runTask(instance, () -> Bukkit.getPluginManager().callEvent(event));
+        }
         playSong(queue.poll());
     }
 

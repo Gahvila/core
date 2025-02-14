@@ -2,13 +2,18 @@ package net.gahvila.gahvilacore.Music;
 
 import cz.koca2000.nbs4j.Song;
 import de.leonhard.storage.Json;
+import net.draycia.carbon.api.CarbonChatProvider;
+import net.draycia.carbon.api.users.CarbonPlayer;
+import net.gahvila.gahvilacore.Utils.WorldGuardRegionChecker;
 import net.gahvila.gahvilacore.nbsminecraft.NBSAPI;
 import net.gahvila.gahvilacore.nbsminecraft.platform.bukkit.player.BukkitSongPlayer;
 import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
 import net.gahvila.gahvilacore.nbsminecraft.player.emitter.EntitySoundEmitter;
 import net.gahvila.gahvilacore.nbsminecraft.player.emitter.GlobalSoundEmitter;
+import net.gahvila.gahvilacore.nbsminecraft.player.emitter.StaticSoundEmitter;
 import net.gahvila.gahvilacore.nbsminecraft.utils.AudioListener;
 import net.gahvila.gahvilacore.nbsminecraft.utils.EntityReference;
+import net.gahvila.gahvilacore.nbsminecraft.utils.SoundLocation;
 import net.kyori.adventure.bossbar.BossBar;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -18,6 +23,7 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 
 import java.io.BufferedReader;
@@ -217,7 +223,7 @@ public class MusicManager {
         clearCookies(player);
     }
 
-    public void createSongPlayer(Player player, Song song, int tick, Boolean playing){
+    public void createSongPlayer(Player player, Song song, long tick, Boolean playing){
         clearSongPlayer(player);
         SongPlayer songPlayer;
 
@@ -225,12 +231,19 @@ public class MusicManager {
             EntityReference entityReference = new EntityReference(player.getEntityId(), player.getUniqueId());
             songPlayer = new BukkitSongPlayer.Builder()
                     .soundEmitter(new EntitySoundEmitter(entityReference))
+                    .volume(45)
                     .transposeNotes(false)
                     .build();
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                songPlayer.addListener(new AudioListener(p.getEntityId(), p.getUniqueId()));
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")){
+                    if(Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
+                        CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(onlinePlayer.getUniqueId()).getNow(null);
+                        if (!carbonPlayer.ignoring(entityReference.uuid())) {
+                            songPlayer.addListener(new AudioListener(onlinePlayer.getEntityId(), onlinePlayer.getUniqueId()));
+                        }
+                    }
+                }
             }
-            songPlayer.setVolume(10);
         } else {
             songPlayer = new BukkitSongPlayer.Builder()
                     .soundEmitter(new GlobalSoundEmitter())
@@ -238,14 +251,18 @@ public class MusicManager {
                     .build();
         }
         songPlayer.playSong(song);
-        songs.forEach(songPlayer::queueSong);
-        songPlayer.loopQueue(true);
-        songPlayer.shuffleQueue();
+        if (getAutoEnabled(player)) {
+            songs.forEach(songPlayer::queueSong);
+            songPlayer.loopQueue(true);
+            songPlayer.shuffleQueue();
+        }
         songPlayer.addListener(new AudioListener(player.getEntityId(), player.getUniqueId()));
         songPlayer.setTick(tick);
         songPlayer.play();
-        //songPlayer.setVolume(getVolume(player));
-        songPlayers.put(player, songPlayer);
+        if (songPlayer.getSoundEmitter() instanceof GlobalSoundEmitter) {
+            songPlayer.setVolume(volumeConverter(getVolume(player)));
+        }
+        saveSongPlayer(player, songPlayer);
         songPlayerSchedule(player, songPlayer);
 
         saveTitleToCookie(player);
@@ -303,6 +320,12 @@ public class MusicManager {
             playerVolume.put(player, (byte) 10);
         } else playerVolume.put(player, (byte) Math.max(volume, 1));
         saveVolumeToCookie(player);
+        if (getSongPlayer(player) != null) {
+            SongPlayer sp = getSongPlayer(player);
+            if (sp.getSoundEmitter() instanceof GlobalSoundEmitter) {
+                sp.setVolume(volumeConverter(getVolume(player)));
+            }
+        }
     }
 
     public void increaseVolume(Player player) {
@@ -333,42 +356,54 @@ public class MusicManager {
     //
     // Miscallaneous
     //
+    public static WeakHashMap<Player, BossBar> progressBars = new WeakHashMap<>();
     public void songPlayerSchedule(Player player, SongPlayer songPlayer) {
-        /*
-        Song currentSong = songPlayer.getCurrentSong();
-        double length = songLength()
-        BossBar progressBar = BossBar.bossBar(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
-                currentSong.getMetadata().getTitle() + "</aqua>"), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
+        if (progressBars.containsKey(player)) {
+            progressBars.get(player).removeViewer(player);
+            progressBars.remove(player);
+        }
+        BossBar progressBar = BossBar.bossBar(toMM("<aqua>" + songPlayer.getCurrentSong().getMetadata().getOriginalAuthor() + " - " +
+                songPlayer.getCurrentSong().getMetadata().getTitle() + "</aqua>"), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
         player.showBossBar(progressBar);
+        progressBars.put(player, progressBar);
         Bukkit.getScheduler().runTaskTimerAsynchronously(instance, task -> {
+            Song currentSong = songPlayer.getCurrentSong();
+            if (currentSong == null) {
+                progressBar.removeViewer(player);
+                task.cancel();
+                return;
+            }
             saveTickToCookie(player);
-            double progress = (double) songPlayer.getTick() / songPlayer.getSongDuration();
+            double progress = (double) songPlayer.getTick() / songPlayer.getCurrentSong().getSongLength();
             if (progress >= 1.0 || progress < 0){
                 progressBar.removeViewer(player);
                 task.cancel();
                 return;
             }
             progressBar.progress((float) progress);
-
             if (!songPlayer.isPlaying()){
-                progressBar.name(toMM("<red>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
-                        currentSong.getMetadata().getTitle() + "</red>"));
+                progressBar.name(toMM("<red>" + songPlayer.getCurrentSong().getMetadata().getOriginalAuthor() + " - " +
+                        songPlayer.getCurrentSong().getMetadata().getTitle() + "</red>"));
                 progressBar.color(BossBar.Color.RED);
             } else {
-                progressBar.name(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
-                        currentSong.getMetadata().getTitle() + "</aqua>"));
+                progressBar.name(toMM("<aqua>" + songPlayer.getCurrentSong().getMetadata().getOriginalAuthor() + " - " +
+                        songPlayer.getCurrentSong().getMetadata().getTitle() + "</aqua>"));
                 progressBar.color(BossBar.Color.BLUE);
             }
-        }, 0, 1);
-         */
+        }, 0, 20);
 
-        /*
-        if (songPlayer instanceof EntitySongPlayer){
+
+        if (songPlayer.getSoundEmitter() instanceof EntitySoundEmitter entitySoundEmitter) {
             boolean carbonEnabled = Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null;
             boolean wgEnabled = Bukkit.getServer().getPluginManager().getPlugin("WorldGuard") != null;
 
             Bukkit.getScheduler().runTaskTimer(instance, task2 -> {
-                double progress = (double) songPlayer.getTick() / length;
+                Song currentSong = songPlayer.getCurrentSong();
+                if (currentSong == null) {
+                    task2.cancel();
+                    return;
+                }
+                double progress = (double) songPlayer.getTick() / songPlayer.getCurrentSong().getSongLength();
                 if (progress >= 1.0 || progress < 0){
                     task2.cancel();
                     return;
@@ -378,12 +413,12 @@ public class MusicManager {
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                         if (wgEnabled) {
                             if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")) {
-                                songPlayer.addPlayer(onlinePlayer);
+                                songPlayer.addListener(new AudioListener(onlinePlayer.getEntityId(), onlinePlayer.getUniqueId()));
                                 if (songPlayer.isPlaying()) {
                                     onlinePlayer.spawnParticle(Particle.NOTE, player.getLocation().add(0, 2, 0), 1);
                                 }
                             } else {
-                                songPlayer.removePlayer(onlinePlayer);
+                                songPlayer.removeListener(onlinePlayer.getUniqueId());
                             }
                         } else {
                             if (songPlayer.isPlaying()) {
@@ -393,15 +428,14 @@ public class MusicManager {
 
                         if (carbonEnabled) {
                             CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(onlinePlayer.getUniqueId()).getNow(null);
-                            if (carbonPlayer.ignoring(((EntitySongPlayer) songPlayer).getEntity().getUniqueId())) {
-                                songPlayer.removePlayer(onlinePlayer);
+                            if (carbonPlayer.ignoring((entitySoundEmitter.entityReference.uuid()))) {
+                                songPlayer.removeListener(onlinePlayer.getUniqueId());
                             }
                         }
                     }
                 }
             }, 10L, 10);
         }
-         */
     }
 
     //
@@ -457,8 +491,8 @@ public class MusicManager {
     public void saveTickToCookie(Player player) {
         SongPlayer songPlayer = getPlayingSongPlayer(player);
         if (songPlayer != null) {
-            ByteBuffer buffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            buffer.putInt(songPlayer.getTick());
+            ByteBuffer buffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
+            buffer.putLong(songPlayer.getTick());
             player.storeCookie(tickKey, buffer.array());
         }
     }
@@ -489,9 +523,9 @@ public class MusicManager {
                 });
     }
 
-    private CompletableFuture<Integer> retrieveTickCookie(Player player) {
+    private CompletableFuture<Long> retrieveTickCookie(Player player) {
         return player.retrieveCookie(tickKey)
-                .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt() : null)
+                .thenApply(bytes -> bytes != null ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getLong() : null)
                 .orTimeout(3, TimeUnit.SECONDS)
                 .exceptionally(ex -> {
                     ex.printStackTrace();
@@ -527,14 +561,14 @@ public class MusicManager {
     public void playSongFromCookies(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(instance, task -> {
             CompletableFuture<String> titleFuture = retrieveTitleCookie(player);
-            CompletableFuture<Integer> tickFuture = retrieveTickCookie(player);
+            CompletableFuture<Long> tickFuture = retrieveTickCookie(player);
             CompletableFuture<Boolean> pauseFuture = retrievePauseCookie(player);
             CompletableFuture<Byte> volumeFuture = retrieveVolumeCookie(player);
 
             CompletableFuture.allOf(titleFuture, tickFuture, pauseFuture, volumeFuture)
                     .thenRun(() -> {
                         String title = titleFuture.join();
-                        Integer tick = tickFuture.join();
+                        Long tick = tickFuture.join();
                         Boolean pause = pauseFuture.join();
                         Byte volume = volumeFuture.join();
 

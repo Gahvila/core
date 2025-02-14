@@ -3,6 +3,7 @@ package net.gahvila.gahvilacore.Music;
 import com.destroystokyo.paper.MaterialTags;
 import cz.koca2000.nbs4j.Song;
 import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
+import net.gahvila.gahvilacore.nbsminecraft.player.emitter.GlobalSoundEmitter;
 import net.gahvila.inventoryframework.adventuresupport.ComponentHolder;
 import net.gahvila.inventoryframework.gui.GuiItem;
 import net.gahvila.inventoryframework.gui.type.ChestGui;
@@ -293,12 +294,10 @@ public class MusicMenu {
 
             if (musicManager.getSongPlayer(player) != null) {
                 SongPlayer sp = musicManager.getSongPlayer(player);
-                /*
-                if (sp instanceof RadioSongPlayer){
+
+                if (sp.getSoundEmitter() instanceof GlobalSoundEmitter){
                     sp.setVolume(musicManager.volumeConverter(musicManager.getVolume(player)));
                 }
-
-                 */
             }
 
             volumeMeta.displayName(toUndecoratedMM("<b>Volyymi</b>: <yellow>" + musicManager.getVolume(player) + "</yellow><gray>/</gray><yellow>10</yellow>"));

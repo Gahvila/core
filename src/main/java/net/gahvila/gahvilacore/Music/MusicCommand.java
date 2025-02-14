@@ -3,6 +3,7 @@ package net.gahvila.gahvilacore.Music;
 import cz.koca2000.nbs4j.Song;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
+import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
 import org.bukkit.Sound;
 
 import java.util.List;
@@ -61,15 +62,6 @@ public class MusicCommand {
                         .executesPlayer((player, args) -> {
                             int volumeInt = (int) args.get("volume");
                             musicManager.setVolume(player, (byte) volumeInt);
-                            if (musicManager.getSongPlayer(player) != null) {
-                                /*
-                                SongPlayer sp = musicManager.getSongPlayer(player);
-                                if (sp instanceof RadioSongPlayer){
-                                    sp.setVolume(musicManager.volumeConverter(musicManager.getVolume(player)));
-                                }
-
-                                 */
-                            }
                             player.sendRichMessage("Äänenvoimakkuus asetettu: <yellow>" + volumeInt + "</yellow>.");
                         }))
                 .withSubcommand(new CommandAPICommand("reload")

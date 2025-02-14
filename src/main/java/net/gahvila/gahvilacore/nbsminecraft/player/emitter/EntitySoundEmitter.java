@@ -4,9 +4,10 @@ import net.gahvila.gahvilacore.nbsminecraft.platform.AbstractPlatform;
 import net.gahvila.gahvilacore.nbsminecraft.utils.AudioListener;
 import net.gahvila.gahvilacore.nbsminecraft.utils.EntityReference;
 import net.gahvila.gahvilacore.nbsminecraft.utils.SoundCategory;
+import org.bukkit.Bukkit;
 
 public class EntitySoundEmitter extends SoundEmitter {
-    private final EntityReference entityReference;
+    public final EntityReference entityReference;
 
     public EntitySoundEmitter(EntityReference entityReference) {
         this.entityReference = entityReference;
