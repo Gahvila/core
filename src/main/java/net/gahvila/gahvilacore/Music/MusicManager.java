@@ -251,7 +251,8 @@ public class MusicManager {
                     .build();
         }
         songPlayer.playSong(song);
-        if (getAutoEnabled(player)) {
+
+        if (!getSpeakerEnabled(player) && getAutoEnabled(player)) {
             songs.forEach(songPlayer::queueSong);
             songPlayer.loopQueue(true);
             songPlayer.shuffleQueue();

@@ -45,7 +45,7 @@ public class MusicCommand {
                                 } else {
                                     musicManager.getSongPlayer(player).play();
                                 }
-                                //musicManager.savePauseToCookie(player);
+                                musicManager.savePauseToCookie(player);
                                 player.sendMessage("Vaihdettu.");
                             } else {
                                 player.sendMessage("Ei vaihdettu.");
