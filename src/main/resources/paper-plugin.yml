@@ -13,4 +13,4 @@ dependencies:
     PlaceholderAPI:
       required: true
     CarbonChat:
-      required: true
+      required: false
