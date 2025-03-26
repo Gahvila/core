@@ -6,6 +6,7 @@ import net.gahvila.gahvilacore.AFK.AfkCommand;
 import net.gahvila.gahvilacore.AFK.AfkEvents;
 import net.gahvila.gahvilacore.AFK.AfkManager;
 import net.gahvila.gahvilacore.Config.ConfigManager;
+import net.gahvila.gahvilacore.Core.CoreCommand;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
 import net.gahvila.gahvilacore.Panilla.Panilla;
 import net.gahvila.gahvilacore.Music.MusicCommand;
@@ -108,6 +109,9 @@ public final class GahvilaCore extends JavaPlugin {
 
         FlyCommand flyCommand = new FlyCommand();
         flyCommand.registerCommands();
+
+        CoreCommand coreCommand = new CoreCommand();
+        coreCommand.registerCommands();
 
         //events
         Bukkit.getPluginManager().registerEvents(new FullBypass(), this);

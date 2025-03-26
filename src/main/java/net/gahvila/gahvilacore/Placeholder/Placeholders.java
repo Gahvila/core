@@ -2,15 +2,12 @@ package net.gahvila.gahvilacore.Placeholder;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.gahvila.gahvilacore.AFK.AfkManager;
+import net.gahvila.gahvilacore.Core.DebugMode;
 import net.gahvila.gahvilacore.GahvilaCore;
-import net.gahvila.gahvilacore.Profiles.Marriage.MarriageManager;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeManager;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-
-import java.util.concurrent.CompletableFuture;
-
 
 public class Placeholders extends PlaceholderExpansion {
 
@@ -53,7 +50,7 @@ public class Placeholders extends PlaceholderExpansion {
             return "";
         }
         Player op = player.getPlayer();
-        return switch (params) {
+        String result = switch (params) {
             case "namecolor" -> prefixManager.generateNamecolor(op);
             case "namecolorplain" -> prefixManager.generateNamecolorPlain(op);
             case "prefix" -> prefixManager.generatePrefix(op);
@@ -65,6 +62,11 @@ public class Placeholders extends PlaceholderExpansion {
             case "playtimeshort" -> PlaytimeManager.formatDurationShort(playtimeManager.getPlaytime(player).join());
             default -> null;
         };
+
+        if (DebugMode.isDebugging()) {
+            DebugMode.logDebugMessage("placeholder result for parameters '" + params + "' is '" + result + "'.");
+        }
+        return result;
     }
 
 }
