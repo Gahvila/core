@@ -43,10 +43,12 @@ public class Placeholders extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer player, String params) {
         if (params.equalsIgnoreCase("name")) {
+            if (DebugMode.isDebugging()) DebugMode.logDebugMessage("placeholder result for player has invalid name");
             return player == null ? null : player.getName(); // "name" requires the player to be valid
         }
 
         if (player == null) {
+            if (DebugMode.isDebugging()) DebugMode.logDebugMessage("placeholder result is for a null player");
             return "";
         }
         Player op = player.getPlayer();
@@ -64,7 +66,7 @@ public class Placeholders extends PlaceholderExpansion {
         };
 
         if (DebugMode.isDebugging()) {
-            DebugMode.logDebugMessage("placeholder result for parameters '" + params + "' is '" + result + "'.");
+            DebugMode.logDebugMessage("placeholder result for player '" + player.getName() + "' with parameters '" + params + "' is '" + result + "'.");
         }
         return result;
     }
