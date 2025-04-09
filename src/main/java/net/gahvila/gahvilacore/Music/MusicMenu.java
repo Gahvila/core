@@ -95,7 +95,7 @@ public class MusicMenu {
                         toUndecoratedMM("<gray>" + musicManager.songLength(song))
                 ));
                 JukeboxPlayableComponent component = meta.getJukeboxPlayable();
-                component.setShowInTooltip(false);
+                component.setShowInTooltip(false); //TODO: update for 1.21.5
                 meta.setJukeboxPlayable(component);
                 if (musicManager.isFavorited(player, song)){
                     meta.setEnchantmentGlintOverride(true);

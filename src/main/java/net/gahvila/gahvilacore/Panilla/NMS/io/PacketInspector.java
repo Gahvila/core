@@ -30,6 +30,7 @@ import net.gahvila.gahvilacore.Panilla.PanillaPlayer;
 import net.gahvila.gahvilacore.Panilla.NMS.nbt.NbtTagCompound;
 import net.gahvila.gahvilacore.Panilla.Panilla;
 import net.minecraft.core.component.TypedDataComponent;
+import net.minecraft.network.HashedStack;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -92,17 +93,19 @@ public class PacketInspector {
 
     public void checkServerboundContainerClickPacket(Object packetHandle) throws NbtNotPermittedException {
         if (!(packetHandle instanceof ServerboundContainerClickPacket packet)) return;
-        int windowId = packet.getContainerId();
+        int windowId = packet.containerId();
         if (windowId != 0 && panilla.getPConfig().ignoreNonPlayerInventories) return;
 
-        int slot = packet.getSlotNum();
-        ItemStack item = packet.getCarriedItem();
-        if (item == null || item.isEmpty() || item.getComponents().isEmpty()) return;
+        int slot = packet.slotNum();
+        HashedStack hashedStack = packet.carriedItem();
+        if (hashedStack instanceof HashedStack.ActualItem actualItem) {
+            ItemStack item = new ItemStack(actualItem.item());
+            if (item.isEmpty() || item.getComponents().isEmpty()) return;
+            NbtTagCompound tag = new NbtTagCompound(NBT.itemStackToNBT(item.getBukkitStack()).getCompound("components"));
+            String itemClass = item.getClass().getName();
 
-        NbtTagCompound tag = new NbtTagCompound(NBT.itemStackToNBT(item.getBukkitStack()).getCompound("components"));
-        String itemClass = item.getClass().getName();
-
-        NbtChecks.checkServerbound(slot, tag, itemClass, packet.getClass().getSimpleName(), panilla);
+            NbtChecks.checkServerbound(slot, tag, itemClass, packet.getClass().getSimpleName(), panilla);
+        }
     }
 
     public void checkServerboundSetCreativeModeSlotPacket(Object packetHandle) throws NbtNotPermittedException {
@@ -145,14 +148,14 @@ public class PacketInspector {
     public void checkClientboundContainerSetContentPacket(Object packetHandle) throws NbtNotPermittedException {
         if (!(packetHandle instanceof ClientboundContainerSetContentPacket packet)) return;
 
-        int windowId = packet.getContainerId();
+        int windowId = packet.containerId();
 
         // check if window is not player inventory
         if (windowId != 0) {
             return;
         }
 
-        List<ItemStack> itemStacks = packet.getItems();
+        List<ItemStack> itemStacks = packet.items();
 
         for (int slotIndex = 0; slotIndex < itemStacks.size(); slotIndex++) {
             ItemStack itemStack = itemStacks.get(slotIndex);
@@ -175,7 +178,7 @@ public class PacketInspector {
         Entity entity = null;
 
         for (ServerLevel worldServer : MinecraftServer.getServer().getAllLevels()) {
-            entity = worldServer.moonrise$getEntityLookup().get(entityId);
+            entity = worldServer.getEntities().get(entityId); //TODO: CHANGE BACK TO MOONRISE!!!
             if (entity != null) break;
         }
 
@@ -229,7 +232,7 @@ public class PacketInspector {
         Entity entity = null;
 
         for (ServerLevel worldServer : MinecraftServer.getServer().getAllLevels()) {
-            entity = worldServer.moonrise$getEntityLookup().get(entityId);
+            entity = worldServer.getEntities().get(entityId); //TODO: CHANGE BACK TO MOONRISE!!!
             if (entity != null) break;
         }
 

@@ -2,7 +2,7 @@ plugins {
     java
     `maven-publish`
     id("com.gradleup.shadow") version "9.0.0-beta4"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.11"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.16"
 }
 
 repositories {
@@ -18,12 +18,10 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
     maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-    maven("https://repo.lushplugins.org/snapshots")
-
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.5-no-moonrise-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.27") {
@@ -35,17 +33,19 @@ dependencies {
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "com.google.guava", module = "guava")
     }
-    compileOnly("dev.jorel:commandapi-annotations:9.7.0")
+    compileOnly("dev.jorel:commandapi-annotations:10.0.0")
 
     implementation("de.tr7zw:item-nbt-api:2.14.1")
 
     implementation("net.gahvila:inventoryframework:0.11.1-SNAPSHOT")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
-    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.7.0")
 
     implementation("com.github.koca2000:NBS4j:a15f8d8a19")
 
-    annotationProcessor("dev.jorel:commandapi-annotations:9.7.0")
+
+    compileOnly("dev.jorel:commandapi-annotations:10.0.0")
+    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:10.0.0")
+    annotationProcessor("dev.jorel:commandapi-annotations:10.0.0")
 }
 
 group = "net.gahvila"
