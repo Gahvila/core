@@ -148,4 +148,8 @@ public final class GahvilaCore extends JavaPlugin {
     public PlaytimeManager getPlaytimeManager() {
         return playtimeManager;
     }
+
+    public GahvilaCore getInstance() {
+        return instance;
+    }
 }
