@@ -2,6 +2,9 @@ package net.gahvila.gahvilacore.Music;
 
 import com.destroystokyo.paper.MaterialTags;
 import cz.koca2000.nbs4j.Song;
+import io.papermc.paper.datacomponent.DataComponentType;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
 import net.gahvila.gahvilacore.nbsminecraft.player.emitter.GlobalSoundEmitter;
 import net.gahvila.inventoryframework.adventuresupport.ComponentHolder;
@@ -22,6 +25,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.JukeboxPlayableComponent;
 import org.bukkit.persistence.PersistentDataType;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -94,15 +98,14 @@ public class MusicMenu {
                         toUndecoratedMM("<gray>" + song.getMetadata().getOriginalAuthor()),
                         toUndecoratedMM("<gray>" + musicManager.songLength(song))
                 ));
-                JukeboxPlayableComponent component = meta.getJukeboxPlayable();
-                component.setShowInTooltip(false); //TODO: update for 1.21.5
-                meta.setJukeboxPlayable(component);
+
                 if (musicManager.isFavorited(player, song)){
                     meta.setEnchantmentGlintOverride(true);
                 }
-
                 item.setItemMeta(meta);
                 items.add(item);
+                item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
+                        TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.JUKEBOX_PLAYABLE).build());
             }
         }
         pages.populateWithItemStacks(items);

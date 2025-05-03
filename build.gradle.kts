@@ -35,9 +35,9 @@ dependencies {
     }
     compileOnly("dev.jorel:commandapi-annotations:10.0.0")
 
-    implementation("de.tr7zw:item-nbt-api:2.14.1")
+    implementation("de.tr7zw:item-nbt-api:2.15.0")
 
-    implementation("net.gahvila:inventoryframework:0.11.1-SNAPSHOT")
+    implementation("net.gahvila:inventoryframework:0.11.2-SNAPSHOT")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
 
     implementation("com.github.koca2000:NBS4j:a15f8d8a19")
