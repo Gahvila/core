@@ -51,12 +51,12 @@ public class MusicManager {
     }
 
     public static ArrayList<Song> songs = new ArrayList<>();
-    public static WeakHashMap<String, Song> namedSong = new WeakHashMap<>();
-    public static WeakHashMap<Player, SongPlayer> songPlayers = new WeakHashMap<>();
-    public static WeakHashMap<Player, Boolean> speakerEnabled = new WeakHashMap<>();
-    public static WeakHashMap<Player, Boolean> autoEnabled = new WeakHashMap<>();
-    public static WeakHashMap<Player, Byte> playerVolume = new WeakHashMap<>();
-    public static WeakHashMap<Player, Integer> lastMenuPage = new WeakHashMap<>();
+    public static HashMap<String, Song> namedSong = new HashMap<>();
+    public static HashMap<Player, SongPlayer> songPlayers = new HashMap<>();
+    public static HashMap<Player, Boolean> speakerEnabled = new HashMap<>();
+    public static HashMap<Player, Boolean> autoEnabled = new HashMap<>();
+    public static HashMap<Player, Byte> playerVolume = new HashMap<>();
+    public static HashMap<Player, Integer> lastMenuPage = new HashMap<>();
 
     public static NamespacedKey titleKey = new NamespacedKey(instance, "song.title");
     public static NamespacedKey tickKey = new NamespacedKey(instance, "song.tick");
@@ -262,7 +262,12 @@ public class MusicManager {
         if (songPlayer.getSoundEmitter() instanceof GlobalSoundEmitter) {
             songPlayer.setVolume(volumeConverter(getVolume(player)));
         }
-        songPlayer.play();
+        //NYT VITTU COMMITTAAT TÄN VITUN GIT KIITOS
+        if (playing) {
+            songPlayer.play();
+        } else {
+            songPlayer.pause();
+        }
         saveSongPlayer(player, songPlayer);
         songPlayerSchedule(player, songPlayer);
 
