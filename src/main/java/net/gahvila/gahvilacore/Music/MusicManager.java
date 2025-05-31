@@ -231,7 +231,7 @@ public class MusicManager {
             EntityReference entityReference = new EntityReference(player.getEntityId(), player.getUniqueId());
             songPlayer = new BukkitSongPlayer.Builder()
                     .soundEmitter(new EntitySoundEmitter(entityReference))
-                    .volume(45)
+                    .volume(60)
                     .transposeNotes(false)
                     .build();
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
