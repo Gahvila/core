@@ -77,6 +77,7 @@ public class MusicMenu {
         discs.remove(Material.MUSIC_DISC_PRECIPICE);
         discs.remove(Material.MUSIC_DISC_RELIC);
         discs.remove(Material.MUSIC_DISC_PIGSTEP);
+        discs.remove(Material.MUSIC_DISC_TEARS);
 
         if (musicManager.getLoadState() && !musicManager.getSongsSorted(player).isEmpty()) {
             int discsSize = discs.size();

@@ -15,6 +15,7 @@ import net.gahvila.gahvilacore.nbsminecraft.utils.AudioListener;
 import net.gahvila.gahvilacore.nbsminecraft.utils.EntityReference;
 import net.gahvila.gahvilacore.nbsminecraft.utils.SoundLocation;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -22,9 +23,12 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,6 +43,7 @@ import java.time.Month;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static net.gahvila.gahvilacore.Config.ConfigManager.*;

@@ -2,7 +2,7 @@ plugins {
     java
     `maven-publish`
     id("com.gradleup.shadow") version "9.0.0-beta4"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.16"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
 }
 
 repositories {
@@ -21,19 +21,18 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.5-no-moonrise-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.6-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
-    compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.27") {
+    compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.32") {
         exclude(group = "it.unimi.dsi", module = "fastutil")
         exclude(group = "com.google.code.gson", module = "gson")
     }
-    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.13-SNAPSHOT") {
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.14") {
         exclude(group = "it.unimi.dsi", module = "fastutil")
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "com.google.guava", module = "guava")
     }
-    compileOnly("dev.jorel:commandapi-annotations:10.0.0")
 
     implementation("de.tr7zw:item-nbt-api:2.15.0")
 
@@ -43,9 +42,11 @@ dependencies {
     implementation("com.github.koca2000:NBS4j:a15f8d8a19")
 
 
-    compileOnly("dev.jorel:commandapi-annotations:10.0.0")
-    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:10.0.0")
-    annotationProcessor("dev.jorel:commandapi-annotations:10.0.0")
+    compileOnly("dev.jorel:commandapi-annotations:10.1.0")
+    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:10.1.0")
+    annotationProcessor("dev.jorel:commandapi-annotations:10.1.0")
+
+    implementation("com.zaxxer:HikariCP:6.3.0")
 }
 
 group = "net.gahvila"
