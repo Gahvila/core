@@ -23,6 +23,9 @@ import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixMainMenu;
 import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixTypeMenu;
 import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.PrefixCommand;
 import net.gahvila.gahvilacore.RankFeatures.FullBypass;
+import net.gahvila.gahvilacore.Teleport.Spawn.SpawnCommand;
+import net.gahvila.gahvilacore.Teleport.Spawn.SpawnTeleport;
+import net.gahvila.gahvilacore.Teleport.TeleportManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
@@ -39,6 +42,7 @@ public final class GahvilaCore extends JavaPlugin {
     private PlaytimeManager playtimeManager;
     private AfkManager afkManager;
     private PluginManager pluginManager;
+    private TeleportManager teleportManager;
     private Panilla panilla;
 
     @Override
@@ -53,6 +57,7 @@ public final class GahvilaCore extends JavaPlugin {
         prefixColorMenu = new PrefixColorMenu(prefixManager);
         afkManager = new AfkManager();
         playtimeManager = new PlaytimeManager(Optional.of(afkManager));
+        teleportManager = new TeleportManager();
 
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
 
@@ -94,6 +99,11 @@ public final class GahvilaCore extends JavaPlugin {
         registerListeners(new PlaytimeListener(playtimeManager));
         playtimeManager.startScheduledSaveTask();
 
+        //spawn
+        SpawnCommand spawnCommand = new SpawnCommand(teleportManager);
+        spawnCommand.registerCommands();
+        Bukkit.getPluginManager().registerEvents(new SpawnTeleport(teleportManager), this);
+
         //general commands
         InfoCommands infoCommands = new InfoCommands();
         infoCommands.registerCommands();
@@ -115,7 +125,6 @@ public final class GahvilaCore extends JavaPlugin {
 
         //events
         Bukkit.getPluginManager().registerEvents(new FullBypass(), this);
-        //Bukkit.getPluginManager().registerEvents(new MarriageEvents(marriageManager), this);
 
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {

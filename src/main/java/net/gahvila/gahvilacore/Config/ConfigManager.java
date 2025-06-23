@@ -55,4 +55,15 @@ public class ConfigManager {
         Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
         return data.getOrDefault("panilla", false);
     }
+
+    // SPAWN
+    public static Boolean getIfSpawnOnJoin() {
+        Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
+        return data.getOrDefault("spawn-on-join", true);
+    }
+
+    public static Boolean getIfSpawnOnFirstJoin() {
+        Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
+        return data.getOrDefault("spawn-on-first-join", true);
+    }
 }
