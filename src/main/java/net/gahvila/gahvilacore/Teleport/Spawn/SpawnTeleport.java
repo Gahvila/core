@@ -26,7 +26,7 @@ public class SpawnTeleport implements Listener {
                 (!firstJoin && ConfigManager.getIfSpawnOnJoin())) {
             Location spawnLoc = teleportManager.getTeleport(GahvilaCore.instance, "spawn");
             if (spawnLoc != null) {
-                player.teleport(spawnLoc);
+                player.teleportAsync(spawnLoc);
             } else {
                 player.sendMessage("Spawn-sijaintia ei ole asetettu.");
             }

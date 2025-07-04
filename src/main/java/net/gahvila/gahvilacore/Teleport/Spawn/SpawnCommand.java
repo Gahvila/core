@@ -23,7 +23,7 @@ public class SpawnCommand {
                         p.sendMessage("Spawn-sijaintia ei ole asetettu.");
                         return;
                     }
-                    p.teleport(loc);
+                    p.teleportAsync(loc);
                     p.sendMessage("Teleporttasit spawnille.");
                     p.playSound(loc, Sound.ENTITY_PLAYER_TELEPORT, MAX_VALUE, 1F);
                 })

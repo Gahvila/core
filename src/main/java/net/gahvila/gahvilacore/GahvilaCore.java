@@ -22,7 +22,6 @@ import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixColorMenu;
 import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixMainMenu;
 import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixTypeMenu;
 import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.PrefixCommand;
-import net.gahvila.gahvilacore.RankFeatures.FullBypass;
 import net.gahvila.gahvilacore.Teleport.Spawn.SpawnCommand;
 import net.gahvila.gahvilacore.Teleport.Spawn.SpawnTeleport;
 import net.gahvila.gahvilacore.Teleport.TeleportManager;
@@ -120,11 +119,8 @@ public final class GahvilaCore extends JavaPlugin {
         FlyCommand flyCommand = new FlyCommand();
         flyCommand.registerCommands();
 
-        CoreCommand coreCommand = new CoreCommand();
+        CoreCommand coreCommand = new CoreCommand(teleportManager);
         coreCommand.registerCommands();
-
-        //events
-        Bukkit.getPluginManager().registerEvents(new FullBypass(), this);
 
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {

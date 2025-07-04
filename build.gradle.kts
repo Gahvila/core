@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.6-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.7-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.32") {
@@ -42,9 +42,9 @@ dependencies {
     implementation("com.github.koca2000:NBS4j:a15f8d8a19")
 
 
-    compileOnly("dev.jorel:commandapi-annotations:10.1.0")
-    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:10.1.0")
-    annotationProcessor("dev.jorel:commandapi-annotations:10.1.0")
+    compileOnly("dev.jorel:commandapi-annotations:10.1.1")
+    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:10.1.1")
+    annotationProcessor("dev.jorel:commandapi-annotations:10.1.1")
 
     implementation("com.zaxxer:HikariCP:6.3.0")
 }
