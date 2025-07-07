@@ -10,24 +10,24 @@ import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Gradient;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Single;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixTypes;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
-import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixColorMenu;
-import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixMainMenu;
-import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixTypeMenu;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.DialogMenu.PrefixColorDialog;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.DialogMenu.PrefixMainDialog;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.DialogMenu.PrefixTypeDialog;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 
 public class PrefixCommand {
 
-    private final PrefixTypeMenu prefixTypeMenu;
-    private final PrefixMainMenu prefixMainMenu;
-    private final PrefixColorMenu prefixColorMenu;
+    private final PrefixTypeDialog prefixTypeDialog;
+    private final PrefixMainDialog prefixMainDialog;
+    private final PrefixColorDialog prefixColorDialog;
     private final PrefixManager prefixManager;
 
-    public PrefixCommand(PrefixTypeMenu prefixTypeMenu, PrefixMainMenu prefixMainMenu, PrefixColorMenu prefixColorMenu, PrefixManager prefixManager) {
-        this.prefixTypeMenu = prefixTypeMenu;
-        this.prefixMainMenu = prefixMainMenu;
-        this.prefixColorMenu = prefixColorMenu;
+    public PrefixCommand(PrefixTypeDialog prefixTypeDialog, PrefixMainDialog prefixMainDialog, PrefixColorDialog prefixColorDialog, PrefixManager prefixManager) {
+        this.prefixTypeDialog = prefixTypeDialog;
+        this.prefixMainDialog = prefixMainDialog;
+        this.prefixColorDialog = prefixColorDialog;
         this.prefixManager = prefixManager;
     }
 
@@ -60,13 +60,13 @@ public class PrefixCommand {
                                     }
                                 }))
                         .executesPlayer((player, args) -> {
-                            prefixColorMenu.showGUI(player);
+                            prefixColorDialog.show(player);
                         }))
                 .withSubcommand(new CommandAPICommand("setprefix")
                         .withOptionalArguments(customPrefixArgument("prefix"))
                         .executesPlayer((player, args) -> {
                             if (args.getRaw("prefix") == null) {
-                                prefixTypeMenu.showGUI(player);
+                                prefixTypeDialog.show(player);
                                 return;
                             }
 
@@ -79,7 +79,7 @@ public class PrefixCommand {
                             }
                         }))
                 .executesPlayer((p, args) -> {
-                    prefixMainMenu.showGUI(p);
+                    prefixMainDialog.show(p);
                 })
                 .register();
 

@@ -18,9 +18,9 @@ import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeCommand;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeListener;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeManager;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.PrefixManager;
-import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixColorMenu;
-import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixMainMenu;
-import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.Menu.PrefixTypeMenu;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.DialogMenu.PrefixColorDialog;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.DialogMenu.PrefixMainDialog;
+import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.DialogMenu.PrefixTypeDialog;
 import net.gahvila.gahvilacore.Profiles.Prefix.Frontend.PrefixCommand;
 import net.gahvila.gahvilacore.Teleport.Spawn.SpawnCommand;
 import net.gahvila.gahvilacore.Teleport.Spawn.SpawnTeleport;
@@ -35,9 +35,9 @@ import java.util.Optional;
 public final class GahvilaCore extends JavaPlugin {
     public static GahvilaCore instance;
     private PrefixManager prefixManager;
-    private PrefixTypeMenu prefixTypeMenu;
-    private PrefixMainMenu prefixMainMenu;
-    private PrefixColorMenu prefixColorMenu;
+    private PrefixTypeDialog prefixTypeDialog;
+    private PrefixMainDialog prefixMainDialog;
+    private PrefixColorDialog prefixColorDialog;
     private PlaytimeManager playtimeManager;
     private AfkManager afkManager;
     private PluginManager pluginManager;
@@ -51,9 +51,9 @@ public final class GahvilaCore extends JavaPlugin {
         instance = this;
         pluginManager = Bukkit.getPluginManager();
         prefixManager = new PrefixManager();
-        prefixTypeMenu = new PrefixTypeMenu(prefixManager);
-        prefixMainMenu = new PrefixMainMenu();
-        prefixColorMenu = new PrefixColorMenu(prefixManager);
+        prefixTypeDialog = new PrefixTypeDialog(prefixManager);
+        prefixMainDialog = new PrefixMainDialog(prefixManager);
+        prefixColorDialog = new PrefixColorDialog(prefixManager);
         afkManager = new AfkManager();
         playtimeManager = new PlaytimeManager(Optional.of(afkManager));
         teleportManager = new TeleportManager();
@@ -88,7 +88,7 @@ public final class GahvilaCore extends JavaPlugin {
          */
 
         //prefixmenu
-        PrefixCommand prefixCommand = new PrefixCommand(prefixTypeMenu, prefixMainMenu, prefixColorMenu, prefixManager);
+        PrefixCommand prefixCommand = new PrefixCommand(prefixTypeDialog, prefixMainDialog, prefixColorDialog, prefixManager);
         prefixCommand.registerCommands();
 
         //playtime
