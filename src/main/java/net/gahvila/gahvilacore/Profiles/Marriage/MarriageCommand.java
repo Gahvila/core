@@ -16,13 +16,11 @@ import java.util.UUID;
 
 public class MarriageCommand {
 
-    private final MarriageMenu marriageMenu;
     private final MarriageManager marriageManager;
 
     public static HashMap<Player, Player> marry = new HashMap<>();
 
-    public MarriageCommand(MarriageMenu marriageMenu, MarriageManager marriageManager) {
-        this.marriageMenu = marriageMenu;
+    public MarriageCommand(MarriageManager marriageManager) {
         this.marriageManager = marriageManager;
 
     }
@@ -136,7 +134,7 @@ public class MarriageCommand {
                         }))
                 .executesPlayer((p, args) -> {
                     if (marriageManager.isPlayerMarried(p)){
-                        marriageMenu.showGUI(p);
+                        //marriageMenu.showGUI(p);
                         return;
                     }
                     p.sendMessage("Et ole parisuhteessa.");
