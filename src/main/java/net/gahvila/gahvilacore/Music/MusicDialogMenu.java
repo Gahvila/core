@@ -47,6 +47,11 @@ public class MusicDialogMenu {
     public void show(Player player, int page) {
         player.showDialog(createMusicDialog(player, page));
     }
+
+    public void showSettings(Player player) {
+        player.showDialog(createSettingsDialog(player));
+    }
+
     private static final int COLUMNS = 7;
     private static final int ROWS = 6;
 
@@ -175,7 +180,7 @@ public class MusicDialogMenu {
                 .width(20)
                 .tooltip(toMM("Asetukset"))
                 .action(DialogAction.customClick((response, audience) -> {
-                            player.showDialog(createSettingsDialog(player));
+                            showSettings(player);
                         },
                         ClickCallback.Options.builder().build()
                 ))
@@ -235,7 +240,7 @@ public class MusicDialogMenu {
                 )));
     }
 
-    public Dialog createSettingsDialog(Player player) {
+    private Dialog createSettingsDialog(Player player) {
         String currentSpeed = String.valueOf((int) musicManager.getSpeed(player));
         return Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(toMM("<b>Musiikkivalikko</b> <dark_gray>(<yellow>Asetukset</yellow><dark_gray>)</dark_gray>"))
@@ -248,7 +253,7 @@ public class MusicDialogMenu {
                                         .initial(musicManager.getSpeakerEnabled(player))
                                         .build(),
                                 DialogInput.bool("auto", Component.text("Jatkuva toisto"))
-                                        .initial(musicManager.getSpeakerEnabled(player))
+                                        .initial(musicManager.getAutoEnabled(player))
                                         .build(),
                                 DialogInput.singleOption("speed", Component.text("Musiikin toistonopeus"),
                                         Arrays.asList(
@@ -289,7 +294,7 @@ public class MusicDialogMenu {
                 )));
     }
 
-    public Dialog createClosingDialog() {
+    private Dialog createClosingDialog() {
         return Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(toMM("<b>Musiikkivalikko</b> <dark_gray>(<yellow>" + 0 +
                         "</yellow><dark_gray>/</dark_gray><yellow>" + 0 + "</yellow><dark_gray>)</dark_gray>")).build())

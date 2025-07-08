@@ -64,6 +64,11 @@ public class MusicCommand {
                             musicManager.setVolume(player, (byte) volumeInt);
                             player.sendRichMessage("Äänenvoimakkuus asetettu: <yellow>" + volumeInt + "</yellow>.");
                         }))
+                .withSubcommand(new CommandAPICommand("settings")
+                        .executesPlayer((player, args) -> {
+                            player.playSound(player.getLocation(), Sound.ENTITY_LLAMA_SWAG, 0.6F, 1F);
+                            musicDialogMenu.showSettings(player);
+                        }))
                 .withSubcommand(new CommandAPICommand("reload")
                         .withPermission("music.reload")
                         .executes((sender, args) -> {
