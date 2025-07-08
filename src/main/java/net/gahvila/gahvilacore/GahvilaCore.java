@@ -8,11 +8,8 @@ import net.gahvila.gahvilacore.AFK.AfkManager;
 import net.gahvila.gahvilacore.Config.ConfigManager;
 import net.gahvila.gahvilacore.Core.CoreCommand;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
+import net.gahvila.gahvilacore.Music.*;
 import net.gahvila.gahvilacore.Panilla.Panilla;
-import net.gahvila.gahvilacore.Music.MusicCommand;
-import net.gahvila.gahvilacore.Music.MusicEvents;
-import net.gahvila.gahvilacore.Music.MusicManager;
-import net.gahvila.gahvilacore.Music.MusicMenu;
 import net.gahvila.gahvilacore.Placeholder.Placeholders;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeCommand;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeListener;
@@ -71,11 +68,11 @@ public final class GahvilaCore extends JavaPlugin {
 
         //music
         MusicManager musicManager = new MusicManager();
-        MusicMenu musicMenu = new MusicMenu(musicManager);
+        MusicDialogMenu musicDialogMenu = new MusicDialogMenu(musicManager);
         musicManager.loadSongs(executionTime -> {
             this.getLogger().info("Ladattu musiikit " + executionTime + " millisekuntissa.");
         });
-        MusicCommand musicCommand = new MusicCommand(musicManager, musicMenu);
+        MusicCommand musicCommand = new MusicCommand(musicManager, musicDialogMenu);
         musicCommand.registerCommands();
         registerListeners(new MusicEvents(musicManager));
 

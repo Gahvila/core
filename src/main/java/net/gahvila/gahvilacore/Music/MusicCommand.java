@@ -10,12 +10,12 @@ import java.util.List;
 
 public class MusicCommand {
 
-    private final MusicMenu musicMenu;
+    private final MusicDialogMenu musicDialogMenu;
     private final MusicManager musicManager;
 
-    public MusicCommand(MusicManager musicManager, MusicMenu musicMenu) {
+    public MusicCommand(MusicManager musicManager, MusicDialogMenu musicDialogMenu) {
         this.musicManager = musicManager;
-        this.musicMenu = musicMenu;
+        this.musicDialogMenu = musicDialogMenu;
     }
 
     public void registerCommands() {
@@ -41,9 +41,9 @@ public class MusicCommand {
                             if (musicManager.getSongPlayer(player) != null) {
                                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 1F);
                                 if (musicManager.getSongPlayer(player).isPlaying()) {
-                                    musicManager.getSongPlayer(player).pause();
+                                    musicManager.pauseSong(player, musicManager.getSongPlayer(player));
                                 } else {
-                                    musicManager.getSongPlayer(player).play();
+                                    musicManager.playSong(player, musicManager.getSongPlayer(player));
                                 }
                                 musicManager.savePauseToCookie(player);
                                 player.sendMessage("Vaihdettu.");
@@ -74,7 +74,7 @@ public class MusicCommand {
                         }))
                 .executesPlayer((p, args) -> {
                     p.playSound(p.getLocation(), Sound.ENTITY_LLAMA_SWAG, 0.6F, 1F);
-                    musicMenu.showGUI(p, musicManager.getPage(p));
+                    musicDialogMenu.show(p, musicManager.getPage(p));
                 })
                 .register();
     }

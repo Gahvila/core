@@ -61,6 +61,7 @@ public class MusicManager {
     public static HashMap<Player, Boolean> speakerEnabled = new HashMap<>();
     public static HashMap<Player, Boolean> autoEnabled = new HashMap<>();
     public static HashMap<Player, Byte> playerVolume = new HashMap<>();
+    public static HashMap<Player, Byte> playerSpeed = new HashMap<>();
     public static HashMap<Player, Integer> lastMenuPage = new HashMap<>();
 
     public static NamespacedKey titleKey = new NamespacedKey(instance, "song.title");
@@ -256,7 +257,11 @@ public class MusicManager {
                     .build();
         }
         songPlayer.playSong(song);
-
+        if (playing) {
+            playSong(player, songPlayer);
+        } else {
+            pauseSong(player, songPlayer);
+        }
         if (!getSpeakerEnabled(player) && getAutoEnabled(player)) {
             songs.forEach(songPlayer::queueSong);
             songPlayer.loopQueue(true);
@@ -266,12 +271,6 @@ public class MusicManager {
         songPlayer.setTick(tick);
         if (songPlayer.getSoundEmitter() instanceof GlobalSoundEmitter) {
             songPlayer.setVolume(volumeConverter(getVolume(player)));
-        }
-        //NYT VITTU COMMITTAAT TÄN VITUN GIT KIITOS
-        if (playing) {
-            songPlayer.play();
-        } else {
-            songPlayer.pause();
         }
         saveSongPlayer(player, songPlayer);
         songPlayerSchedule(player, songPlayer);
@@ -362,6 +361,40 @@ public class MusicManager {
 
         int volume = playerData.getInt(uuid + "." + "volume");
         return (byte) volume;
+    }
+
+    //
+    // Song speed
+    //
+    public byte getSpeed(Player player) {
+        return playerSpeed.getOrDefault(player, (byte) 1);
+    }
+
+    public void setSpeed(Player player, Byte speed) {
+        if (speed == 1 || speed == 2 || speed == 4 || speed == 8) {
+            playerSpeed.put(player, speed);
+        }
+    }
+
+    //
+    //play & pause
+    //
+    public void playSong(Player player, SongPlayer songPlayer) {
+        switch (getSpeed(player)) {
+            case 8:
+                songPlayer.play();
+            case 4:
+                songPlayer.play();
+            case 2:
+                songPlayer.play();
+            case 1:
+                songPlayer.play();
+                break;
+        }
+    }
+
+    public void pauseSong(Player player, SongPlayer songPlayer) {
+        songPlayer.pause();
     }
 
     //
@@ -641,6 +674,10 @@ public class MusicManager {
     /**
      * Music sorting
      */
+    public void setSorting(Player player, MusicSorting sorting) {
+        setData(player, "musicsorting", sorting.name());
+    }
+
     public void changeSorting(Player player) {
         MusicSorting currentSorting = getSorting(player);
 
