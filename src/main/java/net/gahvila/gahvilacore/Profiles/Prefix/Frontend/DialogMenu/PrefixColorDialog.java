@@ -90,7 +90,7 @@ public class PrefixColorDialog {
                                         + prefixManager.getPrefix(player).getDisplayName()
                                         + "!")),
                                 DialogBody.plainMessage(toMM("<st>                                           </st>")),
-                                DialogBody.plainMessage(toMM("Valitse alta etuliite minkä haluat itsellesi käyttöön:"))
+                                DialogBody.plainMessage(toMM("Valitse alta väri minkä haluat itsellesi käyttöön:"))
                         ))
                         .build())
                 .type(DialogType.multiAction(

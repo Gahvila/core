@@ -273,7 +273,7 @@ public class MusicDialogMenu {
                         ))
                         .build())
                 .type(DialogType.notice(
-                        ActionButton.builder(Component.text("Tallenna asetukset"))
+                        ActionButton.builder(Component.text("Päävalikko"))
                                 .action(DialogAction.customClick((response, audience) -> {
                                             musicManager.setSpeakerEnabled(player, response.getBoolean("speaker"));
                                             musicManager.setAutoEnabled(player, response.getBoolean("auto"));
