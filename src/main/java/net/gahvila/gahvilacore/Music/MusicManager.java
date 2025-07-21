@@ -458,15 +458,8 @@ public class MusicManager {
                         if (wgEnabled) {
                             if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")) {
                                 songPlayer.addListener(new AudioListener(onlinePlayer.getEntityId(), onlinePlayer.getUniqueId()));
-                                if (songPlayer.isPlaying()) {
-                                    onlinePlayer.spawnParticle(Particle.NOTE, player.getLocation().add(0, 2, 0), 1);
-                                }
                             } else {
                                 songPlayer.removeListener(onlinePlayer.getUniqueId());
-                            }
-                        } else {
-                            if (songPlayer.isPlaying()) {
-                                onlinePlayer.spawnParticle(Particle.NOTE, player.getLocation().add(0, 2, 0), 1);
                             }
                         }
 

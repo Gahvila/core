@@ -55,7 +55,7 @@ dependencies {
 
     implementation("de.tr7zw:item-nbt-api:2.15.0")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
-    implementation("com.github.koca2000:NBS4j:a15f8d8a19")
+    implementation("com.github.DaJokni:NBS4j:46708e0c89")
 
     compileOnly("dev.jorel:commandapi-annotations:10.1.1")
     implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:10.1.1")
@@ -93,7 +93,6 @@ tasks {
     shadowJar {
         archiveFileName.set("${rootProject.name}-${version}.jar")
         relocate("dev.jorel.commandapi", "net.gahvila.gahvilacore.shaded.commandapi")
-        relocate("net.gahvila.inventoryframework", "net.gahvila.gahvilacore.shaded.inventoryframework")
         relocate("de.leonhard.storage", "net.gahvila.gahvilacore.shaded.storage")
         relocate("de.tr7zw.changeme.nbtapi", "net.gahvila.gahvilacore.shaded.nbtapi")
     }

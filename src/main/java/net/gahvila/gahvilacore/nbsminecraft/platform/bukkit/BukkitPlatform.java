@@ -10,12 +10,16 @@ import net.gahvila.gahvilacore.nbsminecraft.utils.SoundCategory;
 import net.gahvila.gahvilacore.nbsminecraft.utils.SoundLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class BukkitPlatform extends AbstractPlatform {
@@ -34,19 +38,53 @@ public class BukkitPlatform extends AbstractPlatform {
         playSound(player, player, sound, category, volume, pitch);
     }
 
+    private static class RateLimit {
+        long windowStartMs;
+        int count;
+    }
+
+    private final Map<UUID, RateLimit> rateLimits = new ConcurrentHashMap<>();
+
     @Override
-    public void playSound(AudioListener listener, EntityReference entityReference, String sound, SoundCategory category, float volume, float pitch) {
+    public void playSound(AudioListener listener, EntityReference entityReference,
+                          String sound, SoundCategory category,
+                          float volume, float pitch) {
         Player player = findPlayer(listener.uuid());
-        if (player == null || !player.isValid()) {
-            return;
+        if (player == null || !player.isValid()) return;
+
+        // Rate limiting: max 10 full-probability particles per second
+        RateLimit rl = rateLimits.computeIfAbsent(listener.uuid(), k -> new RateLimit());
+        long now = System.currentTimeMillis();
+
+        if (now - rl.windowStartMs >= 1000) {
+            rl.windowStartMs = now;
+            rl.count = 0;
         }
 
-        Entity entity = findEntity(entityReference.uuid());
-        if (entity == null) {
-            return;
+        boolean shouldSpawn;
+        if (rl.count < 25) {
+            rl.count++;
+            shouldSpawn = true;
+        } else {
+            // Over the limit: 1 in 5 chance
+            shouldSpawn = ThreadLocalRandom.current().nextInt(5) == 0;
         }
 
-        playSound(player, entity, sound, category, volume, pitch);
+        if (shouldSpawn) {
+            ThreadLocalRandom random = ThreadLocalRandom.current();
+            Location loc = player.getLocation();
+
+            double spread = 0.5 + volume * 0.5;  // Louder = more horizontal spread
+            double height = 1.5 + pitch * 1.0;   // Higher pitch = higher vertical offset
+
+            double x = loc.getX() + (random.nextDouble() - 0.5) * spread;
+            double y = loc.getY() + height;
+            double z = loc.getZ() + (random.nextDouble() - 0.5) * spread;
+
+            player.spawnParticle(Particle.NOTE, x, y, z, 1);
+        }
+
+        playSound(player, findEntity(entityReference.uuid()), sound, category, volume, pitch);
     }
 
     private void playSound(Player player, Entity entity, String sound, SoundCategory category, float volume, float pitch) {

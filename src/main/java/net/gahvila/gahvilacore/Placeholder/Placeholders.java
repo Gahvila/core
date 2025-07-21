@@ -41,6 +41,11 @@ public class Placeholders extends PlaceholderExpansion {
     }
 
     @Override
+    public boolean persist(){
+        return true;
+    }
+
+    @Override
     public String onRequest(OfflinePlayer player, String params) {
         if (params.equalsIgnoreCase("name")) {
             if (DebugMode.isDebugging()) DebugMode.logDebugMessage("placeholder result for player has invalid name");
