@@ -32,7 +32,6 @@ public class CoreCommand {
     private LiteralCommandNode<CommandSourceStack> create() {
         return Commands.literal("gahvilacore")
                 .requires(source -> source.getSender().hasPermission("gahvilacore.command.admin"))
-                .executes(this::execute)
                 .then(Commands.literal("debug").executes(this::executeDebug))
                 .then(Commands.literal("setspawn").executes(this::executeSetSpawn))
                 .build();
@@ -40,30 +39,30 @@ public class CoreCommand {
 
     private LiteralCommandNode<CommandSourceStack> createAlias() {
         return Commands.literal("gc")
+                .requires(source -> source.getSender().hasPermission("gahvilacore.command.admin"))
                 .redirect(create())
                 .build();
     }
 
-    private int execute(CommandContext<CommandSourceStack> context) {
-        context.getSource().getSender().sendRichMessage("<red>Kelvottomat argumentit.");
-        return 1;
-    }
-
     private int executeDebug(CommandContext<CommandSourceStack> context) {
         CommandSender sender = context.getSource().getSender();
-        boolean isDebugging = DebugMode.isDebugging();
-        DebugMode.setDebugging(!isDebugging);
-        sender.sendRichMessage(isDebugging
-                ? "<red>Debug kytketty pois päältä."
-                : "<green>Debug kytketty päälle.");
+        if (sender.hasPermission("gahvilacore.command.admin")) {
+            boolean isDebugging = DebugMode.isDebugging();
+            DebugMode.setDebugging(!isDebugging);
+            sender.sendRichMessage(isDebugging
+                    ? "<red>Debug kytketty pois päältä."
+                    : "<green>Debug kytketty päälle.");
+        }
         return 1;
     }
 
     private int executeSetSpawn(CommandContext<CommandSourceStack> context) {
         CommandSender sender = context.getSource().getSender();
-        if (!(sender instanceof Player player)) return 0;
-        teleportManager.saveTeleport(GahvilaCore.instance, "spawn", player.getLocation());
-        player.sendMessage("Asetit spawnin uuden sijainnin.");
+        if (sender.hasPermission("gahvilacore.command.admin")) {
+            if (!(sender instanceof Player player)) return 0;
+            teleportManager.saveTeleport(GahvilaCore.instance, "spawn", player.getLocation());
+            player.sendMessage("Asetit spawnin uuden sijainnin.");
+        }
         return 1;
     }
 }
