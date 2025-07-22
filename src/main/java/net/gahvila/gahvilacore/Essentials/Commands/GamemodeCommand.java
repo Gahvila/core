@@ -1,55 +1,75 @@
 package net.gahvila.gahvilacore.Essentials.Commands;
 
-import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.LiteralArgument;
-import dev.jorel.commandapi.arguments.PlayerArgument;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import net.gahvila.gahvilacore.GahvilaCore;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.GameMode;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class GamemodeCommand {
 
-    public void registerCommands() {
-        HashMap<String, GameMode> gamemodes = new HashMap<>();
-        gamemodes.put("adventure", GameMode.ADVENTURE);
-        gamemodes.put("creative", GameMode.CREATIVE);
-        gamemodes.put("spectator", GameMode.SPECTATOR);
-        gamemodes.put("survival", GameMode.SURVIVAL);
+    public void registerCommands(GahvilaCore plugin) {
+        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
+            commands.registrar().register(create());
+            commands.registrar().register(createAlias());
+        });
+    }
 
-        CommandAPI.unregister("gamemode");
-        for (Map.Entry<String, GameMode> entry : gamemodes.entrySet()) {
-            new CommandAPICommand("gamemode")
-                    .withAliases("gm")
-                    .withPermission("gahvilacore.command.gamemode")
-                    .withArguments(new LiteralArgument(entry.getKey()))
-                    .withOptionalArguments(new PlayerArgument("pelaaja"))
-                    .executesPlayer((p, args) -> {
-                        String gamemode = entry.getKey();
-                        Player player;
-                        if (args.get("pelaaja") != null && p.hasPermission("gahvilacore.command.gamemode.others")) {
-                            player = (Player) args.get("pelaaja");
-                        } else {
-                            player = p;
-                        }
+    private LiteralCommandNode<CommandSourceStack> create() {
+        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("gamemode")
+                .requires(source -> source.getSender().hasPermission("gahvilacore.command.gamemode"));
 
-                        if (gamemode == null) {
-                            p.sendRichMessage("Sinun täytyy syöttää kelvollinen pelitila.");
-                            return;
-                        }
+        root.then(Commands.argument("gamemode", ArgumentTypes.gameMode())
+            .then(Commands.argument("player", ArgumentTypes.player())
+                    .requires(source -> source.getSender().hasPermission("gahvilacore.command.gamemode.others"))
+                    .executes(this::executeSetGamemodeOthers)
+            )
+            .executes(this::executeSetGamemode)
+        );
+        return root.build();
+    }
 
-                        player.setGameMode(entry.getValue());
+    private LiteralCommandNode<CommandSourceStack> createAlias() {
+        return Commands.literal("gm")
+                .redirect(create())
+                .build();
+    }
 
-                        if (p == player) {
-                            p.sendRichMessage("Asetit pelitilan <yellow>" + gamemode + "</yellow> itsellesi.");
-                        } else {
-                            p.sendRichMessage("Asetit pelitilan <yellow>" + gamemode + "</yellow> pelaajalle <yellow>" + player.getName() + "</yellow>.");
-                        }
-                    })
-                    .register();
+    private int executeSetGamemode(CommandContext<CommandSourceStack> context) {
+        CommandSender sender = context.getSource().getSender();
+        final GameMode gamemode = context.getArgument("gamemode", GameMode.class);
+
+        if (sender instanceof Player target) {
+            target.setGameMode(gamemode);
+            target.sendRichMessage("Asetit pelitilan <yellow><gamemode></yellow> itsellesi.", Placeholder.component("gamemode", Component.translatable(gamemode)));
+        } else {
+            sender.sendRichMessage("Sinun täytyy syöttää pelaajan nimi");
         }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int executeSetGamemodeOthers(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSender sender = context.getSource().getSender();
+        final GameMode gamemode = context.getArgument("gamemode", GameMode.class);
+
+        final PlayerSelectorArgumentResolver targetResolver = context.getArgument("player", PlayerSelectorArgumentResolver.class);
+        final Player target = targetResolver.resolve(context.getSource()).getFirst();
+
+        target.setGameMode(gamemode);
+        sender.sendRichMessage("Asetit pelitilan <yellow><gamemode></yellow> pelaajalle <yellow>" + target.getName() + "</yellow>.", Placeholder.component("gamemode", Component.translatable(gamemode)));
+        target.sendRichMessage("Sinulle asetettiin pelitila <yellow><gamemode></yellow>.", Placeholder.component("gamemode", Component.translatable(gamemode)));
+        return Command.SINGLE_SUCCESS;
     }
 }

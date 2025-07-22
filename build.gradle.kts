@@ -40,7 +40,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.7-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.32") {
@@ -56,10 +56,6 @@ dependencies {
     implementation("de.tr7zw:item-nbt-api:2.15.0")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
     implementation("com.github.DaJokni:NBS4j:46708e0c89")
-
-    compileOnly("dev.jorel:commandapi-annotations:10.1.1")
-    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:10.1.1")
-    annotationProcessor("dev.jorel:commandapi-annotations:10.1.1")
 
     implementation("com.zaxxer:HikariCP:6.3.0")
 }

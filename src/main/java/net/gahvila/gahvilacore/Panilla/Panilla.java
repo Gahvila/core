@@ -164,7 +164,7 @@ public class Panilla {
 
         /* Register command */
         panillaCommand = new PanillaCommand();
-        panillaCommand.registerCommands();
+        //panillaCommand.registerCommands();
 
         /* Inject already online players in case of reload */
         for (Player player : Bukkit.getOnlinePlayers()) {

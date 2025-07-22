@@ -1,10 +1,12 @@
 package net.gahvila.gahvilacore.Profiles.Prefix.Frontend;
 
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.Argument;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.CustomArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.Prefix;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Gradient;
 import net.gahvila.gahvilacore.Profiles.Prefix.Backend.Enum.PrefixType.Single;
@@ -31,93 +33,120 @@ public class PrefixCommand {
         this.prefixManager = prefixManager;
     }
 
-    public void registerCommands() {
-        new CommandAPICommand("prefix")
-                .withPermission("gahvilacore.prefixmenu")
-                .withSubcommand(new CommandAPICommand("setcolor")
-                        .withSubcommand(new CommandAPICommand("single")
-                                .withArguments(customSingleArgument("color"))
-                                .executesPlayer((player, args) -> {
-                                    Single single = Single.valueOf(args.getRaw("color"));
-                                    if (player.hasPermission(single.getPermissionNode())) {
-                                        prefixManager.setPrefixType(player, PrefixTypes.SINGLE);
-                                        prefixManager.setSingle(player, single);
-                                        player.sendRichMessage("<white>Asetit itsellesi väriksi</white> <" + single.getColor() + ">" + single.getDisplayName() + "<white>.</white>");
-                                    } else {
-                                        player.sendMessage("Ei oikeuksia.");
-                                    }
-                                }))
-                        .withSubcommand(new CommandAPICommand("gradient")
-                                .withArguments(customGradientArgument("color"))
-                                .executesPlayer((player, args) -> {
-                                    Gradient gradient = Gradient.valueOf(args.getRaw("color"));
-                                    if (player.hasPermission(gradient.getPermissionNode())) {
-                                        prefixManager.setPrefixType(player, PrefixTypes.GRADIENT);
-                                        prefixManager.setGradient(player, gradient);
-                                        player.sendRichMessage("<white>Asetit itsellesi liukuväriksi</white> <gradient:" + gradient.getGradient() + ">" + gradient.getDisplayName() + "<white>.</white>");
-                                    } else {
-                                        player.sendMessage("Ei oikeuksia.");
-                                    }
-                                }))
-                        .executesPlayer((player, args) -> {
-                            prefixColorDialog.show(player);
-                        }))
-                .withSubcommand(new CommandAPICommand("setprefix")
-                        .withOptionalArguments(customPrefixArgument("prefix"))
-                        .executesPlayer((player, args) -> {
-                            if (args.getRaw("prefix") == null) {
-                                prefixTypeDialog.show(player);
-                                return;
-                            }
-
-                            Prefix prefix = Prefix.valueOf(args.getRaw("prefix"));
-                            if (player.hasPermission(prefix.getPermissionNode())) {
-                                prefixManager.setPrefix(player, prefix);
-                                player.sendRichMessage("<white>Asetit itsellesi etuliitteeksi " + prefixManager.generatePrefix(player) + ".</white>");
-                            } else {
-                                player.sendMessage("Ei oikeuksia.");
-                            }
-                        }))
-                .executesPlayer((p, args) -> {
-                    prefixMainDialog.show(p);
-                })
-                .register();
-
+    public void registerCommands(GahvilaCore plugin) {
+        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
+            commands.registrar().register(create());
+        });
     }
 
-    public Argument<Prefix> customPrefixArgument(String nodeName) {
-        return new CustomArgument<Prefix, String>(new StringArgument(nodeName), info -> {
-            return Prefix.valueOf(info.input());
-        }).replaceSuggestions(ArgumentSuggestions.strings(info -> {
-            Player player = (Player) info.sender();
-            return Arrays.stream(Prefix.values())
-                    .filter(prefix -> player.hasPermission(prefix.getPermissionNode()))
-                    .map(Prefix::name)
-                    .toArray(String[]::new);
-        }));
+    private LiteralCommandNode<CommandSourceStack> create() {
+        return Commands.literal("prefix")
+                .executes(this::execute)
+                .then(Commands.literal("setcolor")
+                        .then(Commands.literal("single")
+                            .then(Commands.argument("color", StringArgumentType.string())
+                                    .suggests((ctx, builder) -> {
+                                        Arrays.stream(Single.values())
+                                                .filter(single -> ctx.getSource().getSender().hasPermission(single.getPermissionNode()))
+                                                .map(Single::name)
+                                                .filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase()))
+                                                .forEach(builder::suggest);
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(this::executeSetSingle)
+                            )
+                        )
+                        .then(Commands.literal("gradient")
+                                .then(Commands.argument("color", StringArgumentType.string())
+                                        .suggests((ctx, builder) -> {
+                                            Arrays.stream(Gradient.values())
+                                                    .filter(gradient -> ctx.getSource().getSender().hasPermission(gradient.getPermissionNode()))
+                                                    .map(Gradient::name)
+                                                    .filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase()))
+                                                    .forEach(builder::suggest);
+                                            return builder.buildFuture();
+                                        })
+                                        .executes(this::executeSetGradient)
+                                )
+                        )
+                        .executes(this::executeColor)
+                )
+                .then(Commands.literal("setprefix")
+                        .then(Commands.argument("prefix", StringArgumentType.string())
+                                .suggests((ctx, builder) -> {
+                                    Arrays.stream(Prefix.values())
+                                            .filter(prefix -> ctx.getSource().getSender().hasPermission(prefix.getPermissionNode()))
+                                            .map(Prefix::name)
+                                            .filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase()))
+                                            .forEach(builder::suggest);
+                                    return builder.buildFuture();
+                                })
+                                .executes(this::executeSetPrefix)
+                        )
+                        .executes(this::executePrefixType)
+                )
+                .build();
     }
 
-    public Argument<Single> customSingleArgument(String nodeName) {
-        return new CustomArgument<Single, String>(new StringArgument(nodeName), info -> {
-            return Single.valueOf(info.input());
-        }).replaceSuggestions(ArgumentSuggestions.strings(info -> {
-            Player player = (Player) info.sender();
-            return Arrays.stream(Single.values())
-                    .filter(single -> player.hasPermission(single.getPermissionNode()))
-                    .map(Single::name)
-                    .toArray(String[]::new);
-        }));
+    private int execute(CommandContext<CommandSourceStack> context) {
+        if (context.getSource().getSender() instanceof Player player) {
+            prefixMainDialog.show(player);
+        }
+        return 1;
     }
 
-    public Argument<Gradient> customGradientArgument(String nodeName) {
-        return new CustomArgument<Gradient, String>(new StringArgument(nodeName), info -> {
-            return Gradient.valueOf(info.input());
-        }).replaceSuggestions(ArgumentSuggestions.strings(info -> {
-            Player player = (Player) info.sender();
-            return Arrays.stream(Gradient.values())
-                    .filter(gradient -> player.hasPermission(gradient.getPermissionNode()))
-                    .map(Gradient::name)
-                    .toArray(String[]::new);
-        }));
+    private int executeColor(CommandContext<CommandSourceStack> context) {
+        if (context.getSource().getSender() instanceof Player player) {
+            prefixColorDialog.show(player);
+        }
+        return 1;
+    }
+
+    private int executePrefixType(CommandContext<CommandSourceStack> context) {
+        if (context.getSource().getSender() instanceof Player player) {
+            prefixTypeDialog.show(player);
+        }
+        return 1;
+    }
+
+    private int executeSetSingle(CommandContext<CommandSourceStack> context) {
+        if (context.getSource().getSender() instanceof Player player) {
+            Single single = Single.valueOf(context.getArgument("color", String.class));
+            if (player.hasPermission(single.getPermissionNode())) {
+                prefixManager.setPrefixType(player, PrefixTypes.SINGLE);
+                prefixManager.setSingle(player, single);
+                player.sendRichMessage("<white>Asetit itsellesi väriksi</white> <" + single.getColor() + ">" + single.getDisplayName() + "<white>.</white>");
+            } else {
+                player.sendMessage("Ei oikeuksia.");
+            }
+        }
+        return 1;
+    }
+
+    private int executeSetGradient(CommandContext<CommandSourceStack> context) {
+        if (context.getSource().getSender() instanceof Player player) {
+            Gradient gradient = Gradient.valueOf(context.getArgument("color", String.class));
+            if (player.hasPermission(gradient.getPermissionNode())) {
+                prefixManager.setPrefixType(player, PrefixTypes.GRADIENT);
+                prefixManager.setGradient(player, gradient);
+                player.sendRichMessage("<white>Asetit itsellesi liukuväriksi</white> <gradient:" + gradient.getGradient() + ">" + gradient.getDisplayName() + "<white>.</white>");
+            } else {
+                player.sendMessage("Ei oikeuksia.");
+            }
+        }
+        return 1;
+    }
+
+    private int executeSetPrefix(CommandContext<CommandSourceStack> context) {
+        if (context.getSource().getSender() instanceof Player player) {
+            Prefix prefix = Prefix.valueOf(context.getArgument("prefix", String.class));
+            if (player.hasPermission(prefix.getPermissionNode())) {
+                prefixManager.setPrefix(player, prefix);
+                player.sendRichMessage("<white>Asetit itsellesi etuliitteeksi " + prefixManager.generatePrefix(player) + ".</white>");
+            } else {
+                player.sendMessage("Ei oikeuksia.");
+            }
+        }
+        return 1;
     }
 }

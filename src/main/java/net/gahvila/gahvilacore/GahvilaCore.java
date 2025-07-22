@@ -1,7 +1,5 @@
 package net.gahvila.gahvilacore;
 
-import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import net.gahvila.gahvilacore.AFK.AfkCommand;
 import net.gahvila.gahvilacore.AFK.AfkEvents;
 import net.gahvila.gahvilacore.AFK.AfkManager;
@@ -40,6 +38,8 @@ public final class GahvilaCore extends JavaPlugin {
     private PluginManager pluginManager;
     private TeleportManager teleportManager;
     private Panilla panilla;
+    private MusicManager musicManager;
+    private MusicDialogMenu musicDialogMenu;
 
     @Override
     public void onEnable() {
@@ -55,74 +55,37 @@ public final class GahvilaCore extends JavaPlugin {
         playtimeManager = new PlaytimeManager(Optional.of(afkManager));
         teleportManager = new TeleportManager();
 
-        CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
-
         //panilla
         initializePanilla();
 
         //afk
-        AfkCommand afkCommand = new AfkCommand(afkManager);
-        afkCommand.registerCommands();
         registerListeners(new AfkEvents(afkManager));
         afkManager.startAfkScheduler();
 
         //music
-        MusicManager musicManager = new MusicManager();
-        MusicDialogMenu musicDialogMenu = new MusicDialogMenu(musicManager);
+        musicManager = new MusicManager();
+        musicDialogMenu = new MusicDialogMenu(musicManager);
         musicManager.loadSongs(executionTime -> {
             this.getLogger().info("Ladattu musiikit " + executionTime + " millisekuntissa.");
         });
-        MusicCommand musicCommand = new MusicCommand(musicManager, musicDialogMenu);
-        musicCommand.registerCommands();
         registerListeners(new MusicEvents(musicManager));
 
-        //marriage
-        /*
-        MarriageManager marriageManager = new MarriageManager();
-        MarriageMenu marriageMenu = new MarriageMenu(marriageManager);
-        MarriageCommand marriageCommand = new MarriageCommand(marriageMenu, marriageManager);
-        marriageCommand.registerCommands();
-         */
-
-        //prefixmenu
-        PrefixCommand prefixCommand = new PrefixCommand(prefixTypeDialog, prefixMainDialog, prefixColorDialog, prefixManager);
-        prefixCommand.registerCommands();
-
         //playtime
-        PlaytimeManager playtimeManager = new PlaytimeManager(Optional.of(afkManager));
-        PlaytimeCommand playtimeCommand = new PlaytimeCommand(playtimeManager);
-        playtimeCommand.registerCommands();
+        playtimeManager = new PlaytimeManager(Optional.of(afkManager));
         registerListeners(new PlaytimeListener(playtimeManager));
         playtimeManager.startScheduledSaveTask();
 
         //spawn
-        SpawnCommand spawnCommand = new SpawnCommand(teleportManager);
-        spawnCommand.registerCommands();
         Bukkit.getPluginManager().registerEvents(new SpawnTeleport(teleportManager), this);
 
-        //general commands
-        InfoCommands infoCommands = new InfoCommands();
-        infoCommands.registerCommands();
 
-        GamemodeCommand gamemodeCommand = new GamemodeCommand();
-        gamemodeCommand.registerCommands();
-
-        SpeedCommand speedCommand = new SpeedCommand();
-        speedCommand.registerCommands();
-
-        TeleportCommands teleportCommands = new TeleportCommands();
-        teleportCommands.registerCommands();
-
-        FlyCommand flyCommand = new FlyCommand();
-        flyCommand.registerCommands();
-
-        CoreCommand coreCommand = new CoreCommand(teleportManager);
-        coreCommand.registerCommands();
 
         //placeholder
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new Placeholders(this, prefixManager, afkManager, playtimeManager).register();
         }
+
+        registerCommands();
     }
 
     @Override
@@ -134,6 +97,41 @@ public final class GahvilaCore extends JavaPlugin {
         for(Listener listener : listeners){
             pluginManager.registerEvents(listener, this);
         }
+    }
+
+    private void registerCommands() {
+        AfkCommand afkCommand = new AfkCommand(afkManager);
+        afkCommand.registerCommands(this);
+
+        CoreCommand coreCommand = new CoreCommand(teleportManager);
+        coreCommand.registerCommands(this);
+
+        FlyCommand flyCommand = new FlyCommand();
+        flyCommand.registerCommands(this);
+
+        GamemodeCommand gamemodeCommand = new GamemodeCommand();
+        gamemodeCommand.registerCommands(this);
+
+        InfoCommands infoCommands = new InfoCommands();
+        infoCommands.registerCommands(this);
+
+        SpeedCommand speedCommand = new SpeedCommand();
+        speedCommand.registerCommands(this);
+
+        MusicCommand musicCommand = new MusicCommand(musicManager, musicDialogMenu);
+        musicCommand.registerCommands(this);
+
+        SpawnCommand spawnCommand = new SpawnCommand(teleportManager);
+        spawnCommand.registerCommands(this);
+
+        PlaytimeCommand playtimeCommand = new PlaytimeCommand(playtimeManager);
+        playtimeCommand.registerCommands(this);
+
+        PrefixCommand prefixCommand = new PrefixCommand(prefixTypeDialog, prefixMainDialog, prefixColorDialog, prefixManager);
+        prefixCommand.registerCommands(this);
+
+        TeleportCommands teleportCommands = new TeleportCommands();
+        teleportCommands.registerCommands(this);
     }
 
     private void initializePanilla() {

@@ -1,10 +1,16 @@
 package net.gahvila.gahvilacore.Essentials.Commands;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import de.leonhard.storage.Json;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.PlayerArgument;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.draycia.carbon.api.CarbonChatProvider;
 import net.draycia.carbon.api.users.CarbonPlayer;
+import net.gahvila.gahvilacore.GahvilaCore;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
@@ -12,6 +18,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -20,7 +27,6 @@ import java.util.UUID;
 
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
-
 public class TeleportCommands {
     //player which sent the tpa request, player which received the teleport request
     public static HashMap<Player, Player> tpa = new HashMap<>();
@@ -28,117 +34,143 @@ public class TeleportCommands {
 
     public static HashMap<Player, Player> latestTpaName = new HashMap<>();
 
+    public void registerCommands(GahvilaCore plugin) {
+        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
+            commands.registrar().register(createTpaCommand());
+            commands.registrar().register(createTpaHereCommand());
+            commands.registrar().register(createTpaCancelCommand());
+            commands.registrar().register(createTpaToggleCommand());
+            commands.registrar().register(createTpaYesCommand());
+            commands.registrar().register(createTpaNoCommand());
 
+        });
+    }
 
-    public void registerCommands() {
-        new CommandAPICommand("tpa")
-                .withArguments(new PlayerArgument("nimi"))
-                .executesPlayer((tpasender, args) -> {
-                    Player tpareceiver = (Player) args.get("nimi");
-                    if (tpasender.getName().equals(tpareceiver.getName())){
-                        tpasender.sendMessage("Et voi teleportata itseesi.");
-                        return;
-                    }
-                    if (getTpaToggle(tpareceiver)) {
-                        tpasender.sendMessage("Tuolle pelaajalle ei voi lähettää TPA-pyyntöjä.");
-                        return;
-                    }
-                    if (tpa.containsKey(tpasender)) {
-                        tpasender.sendMessage(toMM("Sinulla on jo aktiivinen TPA-pyyntö. Lähettääksesi uuden sinun täytyy perua aikaisempi klikkaamalla tätä viestiä tai /tpacancel.")
-                                .hoverEvent(HoverEvent.showText(toMM("Klikkaa peruaksesi"))).clickEvent(ClickEvent.runCommand("/tpacancel")));
-                        return;
-                    }
-                    if(Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
-                        CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(tpareceiver.getUniqueId()).getNow(null);
-                        if (carbonPlayer.ignoring(tpasender.getUniqueId())) {
-                            tpasender.sendMessage("Et voi lähettää TPA-pyyntöä tuolle pelaajalle.");
-                            return;
-                        }
-                    }
+    private LiteralCommandNode<CommandSourceStack> createTpaCommand() {
+        return Commands.literal("tpa")
+                .then(Commands.argument("target", ArgumentTypes.player())
+                        .executes(ctx -> {
+                            final CommandSender sender = ctx.getSource().getSender();
+                            if (sender instanceof Player tpasender) {
+                                final PlayerSelectorArgumentResolver playerSelector = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                                final Player tpareceiver = playerSelector.resolve(ctx.getSource()).getFirst();
 
-                    tpa.put(tpasender, tpareceiver);
-                    latestTpaName.put(tpareceiver, tpasender);
-                    tpareceiver.playSound(tpareceiver.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 2F, 1F);
-                    tpasender.sendMessage(toMM("Lähetit TPA-pyynnön <#85FF00>" + tpareceiver.getName() + ":lle</#85FF00>."));
+                                if (tpasender.getName().equals(tpareceiver.getName())) {
+                                    tpasender.sendMessage("Et voi teleportata itseesi.");
+                                    return Command.SINGLE_SUCCESS;
+                                }
+                                if (getTpaToggle(tpareceiver)) {
+                                    tpasender.sendMessage("Tuolle pelaajalle ei voi lähettää TPA-pyyntöjä.");
+                                    return Command.SINGLE_SUCCESS;
+                                }
+                                if (tpa.containsKey(tpasender)) {
+                                    tpasender.sendMessage(toMM("Sinulla on jo aktiivinen TPA-pyyntö. Lähettääksesi uuden sinun täytyy perua aikaisempi klikkaamalla tätä viestiä tai /tpacancel.")
+                                            .hoverEvent(HoverEvent.showText(toMM("Klikkaa peruaksesi"))).clickEvent(ClickEvent.runCommand("/tpacancel")));
+                                    return Command.SINGLE_SUCCESS;
+                                }
+                                if (Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
+                                    CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(tpareceiver.getUniqueId()).getNow(null);
+                                    if (carbonPlayer.ignoring(tpasender.getUniqueId())) {
+                                        tpasender.sendMessage("Et voi lähettää TPA-pyyntöä tuolle pelaajalle.");
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+                                }
 
-                    tpareceiver.sendMessage(toMM("\n| <#85FF00>" + tpasender.getName() + " </#85FF00>lähetti sinulle <#85FF00>TPA-pyynnön</#85FF00>."));
-                    tpareceiver.sendMessage(toMM("<white>| Sinulla on <#85FF00>30 sekuntia</#85FF00> <white>aikaa hyväksyä."));
-                    tpareceiver.sendMessage(toMM("| <green><b>Hyväksy</b>: /tpayes " + tpasender.getName())
-                            .hoverEvent(HoverEvent.showText(toMM("<green>Klikkaa hyväksyäksesi</green>"))).clickEvent(ClickEvent.runCommand("/tpayes " + tpasender.getName())));
-                    tpareceiver.sendMessage(toMM("| <red><b>Kieltäydy</b>: /tpano " + tpasender.getName())
-                            .hoverEvent(HoverEvent.showText(toMM("<red>Klikkaa kieltäytyäksesi</red>"))).clickEvent(ClickEvent.runCommand("/tpano " + tpasender.getName())));
+                                tpa.put(tpasender, tpareceiver);
+                                latestTpaName.put(tpareceiver, tpasender);
+                                tpareceiver.playSound(tpareceiver.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 2F, 1F);
+                                tpasender.sendMessage(toMM("Lähetit TPA-pyynnön <#85FF00>" + tpareceiver.getName() + ":lle</#85FF00>."));
 
-                    Bukkit.getServer().getScheduler().runTaskLater(instance, new Runnable() {
-                        @Override
-                        public void run() {
-                            if (tpa.get(tpasender) != null) {
-                                tpa.remove(tpasender);
-                                latestTpaName.remove(tpareceiver);
-                                tpasender.sendMessage("TPA-pyyntösi vanhentui.");
-                                tpareceiver.sendMessage(toMM("<#85FF00>" + tpasender.getName() + ":n </#85FF00>lähettämä TPA-pyyntö vanhentui."));
+                                tpareceiver.sendMessage(toMM("\n| <#85FF00>" + tpasender.getName() + " </#85FF00>lähetti sinulle <#85FF00>TPA-pyynnön</#85FF00>."));
+                                tpareceiver.sendMessage(toMM("<white>| Sinulla on <#85FF00>30 sekuntia</#85FF00> <white>aikaa hyväksyä."));
+                                tpareceiver.sendMessage(toMM("| <green><b>Hyväksy</b>: /tpayes " + tpasender.getName())
+                                        .hoverEvent(HoverEvent.showText(toMM("<green>Klikkaa hyväksyäksesi</green>"))).clickEvent(ClickEvent.runCommand("/tpayes " + tpasender.getName())));
+                                tpareceiver.sendMessage(toMM("| <red><b>Kieltäydy</b>: /tpano " + tpasender.getName())
+                                        .hoverEvent(HoverEvent.showText(toMM("<red>Klikkaa kieltäytyäksesi</red>"))).clickEvent(ClickEvent.runCommand("/tpano " + tpasender.getName())));
+
+                                Bukkit.getServer().getScheduler().runTaskLater(instance, new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (tpa.get(tpasender) != null) {
+                                            tpa.remove(tpasender);
+                                            latestTpaName.remove(tpareceiver);
+                                            tpasender.sendMessage("TPA-pyyntösi vanhentui.");
+                                            tpareceiver.sendMessage(toMM("<#85FF00>" + tpasender.getName() + ":n </#85FF00>lähettämä TPA-pyyntö vanhentui."));
+                                        }
+                                    }
+                                }, 20 * 30);
                             }
-                        }
-                    }, 20 * 30);
 
+                            return Command.SINGLE_SUCCESS;
+                        })
+                ).build();
+    }
 
-                })
-                .register();
-        new CommandAPICommand("tpahere")
-                .withAliases("tpah")
-                .withArguments(new PlayerArgument("nimi"))
-                .executesPlayer((tpasender, args) -> {
-                    Player tpareceiver = (Player) args.get("nimi");
-                    if (tpasender.getName().equals(tpareceiver.getName())){
-                        tpasender.sendMessage("Et voi teleportata itseesi.");
-                        return;
-                    }
-                    if (getTpaToggle(tpareceiver)) {
-                        tpasender.sendMessage("Tuolle pelaajalle ei voi lähettää TPA-pyyntöjä.");
-                        return;
-                    }
-                    if (tpahere.containsKey(tpasender) || tpa.containsKey(tpasender)) {
-                        tpasender.sendMessage(toMM("Sinulla on jo aktiivinen TPA-pyyntö. Lähettääksesi uuden sinun täytyy perua aikaisempi klikkaamalla tätä viestiä tai /tpacancel.")
-                                .hoverEvent(HoverEvent.showText(toMM("Klikkaa peruaksesi"))).clickEvent(ClickEvent.runCommand("/tpacancel")));
-                        return;
-                    }
-                    if(Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
-                        CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(tpareceiver.getUniqueId()).getNow(null);
-                        if (carbonPlayer.ignoring(tpasender.getUniqueId())) {
-                            tpasender.sendMessage("Et voi lähettää TPA-pyyntöä tuolle pelaajalle.");
-                            return;
-                        }
-                    }
+    private LiteralCommandNode<CommandSourceStack> createTpaHereCommand() {
+        return Commands.literal("tpahere")
+                .then(Commands.argument("target", ArgumentTypes.player())
+                        .executes(ctx -> {
+                            final CommandSender sender = ctx.getSource().getSender();
+                            if (sender instanceof Player tpasender) {
+                                final PlayerSelectorArgumentResolver playerSelector = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                                final Player tpareceiver = playerSelector.resolve(ctx.getSource()).getFirst();
 
-                    tpahere.put(tpasender, tpareceiver);
-                    latestTpaName.put(tpareceiver, tpasender);
-                    tpareceiver.playSound(tpareceiver.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 2F, 1F);
-                    tpasender.sendMessage(toMM("Lähetit TPAHere-pyynnön <#85FF00>" + tpareceiver.getName() + ":lle</#85FF00>."));
+                                if (tpasender.getName().equals(tpareceiver.getName())){
+                                    tpasender.sendMessage("Et voi teleportata itseesi.");
+                                    return Command.SINGLE_SUCCESS;
+                                }
+                                if (getTpaToggle(tpareceiver)) {
+                                    tpasender.sendMessage("Tuolle pelaajalle ei voi lähettää TPA-pyyntöjä.");
+                                    return Command.SINGLE_SUCCESS;
+                                }
+                                if (tpahere.containsKey(tpasender) || tpa.containsKey(tpasender)) {
+                                    tpasender.sendMessage(toMM("Sinulla on jo aktiivinen TPA-pyyntö. Lähettääksesi uuden sinun täytyy perua aikaisempi klikkaamalla tätä viestiä tai /tpacancel.")
+                                            .hoverEvent(HoverEvent.showText(toMM("Klikkaa peruaksesi"))).clickEvent(ClickEvent.runCommand("/tpacancel")));
+                                    return Command.SINGLE_SUCCESS;
+                                }
+                                if(Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
+                                    CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(tpareceiver.getUniqueId()).getNow(null);
+                                    if (carbonPlayer.ignoring(tpasender.getUniqueId())) {
+                                        tpasender.sendMessage("Et voi lähettää TPA-pyyntöä tuolle pelaajalle.");
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+                                }
 
-                    tpareceiver.sendMessage(toMM("\n<white>| <#85FF00>" + tpasender.getName() + " </#85FF00>lähetti sinulle <#85FF00>TPAHere-pyynnön</#85FF00>."));
-                    tpareceiver.sendMessage(toMM("<white>| Sinulla on <#85FF00>30 sekuntia</#85FF00> <white>aikaa hyväksyä."));
-                    tpareceiver.sendMessage(toMM("<white>| <green><b>Hyväksy</b>: /tpayes " + tpasender.getName())
-                            .hoverEvent(HoverEvent.showText(toMM("<green>Klikkaa hyväksyäksesi</green>"))).clickEvent(ClickEvent.runCommand("/tpayes " + tpasender.getName())));
-                    tpareceiver.sendMessage(toMM("<white>| <red><b>Kieltäydy</b>: /tpano " + tpasender.getName())
-                            .hoverEvent(HoverEvent.showText(toMM("<red>Klikkaa kieltäytyäksesi</red>"))).clickEvent(ClickEvent.runCommand("/tpano " + tpasender.getName())));
+                                tpahere.put(tpasender, tpareceiver);
+                                latestTpaName.put(tpareceiver, tpasender);
+                                tpareceiver.playSound(tpareceiver.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 2F, 1F);
+                                tpasender.sendMessage(toMM("Lähetit TPAHere-pyynnön <#85FF00>" + tpareceiver.getName() + ":lle</#85FF00>."));
 
-                    Bukkit.getServer().getScheduler().runTaskLater(instance, new Runnable() {
-                        @Override
-                        public void run() {
-                            if (tpahere.get(tpasender) != null) {
-                                tpahere.remove(tpasender);
-                                latestTpaName.remove(tpareceiver);
-                                tpasender.sendMessage("TPAHere-pyyntösi vanhentui.");
-                                tpareceiver.sendMessage(toMM("<#85FF00>" + tpasender.getName() + ":n </#85FF00>lähettämä TPAHere-pyyntö vanhentui."));
+                                tpareceiver.sendMessage(toMM("\n<white>| <#85FF00>" + tpasender.getName() + " </#85FF00>lähetti sinulle <#85FF00>TPAHere-pyynnön</#85FF00>."));
+                                tpareceiver.sendMessage(toMM("<white>| Sinulla on <#85FF00>30 sekuntia</#85FF00> <white>aikaa hyväksyä."));
+                                tpareceiver.sendMessage(toMM("<white>| <green><b>Hyväksy</b>: /tpayes " + tpasender.getName())
+                                        .hoverEvent(HoverEvent.showText(toMM("<green>Klikkaa hyväksyäksesi</green>"))).clickEvent(ClickEvent.runCommand("/tpayes " + tpasender.getName())));
+                                tpareceiver.sendMessage(toMM("<white>| <red><b>Kieltäydy</b>: /tpano " + tpasender.getName())
+                                        .hoverEvent(HoverEvent.showText(toMM("<red>Klikkaa kieltäytyäksesi</red>"))).clickEvent(ClickEvent.runCommand("/tpano " + tpasender.getName())));
+
+                                Bukkit.getServer().getScheduler().runTaskLater(instance, new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (tpahere.get(tpasender) != null) {
+                                            tpahere.remove(tpasender);
+                                            latestTpaName.remove(tpareceiver);
+                                            tpasender.sendMessage("TPAHere-pyyntösi vanhentui.");
+                                            tpareceiver.sendMessage(toMM("<#85FF00>" + tpasender.getName() + ":n </#85FF00>lähettämä TPAHere-pyyntö vanhentui."));
+                                        }
+                                    }
+                                }, 20 * 30);
                             }
-                        }
-                    }, 20 * 30);
 
+                            return Command.SINGLE_SUCCESS;
+                        })
+                ).build();
+    }
 
-                })
-                .register();
-        new CommandAPICommand("tpacancel")
-                .withAliases("tpc")
-                .executesPlayer((tpasender, args) -> {
+    private LiteralCommandNode<CommandSourceStack> createTpaCancelCommand() {
+        return Commands.literal("tpacancel")
+            .executes(ctx -> {
+                final CommandSender sender = ctx.getSource().getSender();
+                if (sender instanceof Player tpasender) {
                     if (tpa.get(tpasender) != null) {
                         Player tpareceiver = tpa.get(tpasender);
 
@@ -156,54 +188,79 @@ public class TeleportCommands {
                         tpasender.sendMessage("Peruit TPAHere-pyyntösi.");
                         tpareceiver.sendMessage(toMM(tpasender.getName() + " perui TPAHere-pyyntönsä."));
                     }
-                })
-                .register();
-        new CommandAPICommand("tpatoggle")
-                .executesPlayer((p, args) -> {
-                    if (getTpaToggle(p)) {
-                        changeTpaToggle(p);
-                        p.sendMessage("Kytkit TPA-pyynnöt päälle.");
-                    } else {
-                        changeTpaToggle(p);
-                        p.sendMessage("Kytkit TPA-pyynnöt pois päältä.");
+                }
+
+                return Command.SINGLE_SUCCESS;
+            }
+        ).build();
+    }
+
+    private LiteralCommandNode<CommandSourceStack> createTpaToggleCommand() {
+        return Commands.literal("tpatoggle")
+            .executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if (sender instanceof Player player) {
+                        if (getTpaToggle(player)) {
+                            changeTpaToggle(player);
+                            player.sendMessage("Kytkit TPA-pyynnöt päälle.");
+                        } else {
+                            changeTpaToggle(player);
+                            player.sendMessage("Kytkit TPA-pyynnöt pois päältä.");
+                        }
                     }
-                })
-                .register();
-        new CommandAPICommand("tpayes")
-                .withAliases("tpaccept", "tpy")
-                .withOptionalArguments(new PlayerArgument("nimi"))
-                .executesPlayer((tpareceiver, args) -> {
-                    if (args.get("nimi") == null){
-                        if (latestTpaName.containsKey(tpareceiver)){
-                            if (tpa.containsKey(latestTpaName.get(tpareceiver))) {
-                                Player tpasender = latestTpaName.get(tpareceiver);
-                                acceptTpa(tpasender, tpareceiver, 0);
-                            }else if (tpahere.containsKey(latestTpaName.get(tpareceiver))) {
-                                Player tpasender = latestTpaName.get(tpareceiver);
-                                acceptTpa(tpasender, tpareceiver, 1);
-                            } else {
-                                tpareceiver.sendMessage("Sinulla ei ole TPA-pyyntöjä.");
+
+                    return Command.SINGLE_SUCCESS;
+                }
+            ).build();
+    }
+
+    private LiteralCommandNode<CommandSourceStack> createTpaYesCommand() {
+        return Commands.literal("tpayes")
+                .executes(ctx -> {
+                            final CommandSender sender = ctx.getSource().getSender();
+                            if (sender instanceof Player tpareceiver) {
+                                if (latestTpaName.containsKey(tpareceiver)) {
+                                    if (tpa.containsKey(latestTpaName.get(tpareceiver))) {
+                                        Player tpasender = latestTpaName.get(tpareceiver);
+                                        acceptTpa(tpasender, tpareceiver, 0);
+                                    } else if (tpahere.containsKey(latestTpaName.get(tpareceiver))) {
+                                        Player tpasender = latestTpaName.get(tpareceiver);
+                                        acceptTpa(tpasender, tpareceiver, 1);
+                                    } else {
+                                        tpareceiver.sendMessage("Sinulla ei ole TPA-pyyntöjä.");
+                                    }
+                                } else {
+                                    tpareceiver.sendMessage("Sinulla ei ole TPA-pyyntöjä.");
+                                }
                             }
-                        } else {
-                            tpareceiver.sendMessage("Sinulla ei ole TPA-pyyntöjä.");
-                        }
-                    }else{
-                        Player tpasender = (Player) args.get("nimi");
-                        if (tpa.containsKey(tpasender) && tpa.get(tpasender).equals(tpareceiver)){
-                            acceptTpa(tpasender, tpareceiver, 0);
-                        } else if (tpahere.containsKey(tpasender) && tpahere.get(tpasender).equals(tpareceiver)) {
-                            acceptTpa(tpasender, tpareceiver, 1);
-                        } else {
-                            tpareceiver.sendMessage(toMM("<white>Sinulla ei ole TPA-pyyntöjä pelaajalta <#85FF00>" + tpasender.getName() + "</#85FF00>."));
-                        }
-                    }
+                            return Command.SINGLE_SUCCESS;
                 })
-                .register();
-        new CommandAPICommand("tpano")
-                .withAliases("tpadeny", "tpn")
-                .withOptionalArguments(new PlayerArgument("nimi"))
-                .executesPlayer((tpareceiver, args) -> {
-                    if (args.get("nimi") == null){
+                .then(Commands.argument("target", ArgumentTypes.player())
+                        .executes(ctx -> {
+                            final CommandSender sender = ctx.getSource().getSender();
+                            if (sender instanceof Player tpareceiver) {
+                                final PlayerSelectorArgumentResolver playerSelector = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                                final Player tpasender = playerSelector.resolve(ctx.getSource()).getFirst();
+
+                                if (tpa.containsKey(tpasender) && tpa.get(tpasender).equals(tpareceiver)){
+                                    acceptTpa(tpasender, tpareceiver, 0);
+                                } else if (tpahere.containsKey(tpasender) && tpahere.get(tpasender).equals(tpareceiver)) {
+                                    acceptTpa(tpasender, tpareceiver, 1);
+                                } else {
+                                    tpareceiver.sendMessage(toMM("<white>Sinulla ei ole TPA-pyyntöjä pelaajalta <#85FF00>" + tpasender.getName() + "</#85FF00>."));
+                                }
+                            }
+
+                            return Command.SINGLE_SUCCESS;
+                        })
+                ).build();
+    }
+
+    private LiteralCommandNode<CommandSourceStack> createTpaNoCommand() {
+        return Commands.literal("tpano")
+                .executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if (sender instanceof Player tpareceiver) {
                         if (latestTpaName.containsKey(tpareceiver)){
                             if (tpa.containsKey(latestTpaName.get(tpareceiver))) {
                                 Player tpasender = latestTpaName.get(tpareceiver);
@@ -217,18 +274,28 @@ public class TeleportCommands {
                         } else {
                             tpareceiver.sendMessage("Sinulla ei ole TPA-pyyntöjä.");
                         }
-                    }else{
-                        Player tpasender = (Player) args.get("nimi");
-                        if (tpa.containsKey(tpasender) && tpa.get(tpasender).equals(tpareceiver)){
-                            denyTpa(tpasender, tpareceiver, 0);
-                        } else if (tpahere.containsKey(tpasender) && tpahere.get(tpasender).equals(tpareceiver)){
-                            denyTpa(tpasender, tpareceiver, 1);
-                        } else {
-                            tpareceiver.sendMessage(toMM("<white>Sinulla ei ole TPA-pyyntöjä pelaajalta <#85FF00>" + tpasender.getName() + "</#85FF00>."));
-                        }
                     }
+                    return Command.SINGLE_SUCCESS;
                 })
-                .register();
+                .then(Commands.argument("target", ArgumentTypes.player())
+                        .executes(ctx -> {
+                            final CommandSender sender = ctx.getSource().getSender();
+                            if (sender instanceof Player tpareceiver) {
+                                final PlayerSelectorArgumentResolver playerSelector = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
+                                final Player tpasender = playerSelector.resolve(ctx.getSource()).getFirst();
+
+                                if (tpa.containsKey(tpasender) && tpa.get(tpasender).equals(tpareceiver)){
+                                    denyTpa(tpasender, tpareceiver, 0);
+                                } else if (tpahere.containsKey(tpasender) && tpahere.get(tpasender).equals(tpareceiver)){
+                                    denyTpa(tpasender, tpareceiver, 1);
+                                } else {
+                                    tpareceiver.sendMessage(toMM("<white>Sinulla ei ole TPA-pyyntöjä pelaajalta <#85FF00>" + tpasender.getName() + "</#85FF00>."));
+                                }
+                            }
+
+                            return Command.SINGLE_SUCCESS;
+                        })
+                ).build();
     }
 
     public void acceptTpa(Player tpasender, Player tpareceiver, Integer type) {
