@@ -20,6 +20,13 @@ public class SongQueue {
     }
 
     /**
+     * @return an unmodifiable view of the current queue
+     */
+    public Collection<Song> getQueue() {
+        return Collections.unmodifiableCollection(queue);
+    }
+
+    /**
      * Queue a song to be played
      * @param song song to queue
      */

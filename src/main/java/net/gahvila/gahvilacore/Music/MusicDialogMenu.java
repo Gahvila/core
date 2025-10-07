@@ -45,7 +45,11 @@ public class MusicDialogMenu {
     }
 
     public void show(Player player, int page) {
-        player.showDialog(createMusicDialog(player, page));
+        if (musicManager.getRadioEnabled(player)) {
+            player.showDialog(createRadioMusicDialog(player));
+        } else {
+            player.showDialog(createNormalMusicDialog(player, page));
+        }
     }
 
     public void showSettings(Player player) {
@@ -57,7 +61,7 @@ public class MusicDialogMenu {
 
     private static final int ENTRIES_PER_PAGE = COLUMNS * ROWS;
 
-    private Dialog createMusicDialog(Player player, int page) {
+    private Dialog createNormalMusicDialog(Player player, int page) {
         List<Song> songs = musicManager.getSongsSorted(player);
         List<ActionButton> buttons = new ArrayList<>();
 
@@ -240,6 +244,66 @@ public class MusicDialogMenu {
                 )));
     }
 
+    private Dialog createRadioMusicDialog(Player player) {
+        List<ActionButton> buttons = new ArrayList<>();
+
+        // navigation buttons
+        buttons.add(ActionButton.builder(
+                        toMM((musicManager.getRadioPlayer() != null
+                                && musicManager.getRadioPlayer().getListeners().containsKey(player.getUniqueId()))
+                                ? "<red>⏸ Lopeta radion kuuntelu"
+                                : "<green>▶ Aloita radion kuuntelu"))
+                .width(130)
+                .action(DialogAction.customClick((response, audience) -> {
+                            if (musicManager.getRadioPlayer() == null) return;
+                            if (musicManager.getRadioPlayer().getListeners().containsKey(player.getUniqueId())) {
+                                musicManager.removeRadioListener(player);
+                            } else {
+                                musicManager.addRadioListener(player);
+                            }
+
+                            show(player, 0);
+                        },
+                        ClickCallback.Options.builder().build()
+                ))
+                .build());
+
+        buttons.add(ActionButton.builder(toMM("⚙"))
+                .width(20)
+                .tooltip(toMM("Asetukset"))
+                .action(DialogAction.customClick((response, audience) -> {
+                            showSettings(player);
+                        },
+                        ClickCallback.Options.builder().build()
+                ))
+                .build());
+
+        return Dialog.create(builder -> builder.empty()
+                .base(DialogBase.builder(toMM("<b>Musiikkivalikko</b> <dark_gray>(<yellow>Radio</yellow><dark_gray>)</dark_gray>"))
+                        .body(List.of(
+                                DialogBody.plainMessage(toMM("<yellow>Sinulla on radiotila käytössä. Voit muuttaa asiaa asetuksista.</yellow>")),
+                                DialogBody.plainMessage(toMM("<gray>Äänenvoimakkuuden, nopeuden tai kaiutintilan säätäminen ei ole saatavilla radiotilassa.</gray>"))
+
+                        ))
+                        .afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
+                        .build())
+                .type(DialogType.multiAction(
+                        buttons,
+                        ActionButton.builder(toMM("Sulje valikko"))
+                                .width(150)
+                                .action(DialogAction.customClick(
+                                        (response, audience) -> {
+                                            player.showDialog(createClosingDialog());
+                                            ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
+                                            serverPlayer.connection.send(ClientboundClearDialogPacket.INSTANCE); // no method for clearing dialogs in paper api
+                                        },
+                                        ClickCallback.Options.builder().build()
+                                ))
+                                .build(),
+                        COLUMNS
+                )));
+    }
+
     private Dialog createSettingsDialog(Player player) {
         String currentSpeed = String.valueOf((int) musicManager.getSpeed(player));
         return Dialog.create(builder -> builder.empty()
@@ -249,6 +313,9 @@ public class MusicDialogMenu {
                                 DialogBody.plainMessage(toMM("Muutokset tallentuvat automaattisesti jos poistut tästä valikosta"))
                         ))
                         .inputs(Arrays.asList(
+                                DialogInput.bool("radio", Component.text("Radiotila"))
+                                        .initial(musicManager.getRadioEnabled(player))
+                                        .build(),
                                 DialogInput.bool("speaker", Component.text("Kaiutintila"))
                                         .initial(musicManager.getSpeakerEnabled(player))
                                         .build(),
@@ -275,14 +342,19 @@ public class MusicDialogMenu {
                 .type(DialogType.notice(
                         ActionButton.builder(Component.text("Päävalikko"))
                                 .action(DialogAction.customClick((response, audience) -> {
+                                            musicManager.setRadioEnabled(player, response.getBoolean("radio"));
                                             musicManager.setSpeakerEnabled(player, response.getBoolean("speaker"));
                                             musicManager.setAutoEnabled(player, response.getBoolean("auto"));
                                             musicManager.setSpeed(player, Byte.valueOf(response.getText("speed")));
                                             musicManager.setSorting(player, MusicSorting.valueOf(response.getText("sorting")));
-                                            if (musicManager.getSongPlayer(player) != null) {
-                                                SongPlayer sp = musicManager.getSongPlayer(player);
-                                                if (sp.isPlaying()){
-                                                    musicManager.createSongPlayer(player, sp.getCurrentSong(), sp.getTick(), true);
+                                            if (musicManager.getRadioEnabled(player)) {
+                                                musicManager.clearSongPlayer(player);
+                                            } else {
+                                                if (musicManager.getSongPlayer(player) != null) {
+                                                    SongPlayer sp = musicManager.getSongPlayer(player);
+                                                    if (sp.isPlaying()) {
+                                                        musicManager.createSongPlayer(player, sp.getCurrentSong(), sp.getTick(), true);
+                                                    }
                                                 }
                                             }
                                             show(player, musicManager.getPage(player));

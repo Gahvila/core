@@ -27,6 +27,7 @@ public class MusicEvents implements Listener {
         musicManager.setSpeakerEnabled(player, false);
         musicManager.setAutoEnabled(player, musicManager.getSavedAutoState(player));
         musicManager.setVolume(player, musicManager.getSavedVolume(player));
+        musicManager.setRadioEnabled(player, musicManager.getSavedRadio(player));
 
         musicManager.playSongFromCookies(player);
     }
@@ -38,6 +39,7 @@ public class MusicEvents implements Listener {
         musicManager.clearSongPlayer(player);
         musicManager.saveAutoState(player);
         musicManager.saveVolume(player);
+        musicManager.saveRadioEnabled(player);
 
         MusicManager.speakerEnabled.remove(player);
         MusicManager.autoEnabled.remove(player);
@@ -51,10 +53,12 @@ public class MusicEvents implements Listener {
         for (UUID uuid : playerUUIDs) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
-                musicManager.saveTitleToCookie(player);
-                musicManager.saveTickToCookie(player);
+                if (!musicManager.getRadioPlayer().getListeners().containsKey(uuid)) {
+                    musicManager.saveTitleToCookie(player);
+                    musicManager.saveTickToCookie(player);
+                    musicManager.songPlayerSchedule(player, songPlayer);
+                }
                 player.sendRichMessage("Nyt soi: <yellow>" + songPlayer.getCurrentSong().getMetadata().getTitle());
-                musicManager.songPlayerSchedule(player, songPlayer);
             }
         }
     }
@@ -64,6 +68,7 @@ public class MusicEvents implements Listener {
         SongPlayer songPlayer = event.getSongPlayer();
         Set<UUID> playerUUIDs = songPlayer.getListeners().keySet();
         for (UUID uuid : playerUUIDs) {
+            if (musicManager.getRadioPlayer().getListeners().containsKey(uuid)) return;
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
                 musicManager.clearSongPlayer(player);

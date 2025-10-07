@@ -135,6 +135,7 @@ public class MusicManager {
             }
 
             Bukkit.getScheduler().runTask(instance, () -> {
+                clearRadioPlayer();
                 isLoaded = true;
                 isLoading = false;
                 long executionTime = System.currentTimeMillis() - startTime;
@@ -229,10 +230,10 @@ public class MusicManager {
         clearCookies(player);
     }
 
-    public void createSongPlayer(Player player, Song song, long tick, Boolean playing){
+    public void createSongPlayer(Player player, Song song, long tick, Boolean playing) {
+        setRadioEnabled(player,false);
         clearSongPlayer(player);
         SongPlayer songPlayer;
-
         if (getSpeakerEnabled(player)) {
             EntityReference entityReference = new EntityReference(player.getEntityId(), player.getUniqueId());
             songPlayer = new BukkitSongPlayer.Builder()
@@ -241,8 +242,8 @@ public class MusicManager {
                     .transposeNotes(false)
                     .build();
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")){
-                    if(Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
+                if (!WorldGuardRegionChecker.isInRegion(onlinePlayer, "spawn")) {
+                    if (Bukkit.getServer().getPluginManager().getPlugin("CarbonChat") != null) {
                         CarbonPlayer carbonPlayer = CarbonChatProvider.carbonChat().userManager().user(onlinePlayer.getUniqueId()).getNow(null);
                         if (!carbonPlayer.ignoring(entityReference.uuid())) {
                             songPlayer.addListener(new AudioListener(onlinePlayer.getEntityId(), onlinePlayer.getUniqueId()));
@@ -267,11 +268,8 @@ public class MusicManager {
             songPlayer.loopQueue(true);
             songPlayer.shuffleQueue();
         }
-        songPlayer.addListener(new AudioListener(player.getEntityId(), player.getUniqueId()));
         songPlayer.setTick(tick);
-        if (songPlayer.getSoundEmitter() instanceof GlobalSoundEmitter) {
-            songPlayer.setVolume(volumeConverter(getVolume(player)));
-        }
+
         saveSongPlayer(player, songPlayer);
         songPlayerSchedule(player, songPlayer);
 
@@ -279,6 +277,91 @@ public class MusicManager {
         saveTickToCookie(player);
         savePauseToCookie(player);
         saveVolumeToCookie(player);
+        songPlayer.addListener(new AudioListener(player.getEntityId(), player.getUniqueId()));
+        if (songPlayer.getSoundEmitter() instanceof GlobalSoundEmitter) {
+            songPlayer.setVolume(volumeConverter(getVolume(player)));
+        }
+    }
+
+    //
+    //RADIO
+    //
+    public static HashMap<Player, Boolean> radioEnabled = new HashMap<>();
+    public boolean getRadioEnabled(Player player) {
+        return radioEnabled.get(player) != null && radioEnabled.get(player);
+    }
+
+    public void setRadioEnabled(Player player, boolean option) {
+        if (option) {
+            addRadioListener(player);
+        } else {
+            removeRadioListener(player);
+        }
+        radioEnabled.put(player, option);
+    }
+
+
+    public void saveRadioEnabled(Player player) {
+        Json playerData = new Json("playerdata.json", instance.getDataFolder() + "/data/");
+        String uuid = player.getUniqueId().toString();
+        playerData.set(uuid + "." + "radio", getRadioEnabled(player));
+    }
+    public boolean getSavedRadio(Player player) {
+        Json playerData = new Json("playerdata.json", instance.getDataFolder() + "/data/");
+        String uuid = player.getUniqueId().toString();
+
+        if (!playerData.contains(uuid + "." + "radio")) {
+            return false;
+        }
+        return playerData.getBoolean(uuid + "." + "radio");
+    }
+
+    private SongPlayer radioPlayer;
+    public void createRadioPlayer() {
+        SongPlayer songPlayer;
+
+        songPlayer = new BukkitSongPlayer.Builder()
+                .soundEmitter(new GlobalSoundEmitter())
+                .transposeNotes(false)
+                .build();
+
+        if (songs != null && !songs.isEmpty()) {
+            Song randomSong = songs.get(new Random().nextInt(songs.size()));
+            songPlayer.playSong(randomSong);
+        }
+
+        songs.forEach(songPlayer::queueSong);
+
+        songPlayer.loopQueue(true);
+        songPlayer.shuffleQueue();
+        songPlayer.play();
+
+        radioPlayer = songPlayer;
+    }
+
+    public void clearRadioPlayer() {
+        radioPlayer.getQueue().clearQueue();
+        if (songs != null && !songs.isEmpty()) {
+            Song randomSong = songs.get(new Random().nextInt(songs.size()));
+            radioPlayer.playSong(randomSong);
+        }
+
+        songs.forEach(radioPlayer::queueSong);
+    }
+
+    public SongPlayer getRadioPlayer() {
+        return radioPlayer;
+    }
+
+    public void addRadioListener(Player player) {
+        getRadioPlayer().addListener(new AudioListener(player.getEntityId(), player.getUniqueId()));
+        if (getRadioPlayer().isPlaying()) {
+            player.sendRichMessage("Nyt soi: <yellow>" + getRadioPlayer().getCurrentSong().getMetadata().getTitle());
+        }
+    }
+
+    public void removeRadioListener(Player player) {
+        getRadioPlayer().removeListener(player.getUniqueId());
     }
 
     //
@@ -616,7 +699,6 @@ public class MusicManager {
                         if (volume != null) {
                             setVolume(player, volume);
                         }
-
                         for (Song song : getSongs()) {
                             if (song.getMetadata().getTitle().equals(title)) {
                                 clearSongPlayer(player);
@@ -625,43 +707,6 @@ public class MusicManager {
                         }
                     });
         });
-    }
-
-    //
-    //Favorited songs
-    //
-    public static WeakHashMap<Player, ArrayList<Song>> favorited = new WeakHashMap<>();
-
-
-    public void addFavorited(Player player, Song song) {
-        favorited.computeIfAbsent(player, k -> new ArrayList<>());
-
-        favorited.get(player).add(song);
-    }
-
-    public void removeFavorited(Player player, Song song) {
-        if (favorited.containsKey(player)) {
-            ArrayList<Song> playerSongs = favorited.get(player);
-            playerSongs.remove(song);
-        }
-    }
-
-    public void toggleFavorited(Player player, Song song) {
-        favorited.computeIfAbsent(player, k -> new ArrayList<>());
-
-        if (favorited.get(player).contains(song)) {
-            removeFavorited(player, song);
-        } else {
-            addFavorited(player, song);
-        }
-    }
-
-    public ArrayList<Song> getFavoritedSongs(Player player) {
-        return favorited.getOrDefault(player, new ArrayList<>());
-    }
-
-    public boolean isFavorited(Player player, Song song) {
-        return favorited.getOrDefault(player, new ArrayList<>()).contains(song);
     }
 
     /**

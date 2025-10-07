@@ -15,11 +15,14 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.gahvila.gahvilacore.Core.DebugMode;
 import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class MusicCommand {
@@ -73,6 +76,9 @@ public class MusicCommand {
                 .then(Commands.literal("reload")
                         .requires(source -> source.getSender().hasPermission("music.reload"))
                         .executes(this::executeReload))
+                .then(Commands.literal("radioskip")
+                        .requires(source -> source.getSender().hasPermission("music.radioskip"))
+                        .executes(this::executeRadioSkip))
                 .build();
     }
 
@@ -86,6 +92,10 @@ public class MusicCommand {
 
     private int executePlay(CommandContext<CommandSourceStack> context) {
         if (context.getSource().getSender() instanceof Player player) {
+            if (musicManager.getRadioEnabled(player)) {
+                musicManager.setRadioEnabled(player, false);
+                player.sendRichMessage("Radiotila kytketty pois päältä.");
+            }
             Song song = musicManager.getSong(context.getArgument("title", String.class));
             if (song != null) {
                 musicManager.clearSongPlayer(player);
@@ -165,6 +175,24 @@ public class MusicCommand {
             musicManager.loadSongs(executionTime -> {
                 sender.sendMessage("Ladattu musiikit uudelleen " + executionTime + " millisekuntissa.");
             });
+            return Command.SINGLE_SUCCESS;
+        } else {
+            sender.sendMessage("Ei oikeuksia.");
+        }
+        return 0;
+    }
+
+    private int executeRadioSkip(CommandContext<CommandSourceStack> context) {
+        CommandSender sender = context.getSource().getSender();
+        if (sender.hasPermission("music.radioskip")) {
+            musicManager.getRadioPlayer().skip();
+            Set<UUID> playerUUIDs = musicManager.getRadioPlayer().getListeners().keySet();
+            for (UUID uuid : playerUUIDs) {
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null) {
+                    player.sendRichMessage("DJ ohitti kappaleen. Nyt soi: <yellow>" + musicManager.getRadioPlayer().getCurrentSong().getMetadata().getTitle());
+                }
+            }
             return Command.SINGLE_SUCCESS;
         } else {
             sender.sendMessage("Ei oikeuksia.");
