@@ -703,6 +703,7 @@ public class MusicManager {
                             if (song.getMetadata().getTitle().equals(title)) {
                                 clearSongPlayer(player);
                                 createSongPlayer(player, song, tick, pause);
+                                player.sendRichMessage("<hover:show_text:'Klikkaa avataksesi asetukset'><click:run_command:'/music'>Musiikki soi edelleen. Asetukset löydät komennolla <yellow>/music</yellow>.</click></hover>");
                             }
                         }
                     });

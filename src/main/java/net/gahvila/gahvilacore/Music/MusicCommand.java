@@ -115,19 +115,28 @@ public class MusicCommand {
     private int executePause(CommandContext<CommandSourceStack> context) {
         CommandSender sender = context.getSource().getSender();
         if (sender instanceof Player player) {
-            if (musicManager.getSongPlayer(player) != null) {
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 1F);
-                if (musicManager.getSongPlayer(player).isPlaying()) {
-                    musicManager.pauseSong(player, musicManager.getSongPlayer(player));
+            if (musicManager.getRadioEnabled(player)) {
+                if (musicManager.getRadioPlayer().getListeners().containsKey(player.getUniqueId())) {
+                    musicManager.removeRadioListener(player);
                 } else {
-                    musicManager.playSong(player, musicManager.getSongPlayer(player));
+                    musicManager.addRadioListener(player);
                 }
-                musicManager.savePauseToCookie(player);
                 player.sendMessage("Vaihdettu.");
             } else {
-                player.sendMessage("Ei vaihdettu.");
+                if (musicManager.getSongPlayer(player) != null) {
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 1F);
+                    if (musicManager.getSongPlayer(player).isPlaying()) {
+                        musicManager.pauseSong(player, musicManager.getSongPlayer(player));
+                    } else {
+                        musicManager.playSong(player, musicManager.getSongPlayer(player));
+                    }
+                    musicManager.savePauseToCookie(player);
+                    player.sendMessage("Vaihdettu.");
+                } else {
+                    player.sendMessage("Ei vaihdettu.");
+                }
+                return Command.SINGLE_SUCCESS;
             }
-            return Command.SINGLE_SUCCESS;
         }
         return 0;
     }
@@ -138,6 +147,9 @@ public class MusicCommand {
             player.sendMessage("Pysäytetty.");
             player.playSound(player.getLocation(), Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1F, 1F);
             musicManager.clearSongPlayer(player);
+            if (musicManager.getRadioEnabled(player)) {
+                musicManager.removeRadioListener(player);
+            }
             return Command.SINGLE_SUCCESS;
         }
         return 0;
