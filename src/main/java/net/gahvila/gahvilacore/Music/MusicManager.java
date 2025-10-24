@@ -4,6 +4,7 @@ import cz.koca2000.nbs4j.Song;
 import de.leonhard.storage.Json;
 import net.draycia.carbon.api.CarbonChatProvider;
 import net.draycia.carbon.api.users.CarbonPlayer;
+import net.gahvila.gahvilacore.Music.MusicBlocks.MusicBlockManager;
 import net.gahvila.gahvilacore.Utils.WorldGuardRegionChecker;
 import net.gahvila.gahvilacore.nbsminecraft.NBSAPI;
 import net.gahvila.gahvilacore.nbsminecraft.platform.bukkit.player.BukkitSongPlayer;
@@ -51,7 +52,7 @@ import static net.gahvila.gahvilacore.GahvilaCore.instance;
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 
 public class MusicManager {
-
+    private MusicBlockManager musicBlockManager;
     public MusicManager() {
     }
 
@@ -69,7 +70,9 @@ public class MusicManager {
     public static NamespacedKey pauseKey = new NamespacedKey(instance, "song.pause");
     public static NamespacedKey volumeKey = new NamespacedKey(instance, "song.volume");
 
-
+    public void setMusicBlockManager(MusicBlockManager musicBlockManager) {
+        this.musicBlockManager = musicBlockManager;
+    }
 
     //
     //Song loading
@@ -136,6 +139,12 @@ public class MusicManager {
 
             Bukkit.getScheduler().runTask(instance, () -> {
                 clearRadioPlayer();
+
+                if (musicBlockManager != null) {
+                    musicBlockManager.stopAll();
+                    musicBlockManager.loadMusicBlocks();
+                }
+
                 isLoaded = true;
                 isLoading = false;
                 long executionTime = System.currentTimeMillis() - startTime;

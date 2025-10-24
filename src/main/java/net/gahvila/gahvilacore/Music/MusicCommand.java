@@ -14,25 +14,33 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.gahvila.gahvilacore.Core.DebugMode;
 import net.gahvila.gahvilacore.GahvilaCore;
+import net.gahvila.gahvilacore.Music.MusicBlocks.MusicBlock;
+import net.gahvila.gahvilacore.Music.MusicBlocks.MusicBlockManager;
 import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class MusicCommand {
 
     private final MusicDialogMenu musicDialogMenu;
     private final MusicManager musicManager;
+    private final MusicBlockManager musicBlockManager;
 
-    public MusicCommand(MusicManager musicManager, MusicDialogMenu musicDialogMenu) {
+    public MusicCommand(MusicManager musicManager, MusicDialogMenu musicDialogMenu, MusicBlockManager musicBlockManager) {
         this.musicManager = musicManager;
         this.musicDialogMenu = musicDialogMenu;
+        this.musicBlockManager = musicBlockManager;
     }
 
     public void registerCommands(GahvilaCore plugin) {
@@ -74,12 +82,290 @@ public class MusicCommand {
                 )
                 .then(Commands.literal("settings").executes(this::executeSettings))
                 .then(Commands.literal("reload")
-                        .requires(source -> source.getSender().hasPermission("music.reload"))
+                        .requires(source -> source.getSender().hasPermission("music.admin.reload"))
                         .executes(this::executeReload))
                 .then(Commands.literal("radioskip")
-                        .requires(source -> source.getSender().hasPermission("music.radioskip"))
+                        .requires(source -> source.getSender().hasPermission("music.admin.radioskip"))
                         .executes(this::executeRadioSkip))
+                .then(Commands.literal("createblock")
+                        .requires(source -> source.getSender().hasPermission("music.admin.musicblocks"))
+                        .then(Commands.argument("name", StringArgumentType.string())
+                                .then(Commands.argument("range", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("volume", IntegerArgumentType.integer(0, 100))
+                                                .then(Commands.argument("songs", StringArgumentType.greedyString())
+                                                        .suggests(this::suggestSongList)
+                                                        .executes(this::executeCreateBlock)
+                                                )
+                                        )
+                                )
+                        )
+                )
+
+                .then(Commands.literal("removeblock")
+                        .requires(source -> source.getSender().hasPermission("music.admin.musicblocks"))
+                        .then(Commands.argument("name", StringArgumentType.string())
+                                .suggests(this::suggestBlockSongs)
+                                .executes(this::executeRemoveBlock)
+                        )
+                )
+
+                .then(Commands.literal("editblock")
+                        .requires(source -> source.getSender().hasPermission("music.admin.musicblocks"))
+                        .then(Commands.argument("name", StringArgumentType.string())
+                                .suggests(this::suggestActiveBlocks)
+                                .then(Commands.literal("volume")
+                                        .then(Commands.argument("volume", IntegerArgumentType.integer(0, 100))
+                                                .executes(this::executeEditVolume)
+                                        )
+                                )
+                                .then(Commands.literal("range")
+                                        .then(Commands.argument("range", IntegerArgumentType.integer(1))
+                                                .executes(this::executeEditRange)
+                                        )
+                                )
+                                .then(Commands.literal("addsongs")
+                                        .then(Commands.argument("songs", StringArgumentType.greedyString())
+                                                .suggests(this::suggestSongList)
+                                                .executes(this::executeEditAddSongs)
+                                        )
+                                )
+                                .then(Commands.literal("removesongs")
+                                        .then(Commands.argument("songs", StringArgumentType.greedyString())
+                                                .suggests(this::suggestBlockSongs)
+                                                .executes(this::executeEditRemoveSongs)
+                                        )
+                                )
+                        )
+                )
                 .build();
+    }
+
+    private CompletableFuture<Suggestions> suggestSongList(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
+        String input = builder.getRemainingLowerCase();
+        String[] currentSongs = input.split("\\s*,\\s*", -1);
+        String lastSongFragment = currentSongs.length > 0 ? currentSongs[currentSongs.length - 1] : "";
+        String prefix = input.substring(0, input.length() - lastSongFragment.length());
+
+        musicManager.getSongs().stream()
+                .map(song -> song.getMetadata().getTitle())
+                .filter(title -> title.toLowerCase().startsWith(lastSongFragment))
+                .forEach(title -> builder.suggest(prefix + title));
+
+        return builder.buildFuture();
+    }
+
+    private CompletableFuture<Suggestions> suggestActiveBlocks(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
+        musicBlockManager.getActiveBlockNames().stream()
+                .filter(name -> name.toLowerCase().startsWith(builder.getRemainingLowerCase()))
+                .forEach(builder::suggest);
+        return builder.buildFuture();
+    }
+
+    private CompletableFuture<Suggestions> suggestBlockSongs(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
+        String blockName;
+        try {
+            blockName = ctx.getArgument("name", String.class);
+        } catch (IllegalArgumentException e) {
+            return builder.buildFuture();
+        }
+
+        MusicBlock block = musicBlockManager.getMusicBlock(blockName);
+        if (block == null) {
+            return builder.buildFuture();
+        }
+
+        String input = builder.getRemainingLowerCase();
+        String[] currentSongs = input.split("\\s*,\\s*", -1);
+        String lastSongFragment = currentSongs.length > 0 ? currentSongs[currentSongs.length - 1] : "";
+        String prefix = input.substring(0, input.length() - lastSongFragment.length());
+
+        block.getSongTitles().stream()
+                .filter(title -> title.toLowerCase().startsWith(lastSongFragment))
+                .forEach(title -> builder.suggest(prefix + title));
+
+        return builder.buildFuture();
+    }
+
+    private int executeCreateBlock(CommandContext<CommandSourceStack> context) {
+        if (!(context.getSource().getSender() instanceof Player player)) {
+            context.getSource().getSender().sendMessage("This command can only be run by a player.");
+            return 0;
+        }
+
+        String name = context.getArgument("name", String.class);
+        int range = context.getArgument("range", Integer.class);
+        int volume = context.getArgument("volume", Integer.class);
+        String songsInput = context.getArgument("songs", String.class);
+
+        Location location = player.getLocation().getBlock().getLocation();
+
+        List<String> songTitles = Arrays.asList(songsInput.split("\\s*,\\s*"));
+        List<String> validTitles = new ArrayList<>();
+        List<String> invalidTitles = new ArrayList<>();
+
+        for (String title : songTitles) {
+            if (musicManager.getSong(title) != null) {
+                validTitles.add(title);
+            } else {
+                invalidTitles.add(title);
+            }
+        }
+
+        if (validTitles.isEmpty()) {
+            player.sendRichMessage("<red>Error: No valid songs found. Block not created.");
+            if (!invalidTitles.isEmpty()) {
+                player.sendRichMessage("<gray>Invalid titles: " + String.join(", ", invalidTitles));
+            }
+            return 0;
+        }
+
+        if (musicBlockManager.createMusicBlock(name, location, validTitles, range, volume)) {
+            player.sendRichMessage("<green>Music block '" + name + "' created at your location (Range: " + range + ", Volume: " + volume + "%).");
+            if (!invalidTitles.isEmpty()) {
+                player.sendRichMessage("<yellow>Warning: The following songs were not found and were skipped: " + String.join(", ", invalidTitles));
+            }
+        } else {
+            player.sendRichMessage("<red>Error: A music block with the name '" + name + "' already exists.");
+        }
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int executeRemoveBlock(CommandContext<CommandSourceStack> context) {
+        CommandSender sender = context.getSource().getSender();
+        String name = context.getArgument("name", String.class);
+
+        if (musicBlockManager.removeMusicBlock(name)) {
+            sender.sendRichMessage("<green>Music block '" + name + "' has been removed.");
+        } else {
+            sender.sendRichMessage("<red>Error: No music block found with the name '" + name + "'.");
+        }
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int executeEditVolume(CommandContext<CommandSourceStack> context) {
+        CommandSender sender = context.getSource().getSender();
+        String name = context.getArgument("name", String.class);
+        int newVolume = context.getArgument("volume", Integer.class);
+
+        if (musicBlockManager.setBlockVolume(name, newVolume)) {
+            sender.sendRichMessage("<green>Set volume for music block '" + name + "' to " + newVolume + "%.");
+        } else {
+            sender.sendRichMessage("<red>Error: No music block found with the name '" + name + "'.");
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int executeEditRange(CommandContext<CommandSourceStack> context) {
+        CommandSender sender = context.getSource().getSender();
+        String name = context.getArgument("name", String.class);
+        int newRange = context.getArgument("range", Integer.class);
+
+        if (musicBlockManager.setBlockRange(name, newRange)) {
+            sender.sendRichMessage("<green>Set range for music block '" + name + "' to " + newRange + " blocks.");
+        } else {
+            sender.sendRichMessage("<red>Error: No music block found with the name '" + name + "'.");
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int executeEditAddSongs(CommandContext<CommandSourceStack> context) {
+        CommandSender sender = context.getSource().getSender();
+        String name = context.getArgument("name", String.class);
+        String songsInput = context.getArgument("songs", String.class);
+
+        MusicBlock block = musicBlockManager.getMusicBlock(name);
+        if (block == null) {
+            sender.sendRichMessage("<red>Error: No music block found with the name '" + name + "'.");
+            return 0;
+        }
+
+        List<String> songTitles = Arrays.asList(songsInput.split("\\s*,\\s*"));
+        List<String> validTitles = new ArrayList<>();
+        List<String> invalidTitles = new ArrayList<>();
+        List<String> duplicateTitles = new ArrayList<>();
+
+        List<String> currentSongs = block.getSongTitles();
+
+        for (String title : songTitles) {
+            if (currentSongs.contains(title)) {
+                duplicateTitles.add(title);
+            } else if (musicManager.getSong(title) != null) {
+                validTitles.add(title);
+            } else {
+                invalidTitles.add(title);
+            }
+        }
+
+        if (validTitles.isEmpty()) {
+            sender.sendRichMessage("<red>Error: No new, valid songs found to add.");
+            if (!invalidTitles.isEmpty()) {
+                sender.sendRichMessage("<gray>Invalid titles: " + String.join(", ", invalidTitles));
+            }
+            if (!duplicateTitles.isEmpty()) {
+                sender.sendRichMessage("<gray>Duplicate titles: " + String.join(", ", duplicateTitles));
+            }
+            return 0;
+        }
+
+        if (musicBlockManager.addBlockSongs(name, validTitles)) {
+            sender.sendRichMessage("<green>Added " + validTitles.size() + " songs to '" + name + "': " + String.join(", ", validTitles));
+            if (!invalidTitles.isEmpty()) {
+                sender.sendRichMessage("<yellow>Warning (Not Found): " + String.join(", ", invalidTitles));
+            }
+            if (!duplicateTitles.isEmpty()) {
+                sender.sendRichMessage("<yellow>Warning (Duplicates): " + String.join(", ", duplicateTitles));
+            }
+        } else {
+            sender.sendRichMessage("<red>Error: Could not add songs to '" + name + "'.");
+        }
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int executeEditRemoveSongs(CommandContext<CommandSourceStack> context) {
+        CommandSender sender = context.getSource().getSender();
+        String name = context.getArgument("name", String.class);
+        String songsInput = context.getArgument("songs", String.class);
+
+        MusicBlock block = musicBlockManager.getMusicBlock(name);
+        if (block == null) {
+            sender.sendRichMessage("<red>Error: No music block found with the name '" + name + "'.");
+            return 0;
+        }
+
+        List<String> songsToRemove = Arrays.asList(songsInput.split("\\s*,\\s*"));
+        List<String> removedTitles = new ArrayList<>();
+        List<String> notFoundTitles = new ArrayList<>();
+        List<String> currentSongs = block.getSongTitles();
+
+        for (String title : songsToRemove) {
+            if (currentSongs.contains(title)) {
+                removedTitles.add(title);
+            } else {
+                notFoundTitles.add(title);
+            }
+        }
+
+        if (removedTitles.isEmpty()) {
+            sender.sendRichMessage("<red>Error: None of the specified songs were found on block '" + name + "'.");
+            if (!notFoundTitles.isEmpty()) {
+                sender.sendRichMessage("<gray>Titles not on block: " + String.join(", ", notFoundTitles));
+            }
+            return 0;
+        }
+
+        if (musicBlockManager.removeBlockSongs(name, removedTitles)) {
+            sender.sendRichMessage("<green>Removed " + removedTitles.size() + " songs from '" + name + "': " + String.join(", ", removedTitles));
+            if (!notFoundTitles.isEmpty()) {
+                sender.sendRichMessage("<yellow>Warning (Not Found): " + String.join(", ", notFoundTitles));
+            }
+        } else {
+            sender.sendRichMessage("<red>Error: Could not remove songs from '" + name + "'.");
+        }
+
+        return Command.SINGLE_SUCCESS;
     }
 
     private int execute(CommandContext<CommandSourceStack> context) {
@@ -185,7 +471,7 @@ public class MusicCommand {
         if (sender.hasPermission("music.reload")) {
             sender.sendMessage("Ladataan musiikit uudelleen...");
             musicManager.loadSongs(executionTime -> {
-                sender.sendMessage("Ladattu musiikit uudelleen " + executionTime + " millisekuntissa.");
+                sender.sendMessage("Ladattu musiikit uudelleen " + executionTime + " millisekuntissa. Myös musiikkilohkot ladattiin uudelleen.");
             });
             return Command.SINGLE_SUCCESS;
         } else {

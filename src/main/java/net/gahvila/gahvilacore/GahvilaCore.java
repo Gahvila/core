@@ -7,6 +7,7 @@ import net.gahvila.gahvilacore.Config.ConfigManager;
 import net.gahvila.gahvilacore.Core.CoreCommand;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
 import net.gahvila.gahvilacore.Music.*;
+import net.gahvila.gahvilacore.Music.MusicBlocks.MusicBlockManager;
 import net.gahvila.gahvilacore.Panilla.Panilla;
 import net.gahvila.gahvilacore.Placeholder.Placeholders;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeCommand;
@@ -40,6 +41,9 @@ public final class GahvilaCore extends JavaPlugin {
     private Panilla panilla;
     private MusicManager musicManager;
     private MusicDialogMenu musicDialogMenu;
+    // --- ADDED ---
+    private MusicBlockManager musicBlockManager;
+    // --- END ADDED ---
 
     @Override
     public void onEnable() {
@@ -62,12 +66,16 @@ public final class GahvilaCore extends JavaPlugin {
         registerListeners(new AfkEvents(afkManager));
         afkManager.startAfkScheduler();
 
-        //music
         musicManager = new MusicManager();
         musicManager.createRadioPlayer();
         musicDialogMenu = new MusicDialogMenu(musicManager);
+
+        musicBlockManager = new MusicBlockManager(this, musicManager);
+
+        musicManager.setMusicBlockManager(musicBlockManager);
+
         musicManager.loadSongs(executionTime -> {
-            this.getLogger().info("Ladattu musiikit " + executionTime + " millisekuntissa.");
+            this.getLogger().info("Ladattu musiikit ja musiikkipalikat " + executionTime + " millisekuntissa.");
         });
         registerListeners(new MusicEvents(musicManager));
 
@@ -92,6 +100,9 @@ public final class GahvilaCore extends JavaPlugin {
     @Override
     public void onDisable() {
         if (panilla != null) panilla.disablePanilla();
+        if (musicBlockManager != null) {
+            musicBlockManager.stopAll();
+        }
     }
 
     private void registerListeners(Listener...listeners){
@@ -119,7 +130,7 @@ public final class GahvilaCore extends JavaPlugin {
         SpeedCommand speedCommand = new SpeedCommand();
         speedCommand.registerCommands(this);
 
-        MusicCommand musicCommand = new MusicCommand(musicManager, musicDialogMenu);
+        MusicCommand musicCommand = new MusicCommand(musicManager, musicDialogMenu, musicBlockManager);
         musicCommand.registerCommands(this);
 
         SpawnCommand spawnCommand = new SpawnCommand(teleportManager);

@@ -3,6 +3,8 @@ package net.gahvila.gahvilacore.Music;
 import net.gahvila.gahvilacore.nbsminecraft.events.SongEndEvent;
 import net.gahvila.gahvilacore.nbsminecraft.events.SongNextEvent;
 import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
+import net.gahvila.gahvilacore.nbsminecraft.player.emitter.SoundEmitter;
+import net.gahvila.gahvilacore.nbsminecraft.player.emitter.StaticSoundEmitter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,6 +51,7 @@ public class MusicEvents implements Listener {
     @EventHandler
     public void songNextEvent(SongNextEvent event) {
         SongPlayer songPlayer = event.getSongPlayer();
+        if (songPlayer.getSoundEmitter() instanceof StaticSoundEmitter) return;
         Set<UUID> playerUUIDs = songPlayer.getListeners().keySet();
         for (UUID uuid : playerUUIDs) {
             Player player = Bukkit.getPlayer(uuid);
@@ -66,6 +69,7 @@ public class MusicEvents implements Listener {
     @EventHandler
     public void onSongStop(SongEndEvent event) {
         SongPlayer songPlayer = event.getSongPlayer();
+        if (songPlayer.getSoundEmitter() instanceof StaticSoundEmitter) return;
         Set<UUID> playerUUIDs = songPlayer.getListeners().keySet();
         for (UUID uuid : playerUUIDs) {
             if (musicManager.getRadioPlayer().getListeners().containsKey(uuid)) return;
