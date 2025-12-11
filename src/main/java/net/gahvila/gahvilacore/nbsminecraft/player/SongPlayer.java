@@ -16,6 +16,7 @@ import net.gahvila.gahvilacore.nbsminecraft.utils.AudioListener;
 import net.gahvila.gahvilacore.nbsminecraft.utils.Instruments;
 import net.gahvila.gahvilacore.nbsminecraft.utils.PitchUtils;
 import net.gahvila.gahvilacore.nbsminecraft.utils.SoundCategory;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
@@ -277,7 +278,10 @@ public class SongPlayer {
                     sound = Instruments.getSound(note.getInstrument());
                 }
 
-                float volume = (layer.getVolume() * this.volume * note.getVolume()) / 1_000_000F;
+                int noteVol = note.getVolume() & 0xFF;
+                if (noteVol == 0) noteVol = 100;
+                float volume = (layer.getVolume() * this.volume * noteVol) / 1_000_000F;
+
                 float pitch = PitchUtils.getPitchInOctave(note);
 
                 float panning = note.getPanning() & 0xFF;
@@ -313,6 +317,7 @@ public class SongPlayer {
         private SongQueue queue = new SongQueue();
         private SoundCategory soundCategory = SoundCategory.RECORDS;
         private int volume = 100;
+        private boolean isStrict = false;
         private boolean transposeNotes = true;
 
         public Builder(AbstractPlatform platform) {
@@ -346,6 +351,11 @@ public class SongPlayer {
 
         public Builder volume(int volume) {
             this.volume = volume;
+            return this;
+        }
+
+        public Builder isStrict(boolean strict) {
+            this.isStrict = strict;
             return this;
         }
 
