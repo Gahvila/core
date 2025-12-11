@@ -40,7 +40,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.32") {
@@ -88,7 +88,6 @@ tasks {
 
     shadowJar {
         archiveFileName.set("${rootProject.name}-${version}.jar")
-        relocate("dev.jorel.commandapi", "net.gahvila.gahvilacore.shaded.commandapi")
         relocate("de.leonhard.storage", "net.gahvila.gahvilacore.shaded.storage")
         relocate("de.tr7zw.changeme.nbtapi", "net.gahvila.gahvilacore.shaded.nbtapi")
     }

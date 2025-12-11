@@ -7,5 +7,4 @@ import net.gahvila.gahvilacore.nbsminecraft.utils.SoundCategory;
 
 public abstract class SoundEmitter {
 
-    public abstract void playSound(AbstractPlatform platform, AudioListener listener, String sound, SoundCategory category, float volume, float pitch);
-}
+    public abstract void playSound(AbstractPlatform platform, AudioListener listener, String sound, SoundCategory category, float volume, float pitch, float panning);}

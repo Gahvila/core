@@ -13,7 +13,7 @@ public class StaticSoundEmitter extends SoundEmitter {
     }
 
     @Override
-    public void playSound(AbstractPlatform platform, AudioListener listener, String sound, SoundCategory category, float volume, float pitch) {
+    public void playSound(AbstractPlatform platform, AudioListener listener, String sound, SoundCategory category, float volume, float pitch, float panning) {
         platform.playSound(listener, location, sound, category, volume, pitch);
     }
 }

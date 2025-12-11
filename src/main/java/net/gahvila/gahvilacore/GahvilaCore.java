@@ -41,9 +41,7 @@ public final class GahvilaCore extends JavaPlugin {
     private Panilla panilla;
     private MusicManager musicManager;
     private MusicDialogMenu musicDialogMenu;
-    // --- ADDED ---
     private MusicBlockManager musicBlockManager;
-    // --- END ADDED ---
 
     @Override
     public void onEnable() {

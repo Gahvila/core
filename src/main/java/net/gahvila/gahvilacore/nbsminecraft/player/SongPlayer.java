@@ -280,8 +280,10 @@ public class SongPlayer {
                 float volume = (layer.getVolume() * this.volume * note.getVolume()) / 1_000_000F;
                 float pitch = PitchUtils.getPitchInOctave(note);
 
+                float panning = note.getPanning() & 0xFF;
+
                 for (AudioListener listener : listeners.values()) {
-                    soundEmitter.playSound(platform, listener, sound, soundCategory, volume, pitch);
+                    soundEmitter.playSound(platform, listener, sound, soundCategory, volume, pitch, panning);
                 }
             }
         }
