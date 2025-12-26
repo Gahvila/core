@@ -12,11 +12,9 @@ import cz.koca2000.nbs4j.Song;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import net.gahvila.gahvilacore.Core.DebugMode;
 import net.gahvila.gahvilacore.GahvilaCore;
 import net.gahvila.gahvilacore.Music.MusicBlocks.MusicBlock;
 import net.gahvila.gahvilacore.Music.MusicBlocks.MusicBlockManager;
-import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -29,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class MusicCommand {
 
@@ -87,14 +84,23 @@ public class MusicCommand {
                 .then(Commands.literal("radioskip")
                         .requires(source -> source.getSender().hasPermission("music.admin.radioskip"))
                         .executes(this::executeRadioSkip))
+
                 .then(Commands.literal("createblock")
                         .requires(source -> source.getSender().hasPermission("music.admin.musicblocks"))
                         .then(Commands.argument("name", StringArgumentType.string())
                                 .then(Commands.argument("range", IntegerArgumentType.integer(1))
                                         .then(Commands.argument("volume", IntegerArgumentType.integer(0, 100))
-                                                .then(Commands.argument("songs", StringArgumentType.greedyString())
-                                                        .suggests(this::suggestSongList)
-                                                        .executes(this::executeCreateBlock)
+                                                .then(Commands.argument("times", StringArgumentType.string())
+                                                        .suggests((ctx, builder) -> {
+                                                            builder.suggest("-1");
+                                                            builder.suggest("0");
+                                                            builder.suggest("0,6000,12000,18000");
+                                                            return builder.buildFuture();
+                                                        })
+                                                        .then(Commands.argument("songs", StringArgumentType.greedyString())
+                                                                .suggests(this::suggestSongList)
+                                                                .executes(this::executeCreateBlock)
+                                                        )
                                                 )
                                         )
                                 )
@@ -121,6 +127,17 @@ public class MusicCommand {
                                 .then(Commands.literal("range")
                                         .then(Commands.argument("range", IntegerArgumentType.integer(1))
                                                 .executes(this::executeEditRange)
+                                        )
+                                )
+                                .then(Commands.literal("times")
+                                        .then(Commands.argument("times", StringArgumentType.greedyString())
+                                                .suggests((ctx, builder) -> {
+                                                    builder.suggest("-1");
+                                                    builder.suggest("0");
+                                                    builder.suggest("0,6000,12000,18000");
+                                                    return builder.buildFuture();
+                                                })
+                                                .executes(this::executeEditTimes)
                                         )
                                 )
                                 .then(Commands.literal("addsongs")
@@ -195,35 +212,36 @@ public class MusicCommand {
         String name = context.getArgument("name", String.class);
         int range = context.getArgument("range", Integer.class);
         int volume = context.getArgument("volume", Integer.class);
+        String timesInput = context.getArgument("times", String.class);
         String songsInput = context.getArgument("songs", String.class);
+
+        List<Integer> triggerTicks = new ArrayList<>();
+        try {
+            String[] timesParts = timesInput.split(",");
+            for (String t : timesParts) {
+                triggerTicks.add(Integer.parseInt(t.trim()));
+            }
+        } catch (NumberFormatException e) {
+            player.sendRichMessage("<red>Error: Invalid time format. Use numbers separated by commas (e.g., '0,6000').");
+            return 0;
+        }
 
         Location location = player.getLocation().getBlock().getLocation();
 
         List<String> songTitles = Arrays.asList(songsInput.split("\\s*,\\s*"));
         List<String> validTitles = new ArrayList<>();
-        List<String> invalidTitles = new ArrayList<>();
 
         for (String title : songTitles) {
-            if (musicManager.getSong(title) != null) {
-                validTitles.add(title);
-            } else {
-                invalidTitles.add(title);
-            }
+            if (musicManager.getSong(title) != null) validTitles.add(title);
         }
 
         if (validTitles.isEmpty()) {
-            player.sendRichMessage("<red>Error: No valid songs found. Block not created.");
-            if (!invalidTitles.isEmpty()) {
-                player.sendRichMessage("<gray>Invalid titles: " + String.join(", ", invalidTitles));
-            }
+            player.sendRichMessage("<red>Error: No valid songs found.");
             return 0;
         }
 
-        if (musicBlockManager.createMusicBlock(name, location, validTitles, range, volume)) {
-            player.sendRichMessage("<green>Music block '" + name + "' created at your location (Range: " + range + ", Volume: " + volume + "%).");
-            if (!invalidTitles.isEmpty()) {
-                player.sendRichMessage("<yellow>Warning: The following songs were not found and were skipped: " + String.join(", ", invalidTitles));
-            }
+        if (musicBlockManager.createMusicBlock(name, location, validTitles, range, volume, triggerTicks)) {
+            player.sendRichMessage("<green>Music block '" + name + "' created.");
         } else {
             player.sendRichMessage("<red>Error: A music block with the name '" + name + "' already exists.");
         }
@@ -234,13 +252,11 @@ public class MusicCommand {
     private int executeRemoveBlock(CommandContext<CommandSourceStack> context) {
         CommandSender sender = context.getSource().getSender();
         String name = context.getArgument("name", String.class);
-
         if (musicBlockManager.removeMusicBlock(name)) {
             sender.sendRichMessage("<green>Music block '" + name + "' has been removed.");
         } else {
             sender.sendRichMessage("<red>Error: No music block found with the name '" + name + "'.");
         }
-
         return Command.SINGLE_SUCCESS;
     }
 
@@ -250,7 +266,7 @@ public class MusicCommand {
         int newVolume = context.getArgument("volume", Integer.class);
 
         if (musicBlockManager.setBlockVolume(name, newVolume)) {
-            sender.sendRichMessage("<green>Set volume for music block '" + name + "' to " + newVolume + "%.");
+            sender.sendRichMessage("<green>Set volume for '" + name + "' to " + newVolume + "%.");
         } else {
             sender.sendRichMessage("<red>Error: No music block found with the name '" + name + "'.");
         }
@@ -263,7 +279,31 @@ public class MusicCommand {
         int newRange = context.getArgument("range", Integer.class);
 
         if (musicBlockManager.setBlockRange(name, newRange)) {
-            sender.sendRichMessage("<green>Set range for music block '" + name + "' to " + newRange + " blocks.");
+            sender.sendRichMessage("<green>Set range for '" + name + "' to " + newRange + " blocks.");
+        } else {
+            sender.sendRichMessage("<red>Error: No music block found with the name '" + name + "'.");
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int executeEditTimes(CommandContext<CommandSourceStack> context) {
+        CommandSender sender = context.getSource().getSender();
+        String name = context.getArgument("name", String.class);
+        String timesInput = context.getArgument("times", String.class);
+
+        List<Integer> triggerTicks = new ArrayList<>();
+        try {
+            String[] timesParts = timesInput.split(",");
+            for (String t : timesParts) {
+                triggerTicks.add(Integer.parseInt(t.trim()));
+            }
+        } catch (NumberFormatException e) {
+            sender.sendRichMessage("<red>Error: Invalid time format. Use numbers separated by commas (e.g., '0,6000').");
+            return 0;
+        }
+
+        if (musicBlockManager.setBlockTimes(name, triggerTicks)) {
+            sender.sendRichMessage("<green>Set trigger times for '" + name + "' to: " + triggerTicks.toString());
         } else {
             sender.sendRichMessage("<red>Error: No music block found with the name '" + name + "'.");
         }
@@ -283,44 +323,18 @@ public class MusicCommand {
 
         List<String> songTitles = Arrays.asList(songsInput.split("\\s*,\\s*"));
         List<String> validTitles = new ArrayList<>();
-        List<String> invalidTitles = new ArrayList<>();
-        List<String> duplicateTitles = new ArrayList<>();
-
-        List<String> currentSongs = block.getSongTitles();
 
         for (String title : songTitles) {
-            if (currentSongs.contains(title)) {
-                duplicateTitles.add(title);
-            } else if (musicManager.getSong(title) != null) {
+            if (musicManager.getSong(title) != null && !block.getSongTitles().contains(title)) {
                 validTitles.add(title);
-            } else {
-                invalidTitles.add(title);
             }
-        }
-
-        if (validTitles.isEmpty()) {
-            sender.sendRichMessage("<red>Error: No new, valid songs found to add.");
-            if (!invalidTitles.isEmpty()) {
-                sender.sendRichMessage("<gray>Invalid titles: " + String.join(", ", invalidTitles));
-            }
-            if (!duplicateTitles.isEmpty()) {
-                sender.sendRichMessage("<gray>Duplicate titles: " + String.join(", ", duplicateTitles));
-            }
-            return 0;
         }
 
         if (musicBlockManager.addBlockSongs(name, validTitles)) {
-            sender.sendRichMessage("<green>Added " + validTitles.size() + " songs to '" + name + "': " + String.join(", ", validTitles));
-            if (!invalidTitles.isEmpty()) {
-                sender.sendRichMessage("<yellow>Warning (Not Found): " + String.join(", ", invalidTitles));
-            }
-            if (!duplicateTitles.isEmpty()) {
-                sender.sendRichMessage("<yellow>Warning (Duplicates): " + String.join(", ", duplicateTitles));
-            }
+            sender.sendRichMessage("<green>Added " + validTitles.size() + " songs to '" + name + "'.");
         } else {
-            sender.sendRichMessage("<red>Error: Could not add songs to '" + name + "'.");
+            sender.sendRichMessage("<red>Error: Could not add songs.");
         }
-
         return Command.SINGLE_SUCCESS;
     }
 
@@ -336,35 +350,17 @@ public class MusicCommand {
         }
 
         List<String> songsToRemove = Arrays.asList(songsInput.split("\\s*,\\s*"));
-        List<String> removedTitles = new ArrayList<>();
-        List<String> notFoundTitles = new ArrayList<>();
-        List<String> currentSongs = block.getSongTitles();
+        List<String> validRemovals = new ArrayList<>();
 
         for (String title : songsToRemove) {
-            if (currentSongs.contains(title)) {
-                removedTitles.add(title);
-            } else {
-                notFoundTitles.add(title);
-            }
+            if (block.getSongTitles().contains(title)) validRemovals.add(title);
         }
 
-        if (removedTitles.isEmpty()) {
-            sender.sendRichMessage("<red>Error: None of the specified songs were found on block '" + name + "'.");
-            if (!notFoundTitles.isEmpty()) {
-                sender.sendRichMessage("<gray>Titles not on block: " + String.join(", ", notFoundTitles));
-            }
-            return 0;
-        }
-
-        if (musicBlockManager.removeBlockSongs(name, removedTitles)) {
-            sender.sendRichMessage("<green>Removed " + removedTitles.size() + " songs from '" + name + "': " + String.join(", ", removedTitles));
-            if (!notFoundTitles.isEmpty()) {
-                sender.sendRichMessage("<yellow>Warning (Not Found): " + String.join(", ", notFoundTitles));
-            }
+        if (musicBlockManager.removeBlockSongs(name, validRemovals)) {
+            sender.sendRichMessage("<green>Removed " + validRemovals.size() + " songs from '" + name + "'.");
         } else {
-            sender.sendRichMessage("<red>Error: Could not remove songs from '" + name + "'.");
+            sender.sendRichMessage("<red>Error: Could not remove songs.");
         }
-
         return Command.SINGLE_SUCCESS;
     }
 
@@ -378,18 +374,11 @@ public class MusicCommand {
 
     private int executePlay(CommandContext<CommandSourceStack> context) {
         if (context.getSource().getSender() instanceof Player player) {
-            if (musicManager.getRadioEnabled(player)) {
-                musicManager.setRadioEnabled(player, false);
-                player.sendRichMessage("Radiotila kytketty pois päältä.");
-            }
+            if (musicManager.getRadioEnabled(player)) musicManager.setRadioEnabled(player, false);
             Song song = musicManager.getSong(context.getArgument("title", String.class));
             if (song != null) {
                 musicManager.clearSongPlayer(player);
-                if (!musicManager.getSpeakerEnabled(player)) {
-                    musicManager.createSongPlayer(player, song, 0, true);
-                } else if (musicManager.getSpeakerEnabled(player)) {
-                    musicManager.createSongPlayer(player, song, 0, true);
-                }
+                musicManager.createSongPlayer(player, song, 0, true);
                 player.sendRichMessage("<white>Laitoit kappaleen <yellow>" + song.getMetadata().getTitle() + "</yellow> <white>soimaan.");
             } else {
                 player.sendRichMessage("Kelvoton nimi.");
@@ -401,28 +390,15 @@ public class MusicCommand {
     private int executePause(CommandContext<CommandSourceStack> context) {
         CommandSender sender = context.getSource().getSender();
         if (sender instanceof Player player) {
-            if (musicManager.getRadioEnabled(player)) {
-                if (musicManager.getRadioPlayer().getListeners().containsKey(player.getUniqueId())) {
-                    musicManager.removeRadioListener(player);
-                } else {
-                    musicManager.addRadioListener(player);
-                }
-                player.sendMessage("Vaihdettu.");
-            } else {
+            if (!musicManager.getRadioEnabled(player)) {
                 if (musicManager.getSongPlayer(player) != null) {
-                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8F, 1F);
-                    if (musicManager.getSongPlayer(player).isPlaying()) {
-                        musicManager.pauseSong(player, musicManager.getSongPlayer(player));
-                    } else {
-                        musicManager.playSong(player, musicManager.getSongPlayer(player));
-                    }
+                    if (musicManager.getSongPlayer(player).isPlaying()) musicManager.pauseSong(player, musicManager.getSongPlayer(player));
+                    else musicManager.playSong(player, musicManager.getSongPlayer(player));
                     musicManager.savePauseToCookie(player);
                     player.sendMessage("Vaihdettu.");
-                } else {
-                    player.sendMessage("Ei vaihdettu.");
                 }
-                return Command.SINGLE_SUCCESS;
             }
+            return Command.SINGLE_SUCCESS;
         }
         return 0;
     }
@@ -431,11 +407,8 @@ public class MusicCommand {
         CommandSender sender = context.getSource().getSender();
         if (sender instanceof Player player) {
             player.sendMessage("Pysäytetty.");
-            player.playSound(player.getLocation(), Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1F, 1F);
             musicManager.clearSongPlayer(player);
-            if (musicManager.getRadioEnabled(player)) {
-                musicManager.removeRadioListener(player);
-            }
+            if (musicManager.getRadioEnabled(player)) musicManager.removeRadioListener(player);
             return Command.SINGLE_SUCCESS;
         }
         return 0;
@@ -444,14 +417,9 @@ public class MusicCommand {
     private int executeVolume(CommandContext<CommandSourceStack> context) {
         CommandSender sender = context.getSource().getSender();
         final int volume = context.getArgument("volume", Integer.class);
-
         if (sender instanceof Player player) {
-            if (volume >= 1 && volume <= 10) {
-                musicManager.setVolume(player, (byte) volume);
-                player.sendRichMessage("Äänenvoimakkuus asetettu: <yellow>" + volume + "</yellow>.");
-            } else {
-                sender.sendMessage("Kelvoton äänenvoimakkuus'.");
-            }
+            musicManager.setVolume(player, (byte) volume);
+            player.sendRichMessage("Äänenvoimakkuus asetettu: <yellow>" + volume + "</yellow>.");
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -459,7 +427,6 @@ public class MusicCommand {
     private int executeSettings(CommandContext<CommandSourceStack> context) {
         CommandSender sender = context.getSource().getSender();
         if (sender instanceof Player player) {
-            player.playSound(player.getLocation(), Sound.ENTITY_LLAMA_SWAG, 0.6F, 1F);
             musicDialogMenu.showSettings(player);
             return Command.SINGLE_SUCCESS;
         }
@@ -471,11 +438,9 @@ public class MusicCommand {
         if (sender.hasPermission("music.reload")) {
             sender.sendMessage("Ladataan musiikit uudelleen...");
             musicManager.loadSongs(executionTime -> {
-                sender.sendMessage("Ladattu musiikit uudelleen " + executionTime + " millisekuntissa. Myös musiikkilohkot ladattiin uudelleen.");
+                sender.sendMessage("Ladattu musiikit uudelleen " + executionTime + " millisekuntissa.");
             });
             return Command.SINGLE_SUCCESS;
-        } else {
-            sender.sendMessage("Ei oikeuksia.");
         }
         return 0;
     }
@@ -484,16 +449,7 @@ public class MusicCommand {
         CommandSender sender = context.getSource().getSender();
         if (sender.hasPermission("music.radioskip")) {
             musicManager.getRadioPlayer().skip();
-            Set<UUID> playerUUIDs = musicManager.getRadioPlayer().getListeners().keySet();
-            for (UUID uuid : playerUUIDs) {
-                Player player = Bukkit.getPlayer(uuid);
-                if (player != null) {
-                    player.sendRichMessage("DJ ohitti kappaleen. Nyt soi: <yellow>" + musicManager.getRadioPlayer().getCurrentSong().getMetadata().getTitle());
-                }
-            }
             return Command.SINGLE_SUCCESS;
-        } else {
-            sender.sendMessage("Ei oikeuksia.");
         }
         return 0;
     }

@@ -35,12 +35,12 @@ public class MusicBlockManager implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    public boolean createMusicBlock(String name, Location location, List<String> songTitles, int range, int volume) {
+    public boolean createMusicBlock(String name, Location location, List<String> songTitles, int range, int volume, List<Integer> triggerTicks) {
         if (activeMusicBlocks.containsKey(name)) {
             return false;
         }
 
-        MusicBlock block = new MusicBlock(plugin, musicManager, name, location, songTitles, range, volume);
+        MusicBlock block = new MusicBlock(plugin, musicManager, name, location, songTitles, range, volume, triggerTicks);
         block.start();
         activeMusicBlocks.put(name, block);
         saveMusicBlock(block);
@@ -66,6 +66,7 @@ public class MusicBlockManager implements Listener {
         musicBlockData.set(path + ".songs", block.getSongTitles());
         musicBlockData.set(path + ".range", block.getRange());
         musicBlockData.set(path + ".volume", block.getVolume());
+        musicBlockData.set(path + ".triggerTicks", block.getTriggerTicks());
     }
 
     private void deleteMusicBlockFromConfig(String name) {
@@ -90,16 +91,18 @@ public class MusicBlockManager implements Listener {
             double y = musicBlockData.getDouble(path + ".y");
             double z = musicBlockData.getDouble(path + ".z");
             List<String> songTitles = musicBlockData.getStringList(path + ".songs");
-
             int range = musicBlockData.getOrDefault(path + ".range", DEFAULT_RANGE);
             int volume = musicBlockData.getOrDefault(path + ".volume", DEFAULT_VOLUME);
 
-            if (songTitles.isEmpty()) {
-                Bukkit.getLogger().warning("Music block '" + name + "' has no songs.");
+            List<Integer> triggerTicks = new ArrayList<>();
+            List<?> rawList = musicBlockData.getList(path + ".triggerTicks");
+            for(Object o : rawList) {
+                if(o instanceof Number) triggerTicks.add(((Number) o).intValue());
+                else if (o instanceof String) triggerTicks.add(Integer.parseInt((String) o));
             }
 
             Location location = new Location(world, x, y, z);
-            MusicBlock block = new MusicBlock(plugin, musicManager, name, location, songTitles, range, volume);
+            MusicBlock block = new MusicBlock(plugin, musicManager, name, location, songTitles, range, volume, triggerTicks);
             block.start();
             activeMusicBlocks.put(name, block);
         }
@@ -126,56 +129,52 @@ public class MusicBlockManager implements Listener {
 
         newBlock.start();
         activeMusicBlocks.put(newBlock.getName(), newBlock);
-
         saveMusicBlock(newBlock);
     }
 
-    public boolean setBlockVolume(String name, int newVolume) {
-        MusicBlock oldBlock = getMusicBlock(name);
-        if (oldBlock == null) {
-            return false;
-        }
-        MusicBlock newBlock = new MusicBlock(plugin, musicManager, name, oldBlock.getLocation(), oldBlock.getSongTitles(), oldBlock.getRange(), newVolume);
+    private void createUpdatedBlock(String name, Location loc, List<String> songs, int range, int volume, List<Integer> ticks) {
+        MusicBlock newBlock = new MusicBlock(plugin, musicManager, name, loc, songs, range, volume, ticks);
         updateBlock(newBlock);
+    }
+
+    public boolean setBlockVolume(String name, int newVolume) {
+        MusicBlock old = getMusicBlock(name);
+        if (old == null) return false;
+        createUpdatedBlock(name, old.getLocation(), old.getSongTitles(), old.getRange(), newVolume, old.getTriggerTicks());
         return true;
     }
 
     public boolean setBlockRange(String name, int newRange) {
-        MusicBlock oldBlock = getMusicBlock(name);
-        if (oldBlock == null) {
-            return false;
-        }
-        MusicBlock newBlock = new MusicBlock(plugin, musicManager, name, oldBlock.getLocation(), oldBlock.getSongTitles(), newRange, oldBlock.getVolume());
-        updateBlock(newBlock);
+        MusicBlock old = getMusicBlock(name);
+        if (old == null) return false;
+        createUpdatedBlock(name, old.getLocation(), old.getSongTitles(), newRange, old.getVolume(), old.getTriggerTicks());
+        return true;
+    }
+
+    public boolean setBlockTimes(String name, List<Integer> newTimes) {
+        MusicBlock old = getMusicBlock(name);
+        if (old == null) return false;
+        createUpdatedBlock(name, old.getLocation(), old.getSongTitles(), old.getRange(), old.getVolume(), newTimes);
         return true;
     }
 
     public boolean addBlockSongs(String name, List<String> songsToAdd) {
-        MusicBlock oldBlock = getMusicBlock(name);
-        if (oldBlock == null) {
-            return false;
-        }
-        List<String> newSongList = new ArrayList<>(oldBlock.getSongTitles());
-        newSongList.addAll(songsToAdd);
-
-        MusicBlock newBlock = new MusicBlock(plugin, musicManager, name, oldBlock.getLocation(), newSongList, oldBlock.getRange(), oldBlock.getVolume());
-        updateBlock(newBlock);
+        MusicBlock old = getMusicBlock(name);
+        if (old == null) return false;
+        List<String> newSongs = new ArrayList<>(old.getSongTitles());
+        newSongs.addAll(songsToAdd);
+        createUpdatedBlock(name, old.getLocation(), newSongs, old.getRange(), old.getVolume(), old.getTriggerTicks());
         return true;
     }
 
     public boolean removeBlockSongs(String name, List<String> songsToRemove) {
-        MusicBlock oldBlock = getMusicBlock(name);
-        if (oldBlock == null) {
-            return false;
-        }
-        List<String> newSongList = new ArrayList<>(oldBlock.getSongTitles());
-        newSongList.removeAll(songsToRemove);
-
-        MusicBlock newBlock = new MusicBlock(plugin, musicManager, name, oldBlock.getLocation(), newSongList, oldBlock.getRange(), oldBlock.getVolume());
-        updateBlock(newBlock);
+        MusicBlock old = getMusicBlock(name);
+        if (old == null) return false;
+        List<String> newSongs = new ArrayList<>(old.getSongTitles());
+        newSongs.removeAll(songsToRemove);
+        createUpdatedBlock(name, old.getLocation(), newSongs, old.getRange(), old.getVolume(), old.getTriggerTicks());
         return true;
     }
-
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {

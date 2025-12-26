@@ -72,7 +72,7 @@ public class BukkitPlatform extends AbstractPlatform {
 
         if (shouldSpawn) {
             ThreadLocalRandom random = ThreadLocalRandom.current();
-            Location loc = player.getLocation();
+            Location loc = findPlayer(entityReference.uuid()).getLocation();
 
             double spread = 0.5 + volume * 0.5;  // Louder = more horizontal spread
             double height = 1.5 + pitch * 1.0;   // Higher pitch = higher vertical offset

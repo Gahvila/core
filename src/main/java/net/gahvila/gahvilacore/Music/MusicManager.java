@@ -46,6 +46,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static net.gahvila.gahvilacore.Config.ConfigManager.*;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
@@ -197,7 +198,9 @@ public class MusicManager {
     }
 
     public ArrayList<Song> getSongs() {
-        return songs;
+        return songs.stream()
+                .filter(this::isNotUnlisted) // Apply the filter
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public List<Song> getSongsSorted(Player player) {
@@ -210,12 +213,27 @@ public class MusicManager {
         };
 
         return songs.stream()
+                .filter(this::isNotUnlisted)
                 .sorted(comparator)
                 .toList();
     }
 
-    public Song getSong(String name){
+    public Song getSong(String name) {
+        Song song = namedSong.get(name);
+
+        if (song != null && isNotUnlisted(song)) {
+            return song;
+        }
+
+        return null;
+    }
+
+    public Song getUnlistedSong(String name){
         return namedSong.get(name);
+    }
+
+    private boolean isNotUnlisted(Song song) {
+        return !song.getMetadata().getDescription().toLowerCase().contains("unlisted");
     }
 
     //

@@ -30,15 +30,23 @@ public class MusicBlock {
     private final int maxRange;
     private final int maxVolume;
 
+    private final List<Integer> triggerTicks;
+
+    private long lastTriggeredTotalTime = -1;
+    private long lastCheckedTime = -1;
+    private boolean isPlaying = false;
+
     private SongPlayer masterPlayer;
     private final Map<UUID, SongPlayer> playerSongPlayers = new ConcurrentHashMap<>();
     private Song lastMasterSong = null;
 
     private BukkitTask particleTask;
     private BukkitTask updateTask;
+    private BukkitTask schedulerTask;
     private SoundLocation soundLocation;
 
-    public MusicBlock(GahvilaCore plugin, MusicManager musicManager, String name, Location location, List<String> songTitles, int range, int volume) {
+    public MusicBlock(GahvilaCore plugin, MusicManager musicManager, String name, Location location,
+                      List<String> songTitles, int range, int volume, List<Integer> triggerTicks) {
         this.plugin = plugin;
         this.musicManager = musicManager;
         this.name = name;
@@ -46,6 +54,7 @@ public class MusicBlock {
         this.songTitles = songTitles;
         this.maxRange = range;
         this.maxVolume = volume;
+        this.triggerTicks = triggerTicks;
     }
 
     public void start() {
@@ -61,6 +70,18 @@ public class MusicBlock {
                 location.getZ()
         );
 
+        // Check if list contains -1 (Infinite Loop Mode)
+        if (triggerTicks.contains(-1)) {
+            setupMasterPlayer(true); // Loop = true
+            setupTasks();
+        } else {
+            startSchedulerTask();
+        }
+    }
+
+    private void setupMasterPlayer(boolean loop) {
+        if (this.masterPlayer != null) return;
+
         this.masterPlayer = new BukkitSongPlayer.Builder()
                 .soundEmitter(new StaticSoundEmitter(this.soundLocation))
                 .transposeNotes(false)
@@ -69,7 +90,7 @@ public class MusicBlock {
 
         int validSongCount = 0;
         for (String title : songTitles) {
-            Song song = musicManager.getSong(title);
+            Song song = musicManager.getUnlistedSong(title);
             if (song != null) {
                 masterPlayer.queueSong(song);
                 validSongCount++;
@@ -77,22 +98,67 @@ public class MusicBlock {
         }
 
         if (validSongCount == 0) {
-            Bukkit.getLogger().warning("Music block '" + name + "' found no valid songs. Player not starting.");
-            masterPlayer.stop();
+            Bukkit.getLogger().warning("Music block '" + name + "' found no valid songs.");
             masterPlayer = null;
             return;
         }
 
-        masterPlayer.loopQueue(true);
-        masterPlayer.shuffleQueue();
-        masterPlayer.play();
-        this.lastMasterSong = masterPlayer.getCurrentSong();
+        this.masterPlayer.loopQueue(loop);
+        this.masterPlayer.shuffleQueue();
+        this.masterPlayer.play();
 
-        startParticleTask();
-        startUpdateTask();
+        this.isPlaying = true;
+        this.lastMasterSong = masterPlayer.getCurrentSong();
+    }
+
+    private void triggerPlayback() {
+        if (this.isPlaying) return;
+        setupMasterPlayer(false);
+        setupTasks();
+    }
+
+    private void startSchedulerTask() {
+        this.schedulerTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            World world = location.getWorld();
+            if (world == null) return;
+
+            long currentFullTime = world.getFullTime();
+            long currentDayTime = world.getTime();
+
+            if (lastCheckedTime != -1 && currentFullTime < lastCheckedTime) {
+                this.lastTriggeredTotalTime = -1;
+            }
+            this.lastCheckedTime = currentFullTime;
+
+            if (shouldTrigger(currentDayTime, currentFullTime)) {
+                triggerPlayback();
+                this.lastTriggeredTotalTime = currentFullTime;
+            }
+        }, 0L, 20L);
+    }
+
+    private boolean shouldTrigger(long currentDayTime, long currentFullTime) {
+        if (lastTriggeredTotalTime != -1 && Math.abs(currentFullTime - lastTriggeredTotalTime) < 100) {
+            return false;
+        }
+
+        for (int tick : triggerTicks) {
+            if (Math.abs(currentDayTime - tick) <= 30) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void stop() {
+        if (schedulerTask != null) {
+            schedulerTask.cancel();
+            schedulerTask = null;
+        }
+        stopActivePlaybackTasks();
+    }
+
+    private void stopActivePlaybackTasks() {
         if (particleTask != null) {
             particleTask.cancel();
             particleTask = null;
@@ -109,13 +175,18 @@ public class MusicBlock {
             masterPlayer.stop();
             masterPlayer = null;
         }
+        this.isPlaying = false;
+    }
+
+    private void setupTasks() {
+        startParticleTask();
+        startUpdateTask();
     }
 
     private void startParticleTask() {
         Location particleLoc = location.clone().add(0.5, 1.2, 0.5);
-
         this.particleTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            if (!playerSongPlayers.isEmpty()) {
+            if (masterPlayer != null && masterPlayer.isPlaying() && !playerSongPlayers.isEmpty()) {
                 location.getWorld().spawnParticle(Particle.NOTE, particleLoc, 1, 0, 0, 0, 0);
             }
         }, 0L, 20L);
@@ -125,13 +196,13 @@ public class MusicBlock {
         final double maxRangeSquared = (double) this.maxRange * this.maxRange;
         final World blockWorld = location.getWorld();
 
-        if (blockWorld == null) {
-            Bukkit.getLogger().warning("Music block '" + name + "' is in an invalid world.");
-            return;
-        }
+        if (blockWorld == null) return;
 
         this.updateTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            if (masterPlayer == null) {
+            if (masterPlayer == null) return;
+
+            if (!masterPlayer.isPlaying()) {
+                stopActivePlaybackTasks();
                 return;
             }
 
@@ -163,11 +234,9 @@ public class MusicBlock {
                     if (sp == null) {
                         sp = addPlayer(player);
                     }
-
                     if (sp == null) continue;
 
-                    int newVolume = getNewVolume(distanceSq);
-                    sp.setVolume(newVolume);
+                    sp.setVolume(getNewVolume(distanceSq));
 
                 } else if (isListening) {
                     removePlayer(player);
@@ -181,10 +250,8 @@ public class MusicBlock {
         double closeness = Math.max(0.0, 1.0 - (distance / this.maxRange));
         double curvedCloseness = closeness * closeness;
 
-        int newVolume = (int) (this.maxVolume * curvedCloseness);
-        return newVolume;
+        return (int) (this.maxVolume * curvedCloseness);
     }
-
 
     public SongPlayer addPlayer(Player player) {
         if (playerSongPlayers.containsKey(player.getUniqueId()) || masterPlayer == null) {
@@ -200,12 +267,12 @@ public class MusicBlock {
         newPlayerSP.addListener(new AudioListener(player.getEntityId(), player.getUniqueId()));
 
         for (String title : songTitles) {
-            Song song = musicManager.getSong(title);
+            Song song = musicManager.getUnlistedSong(title);
             if (song != null) {
                 newPlayerSP.queueSong(song);
             }
         }
-        newPlayerSP.loopQueue(true);
+        newPlayerSP.loopQueue(masterPlayer.getQueue().isLooping());
 
         Song masterSong = masterPlayer.getCurrentSong();
         if (masterSong != null) {
@@ -225,23 +292,10 @@ public class MusicBlock {
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public List<String> getSongTitles() {
-        return songTitles;
-    }
-
-    public int getRange() {
-        return maxRange;
-    }
-
-    public int getVolume() {
-        return maxVolume;
-    }
+    public String getName() { return name; }
+    public Location getLocation() { return location; }
+    public List<String> getSongTitles() { return songTitles; }
+    public int getRange() { return maxRange; }
+    public int getVolume() { return maxVolume; }
+    public List<Integer> getTriggerTicks() { return triggerTicks; }
 }
