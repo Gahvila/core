@@ -19,10 +19,18 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.common.ClientboundClearDialogPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
@@ -32,6 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static java.lang.Float.MAX_VALUE;
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toUndecoratedMM;
@@ -54,6 +63,10 @@ public class MusicDialogMenu {
 
     public void showSettings(Player player) {
         player.showDialog(createSettingsDialog(player));
+    }
+
+    public void showVanillaMusic(Player player) {
+        player.showDialog(createVanillaMusicDialog(player));
     }
 
     private static final int COLUMNS = 7;
@@ -377,6 +390,80 @@ public class MusicDialogMenu {
                 )));
     }
 
+    private Dialog createVanillaMusicDialog(Player player) {
+        List<ActionButton> buttons = new ArrayList<>();
+
+        for (VanillaSongList track : VanillaSongList.values()) {
+
+            buttons.add(
+                    ActionButton.builder(toMM("<u>" + track.getDisplayName()))
+                            .width(150)
+                            .tooltip(toMM("<gray>Soita <white>" + track.getDisplayName()))
+                            .action(DialogAction.customClick((response, audience) -> {
+
+                                        player.stopSound(org.bukkit.SoundCategory.RECORDS);
+                                        player.stopSound(org.bukkit.SoundCategory.MUSIC);
+
+                                        playPacketSound(player, track.getResourceKey(), track.getSeed());
+
+                                    },
+                                    ClickCallback.Options.builder().build()
+                            ))
+                            .build()
+            );
+        }
+
+        buttons.add(
+                ActionButton.builder(toMM("<red>Lopeta toisto"))
+                        .width(150)
+                        .action(DialogAction.customClick((response, audience) -> {
+                            player.stopSound(org.bukkit.SoundCategory.RECORDS);
+                            player.stopSound(org.bukkit.SoundCategory.MUSIC);
+                            player.sendMessage(toMM("<red>Musiikki pysäytetty"));
+                        }, ClickCallback.Options.builder().build()))
+                        .build()
+        );
+
+        return Dialog.create(builder -> builder.empty()
+                .base(DialogBase.builder(toMM("<b>Vanillamusiikki</b>")).build())
+                .type(DialogType.multiAction(
+                        buttons,
+                        ActionButton.builder(toMM("Sulje valikko")).build(),
+                        1
+                )));
+    }
+
+    private void playPacketSound(Player player, String resourceKey, long seed) {
+        ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
+
+        Identifier location = Identifier.parse(resourceKey);
+        SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.getValue(location);
+
+        if (soundEvent == null) {
+            player.sendMessage(toMM("<red>Error: Sound '" + resourceKey + "' not found."));
+            return;
+        }
+
+        Holder<SoundEvent> soundHolder = Holder.direct(soundEvent);
+
+        SoundSource source = resourceKey.contains("music_disc") ? SoundSource.RECORDS : SoundSource.MUSIC;
+
+        Location loc = player.getLocation();
+
+        ClientboundSoundPacket packet = new ClientboundSoundPacket(
+                soundHolder,
+                source,
+                loc.getX(),
+                loc.getY(),
+                loc.getZ(),
+                MAX_VALUE, // Volume
+                1.0f, // Pitch
+                seed
+        );
+
+        // 4. Send the packet directly via the connection
+        serverPlayer.connection.send(packet);
+    }
 
     private TextColor getColorFromTitle(String title) {
         int hash = title.hashCode();

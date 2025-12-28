@@ -78,6 +78,7 @@ public class MusicCommand {
                         )
                 )
                 .then(Commands.literal("settings").executes(this::executeSettings))
+                .then(Commands.literal("vanilla").executes(this::executeVanilla))
                 .then(Commands.literal("reload")
                         .requires(source -> source.getSender().hasPermission("music.admin.reload"))
                         .executes(this::executeReload))
@@ -428,6 +429,15 @@ public class MusicCommand {
         CommandSender sender = context.getSource().getSender();
         if (sender instanceof Player player) {
             musicDialogMenu.showSettings(player);
+            return Command.SINGLE_SUCCESS;
+        }
+        return 0;
+    }
+
+    private int executeVanilla(CommandContext<CommandSourceStack> context) {
+        CommandSender sender = context.getSource().getSender();
+        if (sender instanceof Player player) {
+            musicDialogMenu.showVanillaMusic(player);
             return Command.SINGLE_SUCCESS;
         }
         return 0;
