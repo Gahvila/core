@@ -111,7 +111,16 @@ public class PrefixCommand {
 
     private int executeSetSingle(CommandContext<CommandSourceStack> context) {
         if (context.getSource().getSender() instanceof Player player) {
-            Single single = Single.valueOf(context.getArgument("color", String.class));
+            String inputArg = context.getArgument("color", String.class);
+            Single single;
+
+            try {
+                single = Single.valueOf(inputArg);
+            } catch (IllegalArgumentException e) {
+                player.sendMessage("Tuota väriä ei ole.");
+                return 0;
+            }
+
             if (player.hasPermission(single.getPermissionNode())) {
                 prefixManager.setPrefixType(player, PrefixTypes.SINGLE);
                 prefixManager.setSingle(player, single);
@@ -125,7 +134,16 @@ public class PrefixCommand {
 
     private int executeSetGradient(CommandContext<CommandSourceStack> context) {
         if (context.getSource().getSender() instanceof Player player) {
-            Gradient gradient = Gradient.valueOf(context.getArgument("color", String.class));
+            String inputArg = context.getArgument("color", String.class);
+            Gradient gradient;
+
+            try {
+                gradient = Gradient.valueOf(inputArg);
+            } catch (IllegalArgumentException e) {
+                player.sendMessage("Tuota väriä ei ole.");
+                return 0;
+            }
+
             if (player.hasPermission(gradient.getPermissionNode())) {
                 prefixManager.setPrefixType(player, PrefixTypes.GRADIENT);
                 prefixManager.setGradient(player, gradient);
@@ -139,7 +157,16 @@ public class PrefixCommand {
 
     private int executeSetPrefix(CommandContext<CommandSourceStack> context) {
         if (context.getSource().getSender() instanceof Player player) {
-            Prefix prefix = Prefix.valueOf(context.getArgument("prefix", String.class));
+            String inputArg = context.getArgument("prefix", String.class);
+            Prefix prefix;
+
+            try {
+                prefix = Prefix.valueOf(inputArg);
+            } catch (IllegalArgumentException e) {
+                player.sendMessage("Tuota etuliitettä ei ole.");
+                return 0;
+            }
+
             if (player.hasPermission(prefix.getPermissionNode())) {
                 prefixManager.setPrefix(player, prefix);
                 player.sendRichMessage("<white>Asetit itsellesi etuliitteeksi " + prefixManager.generatePrefix(player) + ".</white>");

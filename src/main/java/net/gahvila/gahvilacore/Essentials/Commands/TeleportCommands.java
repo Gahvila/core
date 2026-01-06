@@ -14,6 +14,7 @@ import net.gahvila.gahvilacore.GahvilaCore;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -40,9 +41,12 @@ public class TeleportCommands {
             commands.registrar().register(createTpaHereCommand());
             commands.registrar().register(createTpaCancelCommand());
             commands.registrar().register(createTpaToggleCommand());
-            commands.registrar().register(createTpaYesCommand());
-            commands.registrar().register(createTpaNoCommand());
 
+            commands.registrar().register(createTpaYesCommand("tpayes"));
+            commands.registrar().register(createTpaYesCommand("tpy"));
+
+            commands.registrar().register(createTpaNoCommand("tpano"));
+            commands.registrar().register(createTpaNoCommand("tpn"));
         });
     }
 
@@ -168,72 +172,72 @@ public class TeleportCommands {
 
     private LiteralCommandNode<CommandSourceStack> createTpaCancelCommand() {
         return Commands.literal("tpacancel")
-            .executes(ctx -> {
-                final CommandSender sender = ctx.getSource().getSender();
-                if (sender instanceof Player tpasender) {
-                    if (tpa.get(tpasender) != null) {
-                        Player tpareceiver = tpa.get(tpasender);
+                .executes(ctx -> {
+                            final CommandSender sender = ctx.getSource().getSender();
+                            if (sender instanceof Player tpasender) {
+                                if (tpa.get(tpasender) != null) {
+                                    Player tpareceiver = tpa.get(tpasender);
 
-                        tpa.remove(tpasender);
-                        latestTpaName.remove(tpareceiver);
+                                    tpa.remove(tpasender);
+                                    latestTpaName.remove(tpareceiver);
 
-                        tpasender.sendMessage("Peruit TPA-pyyntösi.");
-                        tpareceiver.sendMessage(toMM(tpasender.getName() + " perui TPA-pyyntönsä."));
-                    } else if (tpahere.get(tpasender) != null) {
-                        Player tpareceiver = tpahere.get(tpasender);
+                                    tpasender.sendMessage("Peruit TPA-pyyntösi.");
+                                    tpareceiver.sendMessage(toMM(tpasender.getName() + " perui TPA-pyyntönsä."));
+                                } else if (tpahere.get(tpasender) != null) {
+                                    Player tpareceiver = tpahere.get(tpasender);
 
-                        tpahere.remove(tpasender);
-                        latestTpaName.remove(tpareceiver);
+                                    tpahere.remove(tpasender);
+                                    latestTpaName.remove(tpareceiver);
 
-                        tpasender.sendMessage("Peruit TPAHere-pyyntösi.");
-                        tpareceiver.sendMessage(toMM(tpasender.getName() + " perui TPAHere-pyyntönsä."));
-                    }
-                }
+                                    tpasender.sendMessage("Peruit TPAHere-pyyntösi.");
+                                    tpareceiver.sendMessage(toMM(tpasender.getName() + " perui TPAHere-pyyntönsä."));
+                                }
+                            }
 
-                return Command.SINGLE_SUCCESS;
-            }
-        ).build();
+                            return Command.SINGLE_SUCCESS;
+                        }
+                ).build();
     }
 
     private LiteralCommandNode<CommandSourceStack> createTpaToggleCommand() {
         return Commands.literal("tpatoggle")
-            .executes(ctx -> {
-                    final CommandSender sender = ctx.getSource().getSender();
-                    if (sender instanceof Player player) {
-                        if (getTpaToggle(player)) {
-                            changeTpaToggle(player);
-                            player.sendMessage("Kytkit TPA-pyynnöt päälle.");
-                        } else {
-                            changeTpaToggle(player);
-                            player.sendMessage("Kytkit TPA-pyynnöt pois päältä.");
-                        }
-                    }
-
-                    return Command.SINGLE_SUCCESS;
-                }
-            ).build();
-    }
-
-    private LiteralCommandNode<CommandSourceStack> createTpaYesCommand() {
-        return Commands.literal("tpayes")
                 .executes(ctx -> {
                             final CommandSender sender = ctx.getSource().getSender();
-                            if (sender instanceof Player tpareceiver) {
-                                if (latestTpaName.containsKey(tpareceiver)) {
-                                    if (tpa.containsKey(latestTpaName.get(tpareceiver))) {
-                                        Player tpasender = latestTpaName.get(tpareceiver);
-                                        acceptTpa(tpasender, tpareceiver, 0);
-                                    } else if (tpahere.containsKey(latestTpaName.get(tpareceiver))) {
-                                        Player tpasender = latestTpaName.get(tpareceiver);
-                                        acceptTpa(tpasender, tpareceiver, 1);
-                                    } else {
-                                        tpareceiver.sendMessage("Sinulla ei ole TPA-pyyntöjä.");
-                                    }
+                            if (sender instanceof Player player) {
+                                if (getTpaToggle(player)) {
+                                    changeTpaToggle(player);
+                                    player.sendMessage("Kytkit TPA-pyynnöt päälle.");
                                 } else {
-                                    tpareceiver.sendMessage("Sinulla ei ole TPA-pyyntöjä.");
+                                    changeTpaToggle(player);
+                                    player.sendMessage("Kytkit TPA-pyynnöt pois päältä.");
                                 }
                             }
+
                             return Command.SINGLE_SUCCESS;
+                        }
+                ).build();
+    }
+
+    private LiteralCommandNode<CommandSourceStack> createTpaYesCommand(String commandName) {
+        return Commands.literal(commandName)
+                .executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if (sender instanceof Player tpareceiver) {
+                        if (latestTpaName.containsKey(tpareceiver)) {
+                            if (tpa.containsKey(latestTpaName.get(tpareceiver))) {
+                                Player tpasender = latestTpaName.get(tpareceiver);
+                                acceptTpa(tpasender, tpareceiver, 0);
+                            } else if (tpahere.containsKey(latestTpaName.get(tpareceiver))) {
+                                Player tpasender = latestTpaName.get(tpareceiver);
+                                acceptTpa(tpasender, tpareceiver, 1);
+                            } else {
+                                tpareceiver.sendMessage("Sinulla ei ole TPA-pyyntöjä.");
+                            }
+                        } else {
+                            tpareceiver.sendMessage("Sinulla ei ole TPA-pyyntöjä.");
+                        }
+                    }
+                    return Command.SINGLE_SUCCESS;
                 })
                 .then(Commands.argument("target", ArgumentTypes.player())
                         .executes(ctx -> {
@@ -256,8 +260,8 @@ public class TeleportCommands {
                 ).build();
     }
 
-    private LiteralCommandNode<CommandSourceStack> createTpaNoCommand() {
-        return Commands.literal("tpano")
+    private LiteralCommandNode<CommandSourceStack> createTpaNoCommand(String commandName) {
+        return Commands.literal(commandName)
                 .executes(ctx -> {
                     final CommandSender sender = ctx.getSource().getSender();
                     if (sender instanceof Player tpareceiver) {
@@ -305,7 +309,11 @@ public class TeleportCommands {
             tpahere.remove(tpasender);
         }
         latestTpaName.remove(tpareceiver);
-        if (!isLocationSafe(tpareceiver.getLocation())) {
+
+        Player teleportingPlayer = (type == 0) ? tpasender : tpareceiver;
+        Location targetLocation = (type == 0) ? tpareceiver.getLocation() : tpasender.getLocation();
+
+        if (!isLocationSafe(teleportingPlayer, targetLocation)) {
             tpasender.sendMessage("Teleporttaus peruttiin epäturvallisen sijainnin takia.");
             tpareceiver.sendMessage("Teleporttaus peruttiin epäturvallisen sijainnin takia.");
             return;
@@ -381,7 +389,10 @@ public class TeleportCommands {
     }
 
 
-    public boolean isLocationSafe(Location location) {
+    public boolean isLocationSafe(Player player, Location location) {
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
+            return true;
+        }
 
         int x = location.getBlockX();
         int y = location.getBlockY();

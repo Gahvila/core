@@ -51,7 +51,13 @@ public enum Gradient {
     JOULU1("Joulu 1", "#ff0000:#ff7878:#ffffff:#74d680:#378b29"),
     JOULU2("Joulu 2", "#df1103:#d4001a:#b3001b:#aa0000"),
     LIMETINVIHREA("Limetinvihreä", "#CDFF03:#C2F70F:#B8EF1B:#ADE628:#A3DE34:#98D640"),
-    AURINGONNOUSU("Auringonnousu", "#2D1D7A:#573170:#804565:#AA585B:#D36C50:#FD8046");
+    AURINGONNOUSU("Auringonnousu", "#2D1D7A:#573170:#804565:#AA585B:#D36C50:#FD8046"),
+    ECUADOR("Ecuadorin lippu", "#FFD100:#FFD100:#0072CE:#EF3340"),
+    ILTARUSKO("Iltarusko", "#EC6F66:#F3A183"),
+    MEHUKASORANSSI("Mehukas oranssi", "#FF8008:#FFC837"),
+    MOJITO("Mojito", "#5DC47D:#56B4D3"),
+    PELTIMIES("Peltimies", "#0099f7:#f11712");
+
 
 
     private final String displayName;
