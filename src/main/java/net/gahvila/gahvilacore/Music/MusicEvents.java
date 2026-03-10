@@ -3,6 +3,7 @@ package net.gahvila.gahvilacore.Music;
 import net.gahvila.gahvilacore.nbsminecraft.events.SongEndEvent;
 import net.gahvila.gahvilacore.nbsminecraft.events.SongNextEvent;
 import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
+import net.gahvila.gahvilacore.nbsminecraft.player.emitter.EntitySoundEmitter;
 import net.gahvila.gahvilacore.nbsminecraft.player.emitter.SoundEmitter;
 import net.gahvila.gahvilacore.nbsminecraft.player.emitter.StaticSoundEmitter;
 import org.bukkit.Bukkit;
@@ -12,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -68,16 +70,26 @@ public class MusicEvents implements Listener {
 
     @EventHandler
     public void onSongStop(SongEndEvent event) {
-        SongPlayer songPlayer = event.getSongPlayer();
-        if (songPlayer.getSoundEmitter() instanceof StaticSoundEmitter) return;
-        Set<UUID> playerUUIDs = songPlayer.getListeners().keySet();
-        for (UUID uuid : playerUUIDs) {
-            if (musicManager.getRadioPlayer().getListeners().containsKey(uuid)) return;
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null) {
-                musicManager.clearSongPlayer(player);
-                musicManager.clearCookies(player);
-            }
+        SongPlayer sp = event.getSongPlayer();
+        var emitter = sp.getSoundEmitter();
+
+        if (emitter instanceof StaticSoundEmitter) return;
+
+        if (emitter instanceof EntitySoundEmitter es
+                && Bukkit.getEntity(es.entityReference.uuid()) instanceof Player p) {
+            resetPlayer(p);
+            return;
         }
+
+        sp.getListeners().keySet().stream()
+                .filter(uuid -> !musicManager.getRadioPlayer().getListeners().containsKey(uuid))
+                .map(Bukkit::getPlayer)
+                .filter(Objects::nonNull)
+                .forEach(this::resetPlayer);
+    }
+
+    private void resetPlayer(Player player) {
+        musicManager.clearSongPlayer(player);
+        musicManager.clearCookies(player);
     }
 }

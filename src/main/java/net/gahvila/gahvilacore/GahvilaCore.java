@@ -8,7 +8,6 @@ import net.gahvila.gahvilacore.Core.CoreCommand;
 import net.gahvila.gahvilacore.Essentials.Commands.*;
 import net.gahvila.gahvilacore.Music.*;
 import net.gahvila.gahvilacore.Music.MusicBlocks.MusicBlockManager;
-import net.gahvila.gahvilacore.Panilla.Panilla;
 import net.gahvila.gahvilacore.Placeholder.Placeholders;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeCommand;
 import net.gahvila.gahvilacore.Profiles.Playtime.PlaytimeListener;
@@ -38,7 +37,6 @@ public final class GahvilaCore extends JavaPlugin {
     private AfkManager afkManager;
     private PluginManager pluginManager;
     private TeleportManager teleportManager;
-    private Panilla panilla;
     private MusicManager musicManager;
     private MusicDialogMenu musicDialogMenu;
     private MusicBlockManager musicBlockManager;
@@ -57,8 +55,6 @@ public final class GahvilaCore extends JavaPlugin {
         playtimeManager = new PlaytimeManager(Optional.of(afkManager));
         teleportManager = new TeleportManager();
 
-        //panilla
-        initializePanilla();
 
         //afk
         registerListeners(new AfkEvents(afkManager));
@@ -97,7 +93,6 @@ public final class GahvilaCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (panilla != null) panilla.disablePanilla();
         if (musicBlockManager != null) {
             musicBlockManager.stopAll();
         }
@@ -142,17 +137,6 @@ public final class GahvilaCore extends JavaPlugin {
 
         TeleportCommands teleportCommands = new TeleportCommands();
         teleportCommands.registerCommands(this);
-    }
-
-    private void initializePanilla() {
-        //only initialize panilla if its enabled
-        if (ConfigManager.getPanilla()) {
-            getLogger().info("Panilla is being initialized...");
-            panilla = new Panilla();
-            panilla.loadPanilla(this);
-        } else {
-            getLogger().info("Panilla not enabled.");
-        }
     }
 
     public PlaytimeManager getPlaytimeManager() {

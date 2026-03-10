@@ -12,7 +12,28 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 import org.bukkit.entity.Player;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class PrefixManager {
+
+    private final Map<UUID, PlayerCache> cache = new ConcurrentHashMap<>();
+
+    private static class PlayerCache {
+        Prefix prefix;
+        PrefixTypes prefixType;
+        String gradient;
+        String single;
+    }
+
+    public void invalidateCache(Player player) {
+        cache.remove(player.getUniqueId());
+    }
+
+    private PlayerCache getCache(Player player) {
+        return cache.computeIfAbsent(player.getUniqueId(), k -> new PlayerCache());
+    }
 
     //generators
     public String generatePrefix(Player player) {
@@ -44,7 +65,7 @@ public class PrefixManager {
                 case GRADIENT -> "<gradient:" + getGradient(player) + ">";
                 case SINGLE -> "<" + getSingle(player) + ">";
             };
-        }else {
+        } else {
             return switch (type) {
                 case GRADIENT -> "<gradient:" + getGradient(player) + "><b>" + prefix + "</b> ";
                 case SINGLE -> "<" + getSingle(player) + "><b>" + prefix + "</b> ";
@@ -76,16 +97,14 @@ public class PrefixManager {
 
     public String generatePrefixPlain(Player player) {
         if (!isPlayerInGroup(player, "legacy")) return "";
-        String prefix = getPrefix(player).getDisplayName();
-
-        return prefix;
+        return getPrefix(player).getDisplayName();
     }
 
     public String generateNamecolor(Player player) {
         if (!isPlayerInGroup(player, "legacy")) return "";
 
         PrefixTypes type = getPrefixType(player);
-        return switch(type) {
+        return switch (type) {
             case GRADIENT -> "<gradient:" + getGradient(player) + ">";
             case SINGLE -> "<" + getSingle(player) + ">";
         };
@@ -95,7 +114,7 @@ public class PrefixManager {
         if (!isPlayerInGroup(player, "legacy")) return "";
 
         PrefixTypes type = getPrefixType(player);
-        return switch(type) {
+        return switch (type) {
             case GRADIENT -> getGradient(player);
             case SINGLE -> getSingle(player);
         };
@@ -103,18 +122,26 @@ public class PrefixManager {
 
     //prefix
     public Prefix getPrefix(Player player) {
-        LuckPerms api = LuckPermsProvider.get();
+        PlayerCache data = getCache(player);
+        if (data.prefix != null) return data.prefix;
 
+        LuckPerms api = LuckPermsProvider.get();
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
         String prefixValue = metaData.getMetaValue("prefix");
 
-        if (prefixValue == null) return getPrefixBasedOnGroup(player);
-
-        try {
-            return Prefix.valueOf(metaData.getMetaValue("prefix"));
-        } catch (IllegalArgumentException e) {
-            return getPrefixBasedOnGroup(player);
+        Prefix result;
+        if (prefixValue == null) {
+            result = getPrefixBasedOnGroup(player);
+        } else {
+            try {
+                result = Prefix.valueOf(prefixValue);
+            } catch (IllegalArgumentException e) {
+                result = getPrefixBasedOnGroup(player);
+            }
         }
+
+        data.prefix = result;
+        return result;
     }
 
     public void setPrefix(Player player, Prefix type) {
@@ -123,14 +150,25 @@ public class PrefixManager {
 
     //prefix type
     public PrefixTypes getPrefixType(Player player) {
-        LuckPerms api = LuckPermsProvider.get();
+        PlayerCache data = getCache(player);
+        if (data.prefixType != null) return data.prefixType;
 
+        LuckPerms api = LuckPermsProvider.get();
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
+
+        PrefixTypes result;
         if (metaData.getMetaValue("prefixtype") == null) {
-            return PrefixTypes.SINGLE;
+            result = PrefixTypes.SINGLE;
         } else {
-            return PrefixTypes.valueOf(metaData.getMetaValue("prefixtype"));
+            try {
+                result = PrefixTypes.valueOf(metaData.getMetaValue("prefixtype"));
+            } catch (IllegalArgumentException e) {
+                result = PrefixTypes.SINGLE;
+            }
         }
+
+        data.prefixType = result;
+        return result;
     }
 
     public void setPrefixType(Player player, PrefixTypes type) {
@@ -139,18 +177,26 @@ public class PrefixManager {
 
     //gradient
     public String getGradient(Player player) {
-        LuckPerms api = LuckPermsProvider.get();
+        PlayerCache data = getCache(player);
+        if (data.gradient != null) return data.gradient;
 
+        LuckPerms api = LuckPermsProvider.get();
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
         String gradientValue = metaData.getMetaValue("gradient");
 
-        if (gradientValue == null) return Gradient.KAHVI.getGradient();
-
-        try {
-            return Gradient.valueOf(gradientValue.toUpperCase()).getGradient();
-        } catch (IllegalArgumentException e) {
-            return Gradient.KAHVI.getGradient();
+        String result;
+        if (gradientValue == null) {
+            result = Gradient.KAHVI.getGradient();
+        } else {
+            try {
+                result = Gradient.valueOf(gradientValue.toUpperCase()).getGradient();
+            } catch (IllegalArgumentException e) {
+                result = Gradient.KAHVI.getGradient();
+            }
         }
+
+        data.gradient = result;
+        return result;
     }
 
     public void setGradient(Player player, Gradient gradient) {
@@ -159,18 +205,26 @@ public class PrefixManager {
 
     //single
     public String getSingle(Player player) {
-        LuckPerms api = LuckPermsProvider.get();
+        PlayerCache data = getCache(player);
+        if (data.single != null) return data.single;
 
+        LuckPerms api = LuckPermsProvider.get();
         CachedMetaData metaData = api.getPlayerAdapter(Player.class).getMetaData(player);
         String singleValue = metaData.getMetaValue("single");
 
-        if (singleValue == null) return Single.TURKOOSI.getColor();
-
-        try {
-            return Single.valueOf(singleValue).getColor();
-        } catch (IllegalArgumentException e) {
-            return Single.TURKOOSI.getColor();
+        String result;
+        if (singleValue == null) {
+            result = Single.TURKOOSI.getColor();
+        } else {
+            try {
+                result = Single.valueOf(singleValue).getColor();
+            } catch (IllegalArgumentException e) {
+                result = Single.TURKOOSI.getColor();
+            }
         }
+
+        data.single = result;
+        return result;
     }
 
     public void setSingle(Player player, Single type) {
@@ -198,6 +252,9 @@ public class PrefixManager {
     }
 
     private void setData(Player player, String key, String value) {
+        // Invalidate cache immediately so next get() fetches new data
+        invalidateCache(player);
+
         LuckPerms api = LuckPermsProvider.get();
         User user = api.getPlayerAdapter(Player.class).getUser(player);
         MetaNode node = MetaNode.builder(key, value).build();

@@ -51,7 +51,7 @@ public class GamemodeCommand {
 
     private LiteralCommandNode<CommandSourceStack> createAlias() {
         return Commands.literal("gm")
-                .requires(source -> source.getSender().hasPermission(PERM_BASE)) // Added permission check here
+                .requires(source -> source.getSender().hasPermission(PERM_BASE))
                 .redirect(create())
                 .build();
     }

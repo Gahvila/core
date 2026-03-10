@@ -51,11 +51,6 @@ public class ConfigManager {
         return data.getOrDefault("server-name", "unknown").toLowerCase();
     }
 
-    public static Boolean getPanilla() {
-        Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
-        return data.getOrDefault("panilla", false);
-    }
-
     // SPAWN
     public static Boolean getIfSpawnOnJoin() {
         Yaml data = new Yaml("config.yml", instance.getDataFolder() + "/");
