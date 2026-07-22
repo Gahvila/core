@@ -3,8 +3,8 @@ import java.util.Properties
 plugins {
     java
     `maven-publish`
-    id("com.gradleup.shadow") version "9.0.0-beta4"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
+    id("com.gradleup.shadow") version "9.4.1"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
 }
 
 val propsFile = file("gradle.properties")
@@ -40,7 +40,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("26.1.2.build.60-stable")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.32") {
@@ -53,7 +53,6 @@ dependencies {
         exclude(group = "com.google.guava", module = "guava")
     }
 
-    implementation("de.tr7zw:item-nbt-api:2.15.0")
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
     implementation("com.github.DaJokni:NBS4j:46708e0c89")
 
@@ -103,7 +102,7 @@ tasks {
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion.set(JavaLanguageVersion.of(25))
         }
     }
 

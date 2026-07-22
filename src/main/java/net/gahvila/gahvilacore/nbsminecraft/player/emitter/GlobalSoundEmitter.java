@@ -6,7 +6,6 @@ import net.gahvila.gahvilacore.nbsminecraft.utils.SoundCategory;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 
 public class GlobalSoundEmitter extends SoundEmitter {
 
@@ -16,19 +15,11 @@ public class GlobalSoundEmitter extends SoundEmitter {
         if (player == null) return;
 
         double radius = 2.0;
-        double angleRad = (panning / 100.0) * (Math.PI / 2.0);
 
-        Location headLoc = player.getEyeLocation();
-        Vector direction = headLoc.getDirection();
-        direction.setY(0).normalize();
+        Location loc = player.getEyeLocation();
+        double finalYawRad = Math.toRadians(loc.getYaw() + (panning * 0.9));
+        loc.add(-Math.sin(finalYawRad) * radius, 0, Math.cos(finalYawRad) * radius);
 
-        Vector right = direction.clone().crossProduct(new Vector(0, 1, 0)).normalize();
-        Vector forwardComponent = direction.multiply(Math.cos(angleRad));
-        Vector sideComponent = right.multiply(Math.sin(angleRad));
-        Vector soundOffset = forwardComponent.add(sideComponent).normalize().multiply(radius);
-
-        Location soundLoc = headLoc.clone().add(soundOffset);
-
-        player.playSound(soundLoc, sound, org.bukkit.SoundCategory.valueOf(category.name()), volume, pitch);
+        player.playSound(loc, sound, org.bukkit.SoundCategory.valueOf(category.name()), volume, pitch);
     }
 }
