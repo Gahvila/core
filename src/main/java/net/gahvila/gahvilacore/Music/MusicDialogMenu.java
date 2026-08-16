@@ -335,6 +335,9 @@ public class MusicDialogMenu {
                                 DialogInput.bool("auto", Component.text("Jatkuva toisto"))
                                         .initial(musicManager.getAutoEnabled(player))
                                         .build(),
+                                DialogInput.bool("crossfade", Component.text("Crossfade (Shuffle)"))
+                                        .initial(musicManager.getCrossfadeEnabled(player))
+                                        .build(),
                                 DialogInput.singleOption("speed", Component.text("Musiikin toistonopeus"),
                                         Arrays.asList(
                                                 SingleOptionDialogInput.OptionEntry.create("1", toMM("1x"), currentSpeed.equals("1")),
@@ -358,6 +361,7 @@ public class MusicDialogMenu {
                                             musicManager.setRadioEnabled(player, response.getBoolean("radio"));
                                             musicManager.setSpeakerEnabled(player, response.getBoolean("speaker"));
                                             musicManager.setAutoEnabled(player, response.getBoolean("auto"));
+                                            musicManager.setCrossfadeEnabled(player, response.getBoolean("crossfade"));
                                             musicManager.setSpeed(player, Byte.valueOf(response.getText("speed")));
                                             musicManager.setSorting(player, MusicSorting.valueOf(response.getText("sorting")));
                                             if (musicManager.getRadioEnabled(player)) {

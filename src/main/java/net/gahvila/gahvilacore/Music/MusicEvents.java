@@ -40,7 +40,14 @@ public class MusicEvents implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        musicManager.clearSongPlayer(player);
+        SongPlayer songPlayer = musicManager.getSongPlayer(player);
+        if (songPlayer != null) {
+            musicManager.saveTickToCookie(player);
+            musicManager.savePauseToCookie(player);
+            musicManager.saveTitleToCookie(player);
+            songPlayer.stop();
+            MusicManager.songPlayers.remove(player);
+        }
         musicManager.saveAutoState(player);
         musicManager.saveVolume(player);
         musicManager.saveRadioEnabled(player);

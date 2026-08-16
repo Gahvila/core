@@ -55,6 +55,8 @@ import static net.gahvila.gahvilacore.Utils.MiniMessageUtils.toMM;
 public class MusicManager {
     private MusicBlockManager musicBlockManager;
     public MusicManager() {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(instance, this::bossBarUpdateLoop, 0L, 5L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(instance, this::cookieSyncLoop, 0L, 100L);
     }
 
     public static ArrayList<Song> songs = new ArrayList<>();
@@ -62,6 +64,7 @@ public class MusicManager {
     public static HashMap<Player, SongPlayer> songPlayers = new HashMap<>();
     public static HashMap<Player, Boolean> speakerEnabled = new HashMap<>();
     public static HashMap<Player, Boolean> autoEnabled = new HashMap<>();
+    public static HashMap<Player, Boolean> crossfadeEnabled = new HashMap<>();
     public static HashMap<Player, Byte> playerVolume = new HashMap<>();
     public static HashMap<Player, Byte> playerSpeed = new HashMap<>();
     public static HashMap<Player, Integer> lastMenuPage = new HashMap<>();
@@ -70,6 +73,7 @@ public class MusicManager {
     public static NamespacedKey tickKey = new NamespacedKey(instance, "song.tick");
     public static NamespacedKey pauseKey = new NamespacedKey(instance, "song.pause");
     public static NamespacedKey volumeKey = new NamespacedKey(instance, "song.volume");
+    public static NamespacedKey crossfadeKey = new NamespacedKey(instance, "song.crossfade");
 
     public void setMusicBlockManager(MusicBlockManager musicBlockManager) {
         this.musicBlockManager = musicBlockManager;
@@ -295,6 +299,7 @@ public class MusicManager {
             songPlayer.loopQueue(true);
             songPlayer.shuffleQueue();
         }
+        songPlayer.setCrossfade(getCrossfadeEnabled(player));
         songPlayer.setTick(tick);
 
         saveSongPlayer(player, songPlayer);
@@ -321,8 +326,14 @@ public class MusicManager {
     public void setRadioEnabled(Player player, boolean option) {
         if (option) {
             addRadioListener(player);
+            if (radioBossBar != null) {
+                player.showBossBar(radioBossBar);
+            }
         } else {
             removeRadioListener(player);
+            if (radioBossBar != null) {
+                radioBossBar.removeViewer(player);
+            }
         }
         radioEnabled.put(player, option);
     }
@@ -361,9 +372,10 @@ public class MusicManager {
 
         songPlayer.loopQueue(true);
         songPlayer.shuffleQueue();
+        songPlayer.setCrossfade(true);
         songPlayer.play();
-
         radioPlayer = songPlayer;
+        radioBossBar = BossBar.bossBar(toMM("Ladataan..."), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
     }
 
     public void clearRadioPlayer() {
@@ -411,6 +423,18 @@ public class MusicManager {
 
     public void setAutoEnabled(Player player, boolean option) {
         autoEnabled.put(player, option);
+    }
+
+    public boolean getCrossfadeEnabled(Player player) {
+        return crossfadeEnabled.getOrDefault(player, false);
+    }
+
+    public void setCrossfadeEnabled(Player player, boolean option) {
+        crossfadeEnabled.put(player, option);
+        saveCrossfadeToCookie(player);
+        if (getSongPlayer(player) != null) {
+            getSongPlayer(player).setCrossfade(option);
+        }
     }
 
     public void saveAutoState(Player player) {
@@ -511,40 +535,20 @@ public class MusicManager {
     // Miscallaneous
     //
     public static WeakHashMap<Player, BossBar> progressBars = new WeakHashMap<>();
+    public static BossBar radioBossBar;
+
     public void songPlayerSchedule(Player player, SongPlayer songPlayer) {
-        if (progressBars.containsKey(player)) {
-            progressBars.get(player).removeViewer(player);
-            progressBars.remove(player);
+        if (!progressBars.containsKey(player)) {
+            BossBar progressBar = BossBar.bossBar(toMM("Ladataan..."), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
+            progressBars.put(player, progressBar);
         }
-        BossBar progressBar = BossBar.bossBar(toMM("<aqua>" + songPlayer.getCurrentSong().getMetadata().getOriginalAuthor() + " - " +
-                songPlayer.getCurrentSong().getMetadata().getTitle() + "</aqua>"), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
-        player.showBossBar(progressBar);
-        progressBars.put(player, progressBar);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(instance, task -> {
-            Song currentSong = songPlayer.getCurrentSong();
-            if (currentSong == null) {
-                progressBar.removeViewer(player);
-                task.cancel();
-                return;
-            }
-            saveTickToCookie(player);
-            double progress = (double) songPlayer.getTick() / songPlayer.getCurrentSong().getSongLength();
-            if (progress >= 1.0 || progress < 0){
-                progressBar.removeViewer(player);
-                task.cancel();
-                return;
-            }
-            progressBar.progress((float) progress);
-            if (!songPlayer.isPlaying()){
-                progressBar.name(toMM("<red>" + songPlayer.getCurrentSong().getMetadata().getOriginalAuthor() + " - " +
-                        songPlayer.getCurrentSong().getMetadata().getTitle() + "</red>"));
-                progressBar.color(BossBar.Color.RED);
-            } else {
-                progressBar.name(toMM("<aqua>" + songPlayer.getCurrentSong().getMetadata().getOriginalAuthor() + " - " +
-                        songPlayer.getCurrentSong().getMetadata().getTitle() + "</aqua>"));
-                progressBar.color(BossBar.Color.BLUE);
-            }
-        }, 0, 20);
+        BossBar progressBar = progressBars.get(player);
+        
+        Song currentSong = songPlayer.getCurrentSong();
+        if (currentSong != null) {
+            progressBar.name(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " + currentSong.getMetadata().getTitle() + "</aqua>"));
+            player.showBossBar(progressBar);
+        }
 
 
         if (songPlayer.getSoundEmitter() instanceof EntitySoundEmitter entitySoundEmitter) {
@@ -552,8 +556,8 @@ public class MusicManager {
             boolean wgEnabled = Bukkit.getServer().getPluginManager().getPlugin("WorldGuard") != null;
 
             Bukkit.getScheduler().runTaskTimer(instance, task2 -> {
-                Song currentSong = songPlayer.getCurrentSong();
-                if (currentSong == null) {
+                Song taskSong = songPlayer.getCurrentSong();
+                if (taskSong == null) {
                     task2.cancel();
                     return;
                 }
@@ -582,6 +586,57 @@ public class MusicManager {
                     }
                 }
             }, 10L, 10);
+        }
+    }
+
+    private void bossBarUpdateLoop() {
+        for (Player player : progressBars.keySet()) {
+            SongPlayer songPlayer = getSongPlayer(player);
+            BossBar progressBar = progressBars.get(player);
+            
+            if (songPlayer == null || songPlayer.getCurrentSong() == null || !songPlayer.isPlaying()) {
+                if (progressBar != null) {
+                    progressBar.removeViewer(player);
+                }
+                continue;
+            }
+
+            Song currentSong = songPlayer.getCurrentSong();
+            double progress = (double) songPlayer.getTick() / currentSong.getSongLength();
+            
+            if (progress >= 1.0 || progress < 0) {
+                progressBar.removeViewer(player);
+                continue;
+            }
+
+            progressBar.progress((float) progress);
+            if (!songPlayer.isPlaying()){
+                progressBar.name(toMM("<red>" + songPlayer.getCurrentSong().getMetadata().getOriginalAuthor() + " - " +
+                        songPlayer.getCurrentSong().getMetadata().getTitle() + "</red>"));
+                progressBar.color(BossBar.Color.RED);
+            } else {
+                progressBar.name(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
+                        currentSong.getMetadata().getTitle() + "</aqua>"));
+                progressBar.color(BossBar.Color.BLUE);
+            }
+            player.showBossBar(progressBar);
+        }
+
+        if (radioBossBar != null && radioPlayer != null) {
+            Song currentSong = radioPlayer.getCurrentSong();
+            if (currentSong != null && radioPlayer.isPlaying()) {
+                double progress = (double) radioPlayer.getTick() / currentSong.getSongLength();
+                if (progress >= 0 && progress < 1.0) {
+                    radioBossBar.progress((float) progress);
+                    radioBossBar.name(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " + currentSong.getMetadata().getTitle() + "</aqua>"));
+                }
+            }
+        }
+    }
+
+    private void cookieSyncLoop() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            saveTickToCookie(player);
         }
     }
 
@@ -653,11 +708,16 @@ public class MusicManager {
     }
 
     public void saveVolumeToCookie(Player player) {
-        SongPlayer songPlayer = getPlayingSongPlayer(player);
+        SongPlayer songPlayer = getSongPlayer(player);
         if (songPlayer != null) {
-            byte[] volumeArray = new byte[]{getVolume(player)};
+            byte[] volumeArray = {(byte) getVolume(player)};
             player.storeCookie(volumeKey, volumeArray);
         }
+    }
+
+    public void saveCrossfadeToCookie(Player player) {
+        byte[] crossfadeArray = {(byte) (getCrossfadeEnabled(player) ? 1 : 0)};
+        player.storeCookie(crossfadeKey, crossfadeArray);
     }
 
     private CompletableFuture<String> retrieveTitleCookie(Player player) {
@@ -700,6 +760,16 @@ public class MusicManager {
                 });
     }
 
+    private CompletableFuture<Boolean> retrieveCrossfadeCookie(Player player) {
+        return player.retrieveCookie(crossfadeKey)
+                .thenApply(bytes -> bytes != null && bytes.length > 0 && bytes[0] == 1)
+                .orTimeout(3, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    ex.printStackTrace();
+                    return null;
+                });
+    }
+
     public void clearCookies(Player player) {
         player.storeCookie(titleKey, new byte[]{});
         player.storeCookie(tickKey, new byte[]{});
@@ -711,13 +781,19 @@ public class MusicManager {
             CompletableFuture<Long> tickFuture = retrieveTickCookie(player);
             CompletableFuture<Boolean> pauseFuture = retrievePauseCookie(player);
             CompletableFuture<Byte> volumeFuture = retrieveVolumeCookie(player);
+            CompletableFuture<Boolean> crossfadeFuture = retrieveCrossfadeCookie(player);
 
-            CompletableFuture.allOf(titleFuture, tickFuture, pauseFuture, volumeFuture)
+            CompletableFuture.allOf(titleFuture, tickFuture, pauseFuture, volumeFuture, crossfadeFuture)
                     .thenRun(() -> {
                         String title = titleFuture.join();
                         Long tick = tickFuture.join();
                         Boolean pause = pauseFuture.join();
                         Byte volume = volumeFuture.join();
+                        Boolean crossfade = crossfadeFuture.join();
+
+                        if (crossfade != null) {
+                            crossfadeEnabled.put(player, crossfade);
+                        }
 
                         if (title == null || tick == null || pause == null) {
                             return;
