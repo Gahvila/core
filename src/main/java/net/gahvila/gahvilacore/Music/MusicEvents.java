@@ -1,5 +1,6 @@
 package net.gahvila.gahvilacore.Music;
 
+import cz.koca2000.nbs4j.Song;
 import net.gahvila.gahvilacore.nbsminecraft.events.SongEndEvent;
 import net.gahvila.gahvilacore.nbsminecraft.events.SongNextEvent;
 import net.gahvila.gahvilacore.nbsminecraft.player.SongPlayer;
@@ -52,9 +53,13 @@ public class MusicEvents implements Listener {
         musicManager.saveVolume(player);
         musicManager.saveRadioEnabled(player);
 
+        musicManager.removeRadioListener(player);
+        MusicManager.radioEnabled.remove(player.getUniqueId());
+
         MusicManager.speakerEnabled.remove(player);
         MusicManager.autoEnabled.remove(player);
         MusicManager.playerVolume.remove(player);
+        MusicManager.progressBars.remove(player);
     }
 
     @EventHandler
@@ -65,12 +70,15 @@ public class MusicEvents implements Listener {
         for (UUID uuid : playerUUIDs) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
-                if (!musicManager.getRadioPlayer().getListeners().containsKey(uuid)) {
+                if (musicManager.getRadioPlayer() == null || !musicManager.getRadioPlayer().getListeners().containsKey(uuid)) {
                     musicManager.saveTitleToCookie(player);
                     musicManager.saveTickToCookie(player);
                     musicManager.songPlayerSchedule(player, songPlayer);
                 }
-                player.sendRichMessage("Nyt soi: <yellow>" + songPlayer.getCurrentSong().getMetadata().getTitle());
+                Song current = songPlayer.getCurrentSong();
+                if (current != null) {
+                    player.sendRichMessage("Nyt soi: <yellow>" + current.getMetadata().getTitle());
+                }
             }
         }
     }
@@ -85,11 +93,10 @@ public class MusicEvents implements Listener {
         if (emitter instanceof EntitySoundEmitter es
                 && Bukkit.getEntity(es.entityReference.uuid()) instanceof Player p) {
             resetPlayer(p);
-            return;
         }
 
         sp.getListeners().keySet().stream()
-                .filter(uuid -> !musicManager.getRadioPlayer().getListeners().containsKey(uuid))
+                .filter(uuid -> musicManager.getRadioPlayer() == null || !musicManager.getRadioPlayer().getListeners().containsKey(uuid))
                 .map(Bukkit::getPlayer)
                 .filter(Objects::nonNull)
                 .forEach(this::resetPlayer);

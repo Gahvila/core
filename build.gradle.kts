@@ -54,7 +54,7 @@ dependencies {
     }
 
     implementation("com.github.simplix-softworks:simplixstorage:3.2.7")
-    implementation("com.github.DaJokni:NBS4j:46708e0c89")
+    implementation("com.github.DaJokni:NBS4j:5e78f77acb")
 
     implementation("com.zaxxer:HikariCP:6.3.0")
 }

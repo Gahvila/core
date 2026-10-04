@@ -128,6 +128,9 @@ public class MusicDialogMenu {
                 .action(DialogAction.customClick((response, audience) -> {
                             player.playSound(player.getLocation(), Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1F, 1F);
                             musicManager.clearSongPlayer(player);
+                            if (musicManager.getRadioEnabled(player)) {
+                                musicManager.setRadioEnabled(player, false);
+                            }
                             show(player, page);
                         },
                         ClickCallback.Options.builder().build()

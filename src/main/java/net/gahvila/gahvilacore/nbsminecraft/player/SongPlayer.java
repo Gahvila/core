@@ -25,9 +25,9 @@ import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static net.gahvila.gahvilacore.GahvilaCore.instance;
@@ -36,21 +36,22 @@ public class SongPlayer {
     private final AbstractPlatform platform;
     private final SoundEmitter soundEmitter;
     private final SongQueue queue;
-    private final HashMap<UUID, AudioListener> listeners = new HashMap<>();
+    private final Map<UUID, AudioListener> listeners = new ConcurrentHashMap<>();
     private final SoundCategory soundCategory;
     private int volume;
     private final boolean transposeNotes;
 
-    private Song song = null;
-    private boolean playing = true;
-    private long songTick = 0;
-    private long songStartTime = -1;
-    private boolean crossfadeEnabled = false;
-    private Song nextSong = null;
-    private long nextSongTick = 0;
+    private volatile Song song = null;
+    private volatile boolean playing = false;
+    private volatile long songTick = 0;
+    private volatile long songStartTime = -1;
+    private volatile boolean crossfadeEnabled = false;
+    private volatile Song nextSong = null;
+    private volatile long nextSongTick = 0;
     private long nextSongStartTick = 0;
     private java.util.concurrent.ScheduledFuture<?> nextSongTask = null;
     private long crossfadeStartTime = -1;
+    private long currentCrossfadeMs = 8000;
 
     private SongPlayer(AbstractPlatform platform, SoundEmitter soundEmitter, SongQueue queue, SoundCategory soundCategory, int volume, boolean transposeNotes) {
         this.platform = platform;
@@ -129,7 +130,8 @@ public class SongPlayer {
      * @return total duration of current song in seconds
      */
     public long getSongDuration() {
-        return (long) song.getSongLengthInSeconds();
+        Song current = getCurrentSong();
+        return current != null ? (long) current.getSongLengthInSeconds() : 0L;
     }
 
     /**
@@ -144,14 +146,16 @@ public class SongPlayer {
      * Start/continue playing the current song
      */
     public void play() {
-        this.playing = true;
-        tickSong();
+        if (!playing) {
+            this.playing = true;
+            NBSAPI.INSTANCE.getThreadPool().schedule(this::tickSong, 0, java.util.concurrent.TimeUnit.MICROSECONDS);
+        }
     }
 
     private void ensurePlaying() {
         if (!playing) {
             this.playing = true;
-            tickSong();
+            NBSAPI.INSTANCE.getThreadPool().schedule(this::tickSong, 0, java.util.concurrent.TimeUnit.MICROSECONDS);
         }
     }
 
@@ -276,54 +280,142 @@ public class SongPlayer {
             return;
         }
 
-        if (song == null && nextSong == null) {
-            if (!queue.isEmpty()) {
-                playSong(queue.poll());
-            } else {
-                playing = false;
+        try {
+            if (song == null && nextSong == null) {
+                if (!queue.isEmpty()) {
+                    playSong(queue.poll());
+                } else {
+                    playing = false;
+                }
+                return;
             }
+
+            if (song != null) {
+                float tempo = song.getTempo(songTick + 1);
+                if (tempo <= 0) tempo = 10;
+                long remainingMs = (long) ((song.getSongLength() - songTick) * (1000000.0f / tempo) / 1000);
+                long totalSongMs = (long) (song.getSongLength() * (1000000.0f / tempo) / 1000);
+                long allowedCrossfade = Math.max(1, Math.min(8000, totalSongMs / 4));
+                
+                if (crossfadeEnabled && nextSong == null && !queue.isEmpty() && remainingMs <= allowedCrossfade) {
+                    nextSong = queue.poll();
+                    if (nextSong != null) {
+                        nextSongStartTick = getFirstNoteTick(nextSong);
+                        nextSongTick = nextSongStartTick;
+                        crossfadeStartTime = System.currentTimeMillis();
+                        currentCrossfadeMs = allowedCrossfade;
+                        SongNextEvent event = new SongNextEvent(this);
+                        Bukkit.getScheduler().runTask(instance, () -> Bukkit.getPluginManager().callEvent(event));
+                        tickNextSong();
+                    }
+                }
+
+                if (!listeners.isEmpty() && this.volume > 0) {
+                    float fadeOutVol = 1.0f;
+                    if (crossfadeEnabled && nextSong != null && crossfadeStartTime != -1) {
+                        long elapsed = System.currentTimeMillis() - crossfadeStartTime;
+                        float ratioOut = Math.max(0.0f, 1.0f - (elapsed / (float) currentCrossfadeMs));
+                        fadeOutVol = ratioOut;
+                    }
+
+                    for (cz.koca2000.nbs4j.Layer layer : song.getLayers()) {
+                        try {
+                            cz.koca2000.nbs4j.Note note = layer.getNote(songTick);
+                            if (note == null) continue;
+                            
+                            if (crossfadeEnabled && nextSong != null && crossfadeStartTime != -1) {
+                                if (fadeOutVol < 0.5f && isDrumInstrument(note)) continue;
+                            }
+                            
+                            String sound = note.isCustomInstrument() ? song.getCustomInstrument(note.getInstrument()).getName() : Instruments.getSound(note.getInstrument());
+                            int noteVol = note.getVolume() & 0xFF;
+                            if (noteVol == 0) noteVol = 100;
+                            
+                            float volume = (layer.getVolume() * this.volume * noteVol) / 1_000_000F;
+                            volume *= fadeOutVol;
+                            
+                            float pitch = PitchUtils.getPitchInOctave(note);
+                            float panning = note.getPanning() & 0xFF;
+                            
+                            for (AudioListener listener : listeners.values()) {
+                                soundEmitter.playSound(platform, listener, sound, soundCategory, volume, pitch, panning);
+                            }
+                        } catch (Exception e) {
+                            // Ignore Sound Stopper or other invalid notes to prevent crash loop
+                        }
+                    }
+                }
+
+                songTick++;
+                if (song.getSongLength() < songTick) {
+                    if (nextSong != null) {
+                        song = nextSong;
+                        songTick = nextSongTick;
+                        nextSong = null;
+                        if (nextSongTask != null) {
+                            nextSongTask.cancel(false);
+                            nextSongTask = null;
+                        }
+                        float newTempo = song.getTempo(songTick + 1);
+                        if (newTempo <= 0) newTempo = 10;
+                        scheduleNextTick(newTempo);
+                    } else {
+                        onSongFinish();
+                        if (isPlaying() && song != null) {
+                            float newTempo = song.getTempo(songTick + 1);
+                            if (newTempo <= 0) newTempo = 10;
+                            scheduleNextTick(newTempo);
+                        }
+                    }
+                } else {
+                    scheduleNextTick(tempo);
+                }
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            if (isPlaying() && song != null) {
+                float tempo = song.getTempo(songTick + 1);
+                if (tempo <= 0) tempo = 10;
+                scheduleNextTick(tempo);
+            }
+        }
+    }
+
+    private void scheduleNextTick(float tempo) {
+        if (tempo <= 0) tempo = 10;
+        long period = (long) (1000000 / tempo);
+        NBSAPI.INSTANCE.getThreadPool().schedule(this::tickSong, period, java.util.concurrent.TimeUnit.MICROSECONDS);
+    }
+
+    private void tickNextSong() {
+        if (!isPlaying() || nextSong == null) {
             return;
         }
 
-        float tempo = (song != null) ? song.getTempo(songTick + 1) : (nextSong != null ? nextSong.getTempo(nextSongTick + 1) : 10);
-        long period = (long) (1000 / tempo);
-        NBSAPI.INSTANCE.getThreadPool().schedule(this::tickSong, period, java.util.concurrent.TimeUnit.MILLISECONDS);
-
-        if (song != null) {
-            long remainingMs = (long) ((song.getSongLength() - songTick) * (1000.0f / tempo));
-            if (crossfadeEnabled && nextSong == null && !queue.isEmpty() && remainingMs <= 8000) {
-                nextSong = queue.poll();
-                nextSongStartTick = getFirstNoteTick(nextSong);
-                nextSongTick = nextSongStartTick;
-                crossfadeStartTime = System.currentTimeMillis();
-                SongNextEvent event = new SongNextEvent(this);
-                Bukkit.getScheduler().runTask(instance, () -> Bukkit.getPluginManager().callEvent(event));
-                tickNextSong();
-            }
-
+        try {
             if (!listeners.isEmpty() && this.volume > 0) {
-                float fadeOutVol = 1.0f;
-                if (crossfadeEnabled && nextSong != null && crossfadeStartTime != -1) {
+                float fadeInVol = 1.0f;
+                if (crossfadeStartTime != -1) {
                     long elapsed = System.currentTimeMillis() - crossfadeStartTime;
-                    float ratioOut = Math.max(0.0f, 1.0f - (elapsed / 8000.0f));
-                    fadeOutVol = ratioOut;
+                    float ratioIn = Math.min(1.0f, elapsed / (float) currentCrossfadeMs);
+                    fadeInVol = ratioIn;
                 }
-
-                for (cz.koca2000.nbs4j.Layer layer : song.getLayers()) {
+                
+                for (cz.koca2000.nbs4j.Layer layer : nextSong.getLayers()) {
                     try {
-                        cz.koca2000.nbs4j.Note note = layer.getNote(songTick);
+                        cz.koca2000.nbs4j.Note note = layer.getNote(nextSongTick);
                         if (note == null) continue;
                         
-                        if (crossfadeEnabled && nextSong != null && crossfadeStartTime != -1) {
-                            if (fadeOutVol < 0.5f && isDrumInstrument(note)) continue;
+                        if (crossfadeStartTime != -1) {
+                            if (fadeInVol < 0.5f && isDrumInstrument(note)) continue;
                         }
                         
-                        String sound = note.isCustomInstrument() ? song.getCustomInstrument(note.getInstrument()).getName() : Instruments.getSound(note.getInstrument());
+                        String sound = note.isCustomInstrument() ? nextSong.getCustomInstrument(note.getInstrument()).getName() : Instruments.getSound(note.getInstrument());
                         int noteVol = note.getVolume() & 0xFF;
                         if (noteVol == 0) noteVol = 100;
                         
                         float volume = (layer.getVolume() * this.volume * noteVol) / 1_000_000F;
-                        volume *= fadeOutVol;
+                        volume *= fadeInVol;
                         
                         float pitch = PitchUtils.getPitchInOctave(note);
                         float panning = note.getPanning() & 0xFF;
@@ -332,74 +424,20 @@ public class SongPlayer {
                             soundEmitter.playSound(platform, listener, sound, soundCategory, volume, pitch, panning);
                         }
                     } catch (Exception e) {
-                        // Ignore Sound Stopper or other invalid notes to prevent crash loop
+                        // Ignore exceptions to prevent crashing the playback loop
                     }
                 }
-            }
-
-            songTick++;
-            if (song.getSongLength() < songTick) {
-                if (nextSong != null) {
-                    song = nextSong;
-                    songTick = nextSongTick;
-                    nextSong = null;
-                    if (nextSongTask != null) {
-                        nextSongTask.cancel(false);
-                        nextSongTask = null;
-                    }
-                } else {
-                    onSongFinish();
-                }
-            }
-        }
-    }
-
-    private void tickNextSong() {
-        if (!isPlaying() || nextSong == null) {
-            return;
-        }
-
-        if (!listeners.isEmpty() && this.volume > 0) {
-            float fadeInVol = 1.0f;
-            if (crossfadeStartTime != -1) {
-                long elapsed = System.currentTimeMillis() - crossfadeStartTime;
-                float ratioIn = Math.min(1.0f, elapsed / 8000.0f);
-                fadeInVol = ratioIn;
             }
             
-            for (cz.koca2000.nbs4j.Layer layer : nextSong.getLayers()) {
-                try {
-                    cz.koca2000.nbs4j.Note note = layer.getNote(nextSongTick);
-                    if (note == null) continue;
-                    
-                    if (crossfadeStartTime != -1) {
-                        if (fadeInVol < 0.5f && isDrumInstrument(note)) continue;
-                    }
-                    
-                    String sound = note.isCustomInstrument() ? nextSong.getCustomInstrument(note.getInstrument()).getName() : Instruments.getSound(note.getInstrument());
-                    int noteVol = note.getVolume() & 0xFF;
-                    if (noteVol == 0) noteVol = 100;
-                    
-                    float volume = (layer.getVolume() * this.volume * noteVol) / 1_000_000F;
-                    volume *= fadeInVol;
-                    
-                    float pitch = PitchUtils.getPitchInOctave(note);
-                    float panning = note.getPanning() & 0xFF;
-                    
-                    for (AudioListener listener : listeners.values()) {
-                        soundEmitter.playSound(platform, listener, sound, soundCategory, volume, pitch, panning);
-                    }
-                } catch (Exception e) {
-                    // Ignore exceptions to prevent crashing the playback loop
-                }
-            }
+            nextSongTick++;
+            
+            float tempo = nextSong.getTempo(nextSongTick + 1);
+            if (tempo <= 0) tempo = 10;
+            long period = (long) (1000000 / tempo);
+            nextSongTask = NBSAPI.INSTANCE.getThreadPool().schedule(this::tickNextSong, period, java.util.concurrent.TimeUnit.MICROSECONDS);
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
-        
-        nextSongTick++;
-        
-        float tempo = nextSong.getTempo(nextSongTick + 1);
-        long period = (long) (1000 / tempo);
-        nextSongTask = NBSAPI.INSTANCE.getThreadPool().schedule(this::tickNextSong, period, java.util.concurrent.TimeUnit.MILLISECONDS);
     }
     
     private long getFirstNoteTick(Song s) {
@@ -421,6 +459,7 @@ public class SongPlayer {
             Bukkit.getScheduler().runTask(instance, () -> Bukkit.getPluginManager().callEvent(event));
             playSong(queue.poll());
         } else {
+            playing = false;
             SongEndEvent event = new SongEndEvent(this);
             Bukkit.getScheduler().runTask(instance, () -> Bukkit.getPluginManager().callEvent(event));
         }

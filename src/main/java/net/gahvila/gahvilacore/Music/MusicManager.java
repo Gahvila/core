@@ -61,7 +61,7 @@ public class MusicManager {
 
     public static ArrayList<Song> songs = new ArrayList<>();
     public static HashMap<String, Song> namedSong = new HashMap<>();
-    public static HashMap<Player, SongPlayer> songPlayers = new HashMap<>();
+    public static Map<Player, SongPlayer> songPlayers = new ConcurrentHashMap<>();
     public static HashMap<Player, Boolean> speakerEnabled = new HashMap<>();
     public static HashMap<Player, Boolean> autoEnabled = new HashMap<>();
     public static HashMap<Player, Boolean> crossfadeEnabled = new HashMap<>();
@@ -253,11 +253,15 @@ public class MusicManager {
     }
 
     public void clearSongPlayer(Player player){
-        if (!songPlayers.containsKey(player)) return;
-        if (songPlayers.get(player) == null) songPlayers.remove(player);
-        SongPlayer songPlayer = songPlayers.get(player);
-        songPlayer.stop();
-        songPlayers.remove(player);
+        BossBar progressBar = progressBars.remove(player);
+        if (progressBar != null) {
+            player.hideBossBar(progressBar);
+        }
+
+        SongPlayer songPlayer = songPlayers.remove(player);
+        if (songPlayer != null) {
+            songPlayer.stop();
+        }
         clearCookies(player);
     }
 
@@ -289,11 +293,6 @@ public class MusicManager {
                     .build();
         }
         songPlayer.playSong(song);
-        if (playing) {
-            playSong(player, songPlayer);
-        } else {
-            pauseSong(player, songPlayer);
-        }
         if (!getSpeakerEnabled(player) && getAutoEnabled(player)) {
             songs.forEach(songPlayer::queueSong);
             songPlayer.loopQueue(true);
@@ -302,6 +301,17 @@ public class MusicManager {
         songPlayer.setCrossfade(getCrossfadeEnabled(player));
         songPlayer.setTick(tick);
 
+        songPlayer.addListener(new AudioListener(player.getEntityId(), player.getUniqueId()));
+        if (songPlayer.getSoundEmitter() instanceof GlobalSoundEmitter) {
+            songPlayer.setVolume(volumeConverter(getVolume(player)));
+        }
+
+        if (playing) {
+            playSong(player, songPlayer);
+        } else {
+            pauseSong(player, songPlayer);
+        }
+
         saveSongPlayer(player, songPlayer);
         songPlayerSchedule(player, songPlayer);
 
@@ -309,21 +319,19 @@ public class MusicManager {
         saveTickToCookie(player);
         savePauseToCookie(player);
         saveVolumeToCookie(player);
-        songPlayer.addListener(new AudioListener(player.getEntityId(), player.getUniqueId()));
-        if (songPlayer.getSoundEmitter() instanceof GlobalSoundEmitter) {
-            songPlayer.setVolume(volumeConverter(getVolume(player)));
-        }
     }
 
     //
     //RADIO
     //
-    public static HashMap<Player, Boolean> radioEnabled = new HashMap<>();
+    public static Map<UUID, Boolean> radioEnabled = new ConcurrentHashMap<>();
     public boolean getRadioEnabled(Player player) {
-        return radioEnabled.get(player) != null && radioEnabled.get(player);
+        if (player == null) return false;
+        return radioEnabled.getOrDefault(player.getUniqueId(), false);
     }
 
     public void setRadioEnabled(Player player, boolean option) {
+        if (player == null) return;
         if (option) {
             addRadioListener(player);
             if (radioBossBar != null) {
@@ -332,10 +340,10 @@ public class MusicManager {
         } else {
             removeRadioListener(player);
             if (radioBossBar != null) {
-                radioBossBar.removeViewer(player);
+                player.hideBossBar(radioBossBar);
             }
         }
-        radioEnabled.put(player, option);
+        radioEnabled.put(player.getUniqueId(), option);
     }
 
 
@@ -379,13 +387,17 @@ public class MusicManager {
     }
 
     public void clearRadioPlayer() {
+        if (radioPlayer == null) return;
         radioPlayer.getQueue().clearQueue();
         if (songs != null && !songs.isEmpty()) {
             Song randomSong = songs.get(new Random().nextInt(songs.size()));
             radioPlayer.playSong(randomSong);
+            songs.forEach(radioPlayer::queueSong);
+            radioPlayer.loopQueue(true);
+            radioPlayer.shuffleQueue();
+            radioPlayer.setCrossfade(true);
+            radioPlayer.play();
         }
-
-        songs.forEach(radioPlayer::queueSong);
     }
 
     public SongPlayer getRadioPlayer() {
@@ -393,13 +405,15 @@ public class MusicManager {
     }
 
     public void addRadioListener(Player player) {
+        if (player == null || getRadioPlayer() == null) return;
         getRadioPlayer().addListener(new AudioListener(player.getEntityId(), player.getUniqueId()));
-        if (getRadioPlayer().isPlaying()) {
+        if (getRadioPlayer().isPlaying() && getRadioPlayer().getCurrentSong() != null) {
             player.sendRichMessage("Nyt soi: <yellow>" + getRadioPlayer().getCurrentSong().getMetadata().getTitle());
         }
     }
 
     public void removeRadioListener(Player player) {
+        if (player == null || getRadioPlayer() == null) return;
         getRadioPlayer().removeListener(player.getUniqueId());
     }
 
@@ -534,15 +548,13 @@ public class MusicManager {
     //
     // Miscallaneous
     //
-    public static WeakHashMap<Player, BossBar> progressBars = new WeakHashMap<>();
+    public static Map<Player, BossBar> progressBars = new ConcurrentHashMap<>();
     public static BossBar radioBossBar;
 
     public void songPlayerSchedule(Player player, SongPlayer songPlayer) {
-        if (!progressBars.containsKey(player)) {
-            BossBar progressBar = BossBar.bossBar(toMM("Ladataan..."), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
-            progressBars.put(player, progressBar);
-        }
-        BossBar progressBar = progressBars.get(player);
+        BossBar progressBar = progressBars.computeIfAbsent(player, p ->
+                BossBar.bossBar(toMM("Ladataan..."), 0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS)
+        );
         
         Song currentSong = songPlayer.getCurrentSong();
         if (currentSong != null) {
@@ -590,47 +602,76 @@ public class MusicManager {
     }
 
     private void bossBarUpdateLoop() {
-        for (Player player : progressBars.keySet()) {
-            SongPlayer songPlayer = getSongPlayer(player);
-            BossBar progressBar = progressBars.get(player);
-            
-            if (songPlayer == null || songPlayer.getCurrentSong() == null || !songPlayer.isPlaying()) {
-                if (progressBar != null) {
-                    progressBar.removeViewer(player);
+        try {
+            for (Iterator<Map.Entry<Player, BossBar>> it = progressBars.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<Player, BossBar> entry = it.next();
+                Player player = entry.getKey();
+                BossBar progressBar = entry.getValue();
+
+                if (player == null || !player.isOnline()) {
+                    it.remove();
+                    continue;
                 }
-                continue;
+
+                SongPlayer songPlayer = getSongPlayer(player);
+                if (songPlayer == null || songPlayer.getCurrentSong() == null) {
+                    if (progressBar != null) {
+                        player.hideBossBar(progressBar);
+                    }
+                    it.remove();
+                    continue;
+                }
+
+                Song currentSong = songPlayer.getCurrentSong();
+                long songLength = currentSong.getSongLength();
+                if (songLength <= 0) {
+                    if (progressBar != null) {
+                        player.hideBossBar(progressBar);
+                    }
+                    it.remove();
+                    continue;
+                }
+
+                double progress = (double) songPlayer.getTick() / songLength;
+                if (progress >= 1.0 || progress < 0) {
+                    if (progressBar != null) {
+                        player.hideBossBar(progressBar);
+                    }
+                    it.remove();
+                    continue;
+                }
+
+                float clampedProgress = (float) Math.max(0.0, Math.min(1.0, progress));
+                progressBar.progress(clampedProgress);
+
+                if (!songPlayer.isPlaying()) {
+                    progressBar.name(toMM("<red>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
+                            currentSong.getMetadata().getTitle() + "</red>"));
+                    progressBar.color(BossBar.Color.RED);
+                } else {
+                    progressBar.name(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
+                            currentSong.getMetadata().getTitle() + "</aqua>"));
+                    progressBar.color(BossBar.Color.BLUE);
+                }
+                player.showBossBar(progressBar);
             }
 
-            Song currentSong = songPlayer.getCurrentSong();
-            double progress = (double) songPlayer.getTick() / currentSong.getSongLength();
-            
-            if (progress >= 1.0 || progress < 0) {
-                progressBar.removeViewer(player);
-                continue;
-            }
-
-            progressBar.progress((float) progress);
-            if (!songPlayer.isPlaying()){
-                progressBar.name(toMM("<red>" + songPlayer.getCurrentSong().getMetadata().getOriginalAuthor() + " - " +
-                        songPlayer.getCurrentSong().getMetadata().getTitle() + "</red>"));
-                progressBar.color(BossBar.Color.RED);
-            } else {
-                progressBar.name(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " +
-                        currentSong.getMetadata().getTitle() + "</aqua>"));
-                progressBar.color(BossBar.Color.BLUE);
-            }
-            player.showBossBar(progressBar);
-        }
-
-        if (radioBossBar != null && radioPlayer != null) {
-            Song currentSong = radioPlayer.getCurrentSong();
-            if (currentSong != null && radioPlayer.isPlaying()) {
-                double progress = (double) radioPlayer.getTick() / currentSong.getSongLength();
-                if (progress >= 0 && progress < 1.0) {
-                    radioBossBar.progress((float) progress);
+            if (radioBossBar != null && radioPlayer != null) {
+                Song currentSong = radioPlayer.getCurrentSong();
+                if (currentSong != null && radioPlayer.isPlaying() && currentSong.getSongLength() > 0) {
+                    double progress = (double) radioPlayer.getTick() / currentSong.getSongLength();
+                    float clampedProgress = (float) Math.max(0.0, Math.min(1.0, progress));
+                    radioBossBar.progress(clampedProgress);
                     radioBossBar.name(toMM("<aqua>" + currentSong.getMetadata().getOriginalAuthor() + " - " + currentSong.getMetadata().getTitle() + "</aqua>"));
                 }
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (getRadioEnabled(player)) {
+                        player.showBossBar(radioBossBar);
+                    }
+                }
             }
+        } catch (Exception e) {
+            instance.getLogger().warning("Error in bossBarUpdateLoop: " + e.getMessage());
         }
     }
 

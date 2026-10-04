@@ -409,7 +409,9 @@ public class MusicCommand {
         if (sender instanceof Player player) {
             player.sendMessage("Pysäytetty.");
             musicManager.clearSongPlayer(player);
-            if (musicManager.getRadioEnabled(player)) musicManager.removeRadioListener(player);
+            if (musicManager.getRadioEnabled(player)) {
+                musicManager.setRadioEnabled(player, false);
+            }
             return Command.SINGLE_SUCCESS;
         }
         return 0;
